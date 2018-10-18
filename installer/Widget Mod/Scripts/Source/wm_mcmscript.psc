@@ -144,7 +144,9 @@ String[] VAnchorAttributeString
 String[] HAnchorEssentialString
 String[] VAnchorEssentialString
 
+
 Event OnConfigInit()
+	Utility.Wait(5.0)
 
 	HAnchorArrowString = new String[3]
 	HAnchorArrowString[0] = "Left"
@@ -197,8 +199,7 @@ Event OnConfigInit()
 	HAnchorEssentialString = new String[3]
 	HAnchorEssentialString[0] = "Left"
 	HAnchorEssentialString[1] = "Right"
-	HAnchorEssentialString[2] = "Center"	
-	
+	HAnchorEssentialString[2] = "Center"
 	VAnchorArrowString = new String[3]
 	VAnchorArrowString[0] = "Bottom"
 	VAnchorArrowString[1] = "Top"
@@ -252,16 +253,14 @@ Event OnConfigInit()
 	VAnchorEssentialString[1] = "Top"
 	VAnchorEssentialString[2] = "Center"
 
-	; region - Load user defaults on startup
 	FISSInterface fiss = FISSFactory.getFISS()
 	If fiss
 		fiss.beginLoad("WMUserSettings.xml")		
 		LoadUserPreset()
 	Else
 	EndIf	
-	; endRegion
-
 EndEvent
+
 
 Event OnPageReset(string Page)
 	If (Page == "Position")
