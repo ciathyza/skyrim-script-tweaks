@@ -1,278 +1,271 @@
 scriptName LIH_ConfigMenu extends SKI_ConfigBase
 
-;-- Properties --------------------------------------
-globalvariable property _LIH_DefEnchantLY auto
-globalvariable property _LIH_ActivateButtonVisible auto
-globalvariable property _LIH_DefGrayBarX auto
-globalvariable property _LIH_CrosshairS auto
-globalvariable property _LIH_ActivateButtonY auto
-globalvariable property _LIH_NextKey auto
-globalvariable property _LIH_InfoY auto
-globalvariable property _LIH_DefStaminaY auto
-globalvariable property _LIH_DefFavorBackButtonX auto
-globalvariable property _LIH_StealthMeterX auto
-globalvariable property _LIH_Toggle auto
-globalvariable property _LIH_PlayerSetMarkerVisible auto
-globalvariable property _LIH_StaminaY auto
-globalvariable property _LIH_DefStaminaX auto
-globalvariable property _LIH_SlimCompassVisible auto
-globalvariable property _LIH_DefEnemyHealthY auto
-globalvariable property _LIH_AltSneakMeterVisible auto
-globalvariable property _LIH_DefObjectivesX auto
-globalvariable property _LIH_SneakCrosshairS auto
-globalvariable property _LIH_ArrowsX auto
-globalvariable property _LIH_DefLevelUpY auto
-globalvariable property _LIH_Key auto
-globalvariable property _LIH_PrevKey auto
-globalvariable property _LIH_EnchantmentAlpha auto
-globalvariable property _LIH_HealthR auto
-globalvariable property _LIH_AnimLetterS auto
-globalvariable property _LIH_FavorBackButtonS auto
-globalvariable property _LIH_EnchantLS auto
-globalvariable property _LIH_Enabled auto
-globalvariable property _LIH_CompassX auto
-globalvariable property _LIH_LevelUpX auto
-globalvariable property _LIH_QuestDoorMarkersVisible auto
-globalvariable property _LIH_DefHealthX auto
-globalvariable property _LIH_MagickaY auto
-globalvariable property _LIH_ResetKey auto
-globalvariable property _LIH_DefHUDMsgX auto
-globalvariable property _LIH_DefMagickaX auto
-globalvariable property _LIH_DefSneakCrosshairY auto
-globalvariable property _LIH_DefFavorBackButtonY auto
-globalvariable property _LIH_SeparatorAlpha auto
-globalvariable property _LIH_ObjectivesS auto
-globalvariable property _LIH_DefInfoX auto
-globalvariable property _LIH_DefEnchantRY auto
-globalvariable property _LIH_LocationS auto
-globalvariable property _LIH_CrosshairX auto
-globalvariable property _LIH_DefShoutsX auto
-globalvariable property _LIH_HealthX auto
-globalvariable property _LIH_AltCrosshairVisible auto
-globalvariable property _LIH_InfoAlpha auto
-lih_main property LIH_MainInstance auto
-globalvariable property _LIH_DefSubtitleY auto
-globalvariable property _LIH_MagickaX auto
-globalvariable property _LIH_DefObjectivesY auto
-globalvariable property _LIH_StealthMeterS auto
-globalvariable property _LIH_SneakTextVisible auto
-globalvariable property _LIH_SneakCrosshairY auto
-globalvariable property _LIH_SubtitleY auto
-globalvariable property _LIH_RightKey auto
-globalvariable property _LIH_StaminaR auto
-globalvariable property _LIH_MagickaS auto
-globalvariable property _LIH_StealthMeterY auto
-globalvariable property _LIH_EnemyHealthX auto
-globalvariable property _LIH_DefCrosshairX auto
-globalvariable property _LIH_ActivateButtonS auto
-globalvariable property _LIH_FavorBackButtonX auto
-globalvariable property _LIH_EnemyMarkersVisible auto
-globalvariable property _LIH_DefNameY auto
-globalvariable property _LIH_ShoutsX auto
-globalvariable property _LIH_CrosshairY auto
-globalvariable property _LIH_DefEnemyHealthX auto
-globalvariable property _LIH_DebugVisible auto
-globalvariable property _LIH_DefEnchantRX auto
-globalvariable property _LIH_AnimLetterY auto
-globalvariable property _LIH_AnimLetterX auto
-globalvariable property _LIH_DefEnchantLX auto
-globalvariable property _LIH_SubtitleLeadingAlpha auto
-globalvariable property _LIH_ShoutsS auto
-globalvariable property _LIH_EnchantLR auto
-globalvariable property _LIH_ShoutsY auto
-globalvariable property _LIH_ItemAlpha auto
-globalvariable property _LIH_DownKey auto
-globalvariable property _LIH_Step auto
-globalvariable property _LIH_DefActivateButtonY auto
-globalvariable property _LIH_ObjectivesY auto
-globalvariable property _LIH_DefAnimLetterX auto
-globalvariable property _LIH_ObjectivesX auto
-globalvariable property _LIH_DefArrowsY auto
-globalvariable property _LIH_LevelUpS auto
-globalvariable property _LIH_LocationY auto
-globalvariable property _LIH_DefCompassY auto
-globalvariable property _LIH_FavorBackButtonY auto
-globalvariable property _LIH_GrayBarY auto
-globalvariable property _LIH_SubtitleX auto
-globalvariable property _LIH_ArrowsAlign auto
-globalvariable property _LIH_InfoS auto
-globalvariable property _LIH_UpKey auto
-globalvariable property _LIH_InfoX auto
-globalvariable property _LIH_DefHealthY auto
+; -------------------------------------------------------------------------------------------------
+; Properties
+; -------------------------------------------------------------------------------------------------
+
+globalvariable property _LIH_ActivateButtonS            auto
+globalvariable property _LIH_ActivateButtonVisible      auto
+globalvariable property _LIH_ActivateButtonX            auto
+globalvariable property _LIH_ActivateButtonY            auto
+globalvariable property _LIH_AltCrosshairVisible        auto
+globalvariable property _LIH_AltHealthBarVisible        auto
+globalvariable property _LIH_AltSneakMeterVisible       auto
+globalvariable property _LIH_AnimLetterS                auto
+globalvariable property _LIH_AnimLetterX                auto
+globalvariable property _LIH_AnimLetterY                auto
+globalvariable property _LIH_ArrowsAlign                auto
+globalvariable property _LIH_ArrowsAlpha                auto
+globalvariable property _LIH_ArrowsS                    auto
+globalvariable property _LIH_ArrowsX                    auto
+globalvariable property _LIH_ArrowsY                    auto
+globalvariable property _LIH_BarsAlwaysVisible          auto
+globalvariable property _LIH_CompassS                   auto
+globalvariable property _LIH_CompassX                   auto
+globalvariable property _LIH_CompassY                   auto
+globalvariable property _LIH_CrosshairAlpha             auto
+globalvariable property _LIH_CrosshairS                 auto
+globalvariable property _LIH_CrosshairX                 auto
+globalvariable property _LIH_CrosshairY                 auto
+globalvariable property _LIH_DebugVisible               auto
+globalvariable property _LIH_DefActivateButtonX         auto
+globalvariable property _LIH_DefActivateButtonY         auto
+globalvariable property _LIH_DefAnimLetterX             auto
+globalvariable property _LIH_DefAnimLetterY             auto
+globalvariable property _LIH_DefArrowsX                 auto
+globalvariable property _LIH_DefArrowsY                 auto
+globalvariable property _LIH_Default                    auto
+globalvariable property _LIH_DefCompassX                auto
+globalvariable property _LIH_DefCompassY                auto
+globalvariable property _LIH_DefCrosshairX              auto
+globalvariable property _LIH_DefCrosshairY              auto
+globalvariable property _LIH_DefEnchantLX               auto
+globalvariable property _LIH_DefEnchantLY               auto
+globalvariable property _LIH_DefEnchantRX               auto
+globalvariable property _LIH_DefEnchantRY               auto
+globalvariable property _LIH_DefEnemyHealthX            auto
+globalvariable property _LIH_DefEnemyHealthY            auto
+globalvariable property _LIH_DefFavorBackButtonX        auto
+globalvariable property _LIH_DefFavorBackButtonY        auto
+globalvariable property _LIH_DefGrayBarX                auto
+globalvariable property _LIH_DefGrayBarY                auto
+globalvariable property _LIH_DefHealthX                 auto
+globalvariable property _LIH_DefHealthY                 auto
+globalvariable property _LIH_DefHUDMsgX                 auto
+globalvariable property _LIH_DefHUDMsgY                 auto
+globalvariable property _LIH_DefInfoX                   auto
+globalvariable property _LIH_DefInfoY                   auto
+globalvariable property _LIH_DefLevelUpX                auto
+globalvariable property _LIH_DefLevelUpY                auto
+globalvariable property _LIH_DefLocationX               auto
+globalvariable property _LIH_DefLocationY               auto
+globalvariable property _LIH_DefMagickaX                auto
+globalvariable property _LIH_DefMagickaY                auto
+globalvariable property _LIH_DefNameX                   auto
+globalvariable property _LIH_DefNameY                   auto
+globalvariable property _LIH_DefObjectivesX             auto
+globalvariable property _LIH_DefObjectivesY             auto
+globalvariable property _LIH_DefShoutsX                 auto
+globalvariable property _LIH_DefShoutsY                 auto
+globalvariable property _LIH_DefSneakCrosshairX         auto
+globalvariable property _LIH_DefSneakCrosshairY         auto
+globalvariable property _LIH_DefStaminaX                auto
+globalvariable property _LIH_DefStaminaY                auto
+globalvariable property _LIH_DefStealthMeterX           auto
+globalvariable property _LIH_DefStealthMeterY           auto
+globalvariable property _LIH_DefSubtitleX               auto
+globalvariable property _LIH_DefSubtitleY               auto
+globalvariable property _LIH_DownKey                    auto
+globalvariable property _LIH_Enabled                    auto
+globalvariable property _LIH_EnchantLR                  auto
+globalvariable property _LIH_EnchantLS                  auto
+globalvariable property _LIH_EnchantLX                  auto
+globalvariable property _LIH_EnchantLY                  auto
+globalvariable property _LIH_EnchantmentAlpha           auto
+globalvariable property _LIH_EnchantRR                  auto
+globalvariable property _LIH_EnchantRS                  auto
+globalvariable property _LIH_EnchantRX                  auto
+globalvariable property _LIH_EnchantRY                  auto
+globalvariable property _LIH_EnemyHealthS               auto
+globalvariable property _LIH_EnemyHealthX               auto
+globalvariable property _LIH_EnemyHealthY               auto
+globalvariable property _LIH_EnemyMarkersVisible        auto
+globalvariable property _LIH_FavorBackButtonS           auto
+globalvariable property _LIH_FavorBackButtonX           auto
+globalvariable property _LIH_FavorBackButtonY           auto
+globalvariable property _LIH_GrayBarS                   auto
+globalvariable property _LIH_GrayBarX                   auto
+globalvariable property _LIH_GrayBarY                   auto
+globalvariable property _LIH_HealthAlpha                auto
+globalvariable property _LIH_HealthR                    auto
+globalvariable property _LIH_HealthS                    auto
+globalvariable property _LIH_HealthX                    auto
+globalvariable property _LIH_HealthY                    auto
+globalvariable property _LIH_HUDMsgAlign                auto
+globalvariable property _LIH_HUDMsgS                    auto
+globalvariable property _LIH_HUDMsgX                    auto
+globalvariable property _LIH_HUDMsgY                    auto
+globalvariable property _LIH_InfoAlign                  auto
+globalvariable property _LIH_InfoAlpha                  auto
+globalvariable property _LIH_InfoS                      auto
+globalvariable property _LIH_InfoX                      auto
+globalvariable property _LIH_InfoY                      auto
+globalvariable property _LIH_ItemAlpha                  auto
+globalvariable property _LIH_ItemLeadingAlpha           auto
+globalvariable property _LIH_Key                        auto
+globalvariable property _LIH_LeftKey                    auto
+globalvariable property _LIH_LevelUpS                   auto
+globalvariable property _LIH_LevelUpX                   auto
+globalvariable property _LIH_LevelUpY                   auto
+globalvariable property _LIH_Load                       auto
+globalvariable property _LIH_LocationAlign              auto
+globalvariable property _LIH_LocationMarkersVisible     auto
+globalvariable property _LIH_LocationS                  auto
+globalvariable property _LIH_LocationX                  auto
+globalvariable property _LIH_LocationY                  auto
+globalvariable property _LIH_MagickaAlpha               auto
+globalvariable property _LIH_MagickaR                   auto
+globalvariable property _LIH_MagickaS                   auto
+globalvariable property _LIH_MagickaX                   auto
+globalvariable property _LIH_MagickaY                   auto
+globalvariable property _LIH_NameS                      auto
+globalvariable property _LIH_NameX                      auto
+globalvariable property _LIH_NameY                      auto
+globalvariable property _LIH_NextKey                    auto
+globalvariable property _LIH_ObjectivesS                auto
+globalvariable property _LIH_ObjectivesX                auto
+globalvariable property _LIH_ObjectivesY                auto
+globalvariable property _LIH_PlayerSetMarkerVisible     auto
+globalvariable property _LIH_PrevKey                    auto
+globalvariable property _LIH_QuestDoorMarkersVisible    auto
+globalvariable property _LIH_QuestMarkersVisible        auto
+globalvariable property _LIH_Reset                      auto
+globalvariable property _LIH_ResetKey                   auto
+globalvariable property _LIH_RightKey                   auto
+globalvariable property _LIH_RotateKey                  auto
+globalvariable property _LIH_ScaleDownKey               auto
+globalvariable property _LIH_ScaleUpKey                 auto
+globalvariable property _LIH_Selected                   auto
+globalvariable property _LIH_SeparatorAlpha             auto
+globalvariable property _LIH_ShoutsS                    auto
+globalvariable property _LIH_ShoutsX                    auto
+globalvariable property _LIH_ShoutsY                    auto
+globalvariable property _LIH_SlimCompassVisible         auto
+globalvariable property _LIH_SneakCrosshairAlpha        auto
+globalvariable property _LIH_SneakCrosshairS            auto
+globalvariable property _LIH_SneakCrosshairVisible      auto
+globalvariable property _LIH_SneakCrosshairX            auto
+globalvariable property _LIH_SneakCrosshairY            auto
+globalvariable property _LIH_SneakTextVisible           auto
+globalvariable property _LIH_StaminaAlpha               auto
+globalvariable property _LIH_StaminaR                   auto
+globalvariable property _LIH_StaminaS                   auto
+globalvariable property _LIH_StaminaX                   auto
+globalvariable property _LIH_StaminaY                   auto
+globalvariable property _LIH_StealthMeterS              auto
+globalvariable property _LIH_StealthMeterX              auto
+globalvariable property _LIH_StealthMeterY              auto
+globalvariable property _LIH_Step                       auto
+globalvariable property _LIH_StepKey                    auto
+globalvariable property _LIH_SubtitleAlpha              auto
+globalvariable property _LIH_SubtitleLeadingAlpha       auto
+globalvariable property _LIH_SubtitleS                  auto
+globalvariable property _LIH_SubtitlesAlign             auto
+globalvariable property _LIH_SubtitleX                  auto
+globalvariable property _LIH_SubtitleY                  auto
+globalvariable property _LIH_Toggle                     auto
 globalvariable property _LIH_UndiscoveredMarkersVisible auto
-globalvariable property _LIH_SubtitleS auto
-globalvariable property _LIH_StaminaS auto
-globalvariable property _LIH_EnchantRX auto
-globalvariable property _LIH_NameS auto
-globalvariable property _LIH_DefMagickaY auto
-globalvariable property _LIH_LocationX auto
-globalvariable property _LIH_NameY auto
-globalvariable property _LIH_NameX auto
-globalvariable property _LIH_DefHUDMsgY auto
-globalvariable property _LIH_ArrowsAlpha auto
-globalvariable property _LIH_HUDMsgY auto
-globalvariable property _LIH_ActivateButtonX auto
-globalvariable property _LIH_HUDMsgS auto
-globalvariable property _LIH_HUDMsgX auto
-globalvariable property _LIH_MagickaAlpha auto
-globalvariable property _LIH_EnchantRR auto
-globalvariable property _LIH_EnchantRS auto
-globalvariable property _LIH_EnchantRY auto
-globalvariable property _LIH_CompassY auto
-globalvariable property _LIH_Reset auto
-globalvariable property _LIH_GrayBarX auto
-globalvariable property _LIH_Default auto
-globalvariable property _LIH_StaminaAlpha auto
-globalvariable property _LIH_DefActivateButtonX auto
-globalvariable property _LIH_ArrowsS auto
-globalvariable property _LIH_EnchantLY auto
-globalvariable property _LIH_SneakCrosshairX auto
-globalvariable property _LIH_EnchantLX auto
-globalvariable property _LIH_StaminaX auto
-globalvariable property _LIH_ScaleUpKey auto
-globalvariable property _LIH_HUDMsgAlign auto
-globalvariable property _LIH_Load auto
-globalvariable property _LIH_SubtitleAlpha auto
-globalvariable property _LIH_DefCompassX auto
-globalvariable property _LIH_InfoAlign auto
-globalvariable property _LIH_SneakCrosshairVisible auto
-globalvariable property _LIH_DefStealthMeterY auto
-globalvariable property _LIH_CrosshairAlpha auto
-globalvariable property _LIH_EnemyHealthS auto
-globalvariable property _LIH_DefArrowsX auto
-globalvariable property _LIH_LocationAlign auto
-globalvariable property _LIH_GrayBarS auto
-globalvariable property _LIH_DefInfoY auto
-globalvariable property _LIH_SneakCrosshairAlpha auto
-globalvariable property _LIH_DefAnimLetterY auto
-globalvariable property _LIH_DefLocationY auto
-globalvariable property _LIH_DefNameX auto
-globalvariable property _LIH_DefLocationX auto
-globalvariable property _LIH_DefSneakCrosshairX auto
-globalvariable property _LIH_AltHealthBarVisible auto
-globalvariable property _LIH_LeftKey auto
-globalvariable property _LIH_HealthS auto
-globalvariable property _LIH_DefLevelUpX auto
-globalvariable property _LIH_Selected auto
-globalvariable property _LIH_RotateKey auto
-globalvariable property _LIH_EnemyHealthY auto
-globalvariable property _LIH_Version auto
-globalvariable property _LIH_DefSubtitleX auto
-globalvariable property _LIH_DefStealthMeterX auto
-globalvariable property _LIH_LevelUpY auto
-globalvariable property _LIH_BarsAlwaysVisible auto
-globalvariable property _LIH_DefShoutsY auto
-globalvariable property _LIH_StepKey auto
-globalvariable property _LIH_ScaleDownKey auto
-globalvariable property _LIH_ItemLeadingAlpha auto
-globalvariable property _LIH_DefGrayBarY auto
-globalvariable property _LIH_LocationMarkersVisible auto
-globalvariable property _LIH_MagickaR auto
-globalvariable property _LIH_QuestMarkersVisible auto
-globalvariable property _LIH_HealthY auto
-globalvariable property _LIH_HealthAlpha auto
-globalvariable property _LIH_SubtitlesAlign auto
-globalvariable property _LIH_DefCrosshairY auto
-globalvariable property _LIH_CompassS auto
-globalvariable property _LIH_ArrowsY auto
+globalvariable property _LIH_UpKey                      auto
+globalvariable property _LIH_Version                    auto
+lih_main       property LIH_MainInstance                auto
 
-;-- Variables ---------------------------------------
-Int _SubtitleAlpha_S
-Int _QuestDoorMarkersVisible_T
-Float _LIH_XItem
-String isClip
-Int _ScaleDownKey_K
-Int _RotateKey_K
-Int _HotKey_K
-String _LIH_SelectedDesc
-Int _PrevKey_K
-Int _LeftKey_K
-Int _StepKey_K
-Int _NextKey_K
-Int _StaminaAlpha_S
-Int _PlayerSetMarkerVisible_T
-Int _ActivateButtonVisible_T
-Int _Enabled_T
-Int _EnchantmentAlpha_S
-Int _SlimCompassVisible_T
-Int _MagickaAlpha_S
-Int _InfoAlpha_S
-Int _ScaleUpKey_K
-Int _LIH_RotateItem
-Int _DownKey_K
-Int _EnemyMarkersVisible_T
-Int _UpKey_K
-Float _LIH_YItem
-Int _SneakCrosshairAlpha_S
-Int _ItemAlpha_S
-Int _HealthAlpha_S
-Int _AltSneakMeterVisible_T
+
+; -------------------------------------------------------------------------------------------------
+; Variables
+; -------------------------------------------------------------------------------------------------
+
+Float  _LIH_XItem
+Float  _LIH_YItem
+Int    _ActivateButtonVisible_T
+Int    _AltCrosshairVisible_T
+Int    _AltHealthBarVisible_T
+Int    _AltSneakMeterVisible_T
+Int    _ArrowsAlpha_S
+Int    _BarsAlwaysVisible_T
+Int    _CrosshairAlpha_S
+Int    _DebugVisible_T
+Int    _DownKey_K
+Int    _Enabled_T
+Int    _EnchantmentAlpha_S
+Int    _EnemyMarkersVisible_T
+Int    _HealthAlpha_S
+Int    _HotKey_K
+Int    _InfoAlpha_S
+Int    _ItemAlpha_S
+Int    _LeftKey_K
+Int    _LIH_RotateItem
+Int    _LIH_ScaleItem
+Int    _Load2_T
+Int    _Load_T
+Int    _LocationMarkersVisible_T
+Int    _MagickaAlpha_S
+Int    _NextKey_K
+Int    _PlayerSetMarkerVisible_T
+Int    _PrevKey_K
+Int    _QuestDoorMarkersVisible_T
+Int    _QuestMarkersVisible_T
+Int    _Reset_T
+Int    _ResetKey_K
+Int    _RightKey_K
+Int    _RotateKey_K
+Int    _Save_T
+Int    _ScaleDownKey_K
+Int    _ScaleUpKey_K
+Int    _SeparatorAlpha_S
+Int    _SlimCompassVisible_T
+Int    _SneakCrosshairAlpha_S
+Int    _SneakCrosshairVisible_T
+Int    _SneakTextVisible_T
+Int    _StaminaAlpha_S
+Int    _StepKey_K
+Int    _SubtitleAlpha_S
+Int    _UndiscoveredMarkersVisible_T
+Int    _UpKey_K
 String _LIH_AlignItem
-Int _Load_T
-Int _QuestMarkersVisible_T
-Int _LIH_ScaleItem
-Int _SneakCrosshairVisible_T
-Int _CrosshairAlpha_S
-Int _AltCrosshairVisible_T
-Int _SeparatorAlpha_S
+String _LIH_SelectedDesc
 String _LIH_SelectedItem
-Int _Reset_T
-Int _BarsAlwaysVisible_T
-Int _ResetKey_K
-Int _UndiscoveredMarkersVisible_T
-Int _SneakTextVisible_T
-Int _DebugVisible_T
-Int _ArrowsAlpha_S
-Int _RightKey_K
-Int _LocationMarkersVisible_T
-Int _AltHealthBarVisible_T
+String isClip
 
-; -------- added by towawot -----
-Int _Save_T
-Int _Load2_T
-; -------- end -----
 
-;-- Functions ---------------------------------------
+; -------------------------------------------------------------------------------------------------
+; MCM Events
+; -------------------------------------------------------------------------------------------------
 
-Float function getHUDNumber(String element, String attribute) global
+Event OnConfigInit()
+	setPages()
+	OnGameReload()
+	Utility.wait(1.0)
+	LoadPreset_New()
+endEvent
 
-	return ui.GetNumber("HUD Menu", element + "." + attribute)
-endFunction
 
-function setHUDNumber(String element, String attribute, Float value) global
-
-	ui.SetNumber("HUD Menu", element + "." + attribute, value)
-endFunction
-
-function setHUDBool(String element, String attribute, Bool value) global
-
-	ui.SetBool("HUD Menu", element + "." + attribute, value)
-endFunction
-
-function setHUDString(String element, String attribute, String value) global
-
-	ui.SetString("HUD Menu", element + "." + attribute, value)
-endFunction
-
-function hide(String clip, Bool visible)
-
-	isClip = clip
-	if visible == true
-		visible = false
+Event OnConfigClose()
+	if _LIH_Reset.GetValueInt() == 1
+		ResetDefaults()
 	else
-		visible = true
+		ApplySettings()
 	endIf
-	LIH_ConfigMenu.setHUDBool(isClip, "_visible", visible)
-endFunction
+endEvent
+
 
 Event OnPageReset(String a_page)
-
 	if a_page == ""
 		LoadCustomContent("exported/lihud_splash.swf", 0.000000, 0.000000)
 		return 
 	else
 		UnloadCustomContent()
 	endIf
+
 	if a_page == "General Settings"
 		SetCursorFillMode(TOP_TO_BOTTOM)
 		AddHeaderOption("MOD Configuration", 0)
@@ -284,7 +277,6 @@ Event OnPageReset(String a_page)
 		AddEmptyOption()
 		_DebugVisible_T = AddToggleOption("Show MOD messages", _LIH_DebugVisible.GetValueInt() as Bool, 0)
 		AddEmptyOption()
-; -------- added by towawot -----
 		SetCursorPosition(1)
 		AddHeaderOption("FileAccess Interface", 0)
 		FISSInterface fiss = FISSFactory.getFISS()
@@ -294,7 +286,6 @@ Event OnPageReset(String a_page)
 			_Load2_T = AddToggleOption("Load personal preset", _LIH_Load.GetValueInt() as Bool, 0)
 			AddEmptyOption()
 		endif
-; -------- end -----
 	elseIf a_page == "HUD Visibility"
 		SetCursorFillMode(TOP_TO_BOTTOM)
 		SetCursorPosition(0)
@@ -350,8 +341,332 @@ Event OnPageReset(String a_page)
 	endIf
 endEvent
 
-function ResetItem()
 
+Event OnOptionKeyMapChange(Int a_option, Int a_keyCode, String a_conflictControl, String a_conflictName)
+	String page = CurrentPage
+	if page == "HUD Position"
+		if a_option == _HotKey_K
+			SetKeyMapOptionValue(a_option, a_keyCode, false)
+			_LIH_Key.SetValue(a_keyCode as Float)
+		elseIf a_option == _LeftKey_K
+			SetKeyMapOptionValue(a_option, a_keyCode, false)
+			_LIH_LeftKey.SetValue(a_keyCode as Float)
+		elseIf a_option == _RightKey_K
+			SetKeyMapOptionValue(a_option, a_keyCode, false)
+			_LIH_RightKey.SetValue(a_keyCode as Float)
+		elseIf a_option == _UpKey_K
+			SetKeyMapOptionValue(a_option, a_keyCode, false)
+			_LIH_UpKey.SetValue(a_keyCode as Float)
+		elseIf a_option == _DownKey_K
+			SetKeyMapOptionValue(a_option, a_keyCode, false)
+			_LIH_DownKey.SetValue(a_keyCode as Float)
+		elseIf a_option == _PrevKey_K
+			SetKeyMapOptionValue(a_option, a_keyCode, false)
+			_LIH_PrevKey.SetValue(a_keyCode as Float)
+		elseIf a_option == _NextKey_K
+			SetKeyMapOptionValue(a_option, a_keyCode, false)
+			_LIH_NextKey.SetValue(a_keyCode as Float)
+		elseIf a_option == _ScaleUpKey_K
+			SetKeyMapOptionValue(a_option, a_keyCode, false)
+			_LIH_ScaleUpKey.SetValue(a_keyCode as Float)
+		elseIf a_option == _ScaleDownKey_K
+			SetKeyMapOptionValue(a_option, a_keyCode, false)
+			_LIH_ScaleDownKey.SetValue(a_keyCode as Float)
+		elseIf a_option == _StepKey_K
+			SetKeyMapOptionValue(a_option, a_keyCode, false)
+			_LIH_StepKey.SetValue(a_keyCode as Float)
+		elseIf a_option == _RotateKey_K
+			SetKeyMapOptionValue(a_option, a_keyCode, false)
+			_LIH_RotateKey.SetValue(a_keyCode as Float)
+		elseIf a_option == _ResetKey_K
+			SetKeyMapOptionValue(a_option, a_keyCode, false)
+			_LIH_ResetKey.SetValue(a_keyCode as Float)
+		endIf
+	endIf
+endEvent
+
+
+Event OnOptionSelect(Int a_option)
+	String page = CurrentPage
+	if page == "General Settings"
+		if a_option == _Enabled_T
+			toggle(_LIH_Enabled)
+			SetToggleOptionValue(a_option, _LIH_Enabled.GetValueInt() as Bool, false)
+		elseIf a_option == _Reset_T
+			toggle(_LIH_Reset)
+			SetToggleOptionValue(a_option, _LIH_Reset.GetValueInt() as Bool, false)
+		elseIf a_option == _Load_T
+			toggle(_LIH_Load)
+			SetToggleOptionValue(a_option, _LIH_Load.GetValueInt() as Bool, false)
+		elseIf a_option == _Load2_T
+			bool continue = ShowMessage("do you want to load personal setting?", true, "$Yes", "$No")
+			if (continue)
+				toggle3(_LIH_Load)
+				SetToggleOptionValue(a_option, _LIH_Load.GetValueInt() as Bool, false)
+			endif
+		elseIf a_option == _Save_T
+			bool continue = ShowMessage("do you want to save current setting?", true, "$Yes", "$No")
+			if (continue)
+				toggle2(_LIH_Load)
+				SetToggleOptionValue(a_option, _LIH_Load.GetValueInt() as Bool, false)
+			endif
+		elseIf a_option == _DebugVisible_T
+			toggle(_LIH_DebugVisible)
+			SetToggleOptionValue(a_option, _LIH_DebugVisible.GetValueInt() as Bool, false)
+		endIf
+	elseIf page == "HUD Visibility"
+		if a_option == _BarsAlwaysVisible_T
+			toggle(_LIH_BarsAlwaysVisible)
+			SetToggleOptionValue(a_option, _LIH_BarsAlwaysVisible.GetValueInt() as Bool, false)
+		elseIf a_option == _AltHealthBarVisible_T
+			toggle(_LIH_AltHealthBarVisible)
+			SetToggleOptionValue(a_option, _LIH_AltHealthBarVisible.GetValueInt() as Bool, false)
+		elseIf a_option == _SneakCrosshairVisible_T
+			toggle(_LIH_SneakCrosshairVisible)
+			SetToggleOptionValue(a_option, _LIH_SneakCrosshairVisible.GetValueInt() as Bool, false)
+		elseIf a_option == _AltCrosshairVisible_T
+			toggle(_LIH_AltCrosshairVisible)
+			SetToggleOptionValue(a_option, _LIH_AltCrosshairVisible.GetValueInt() as Bool, false)
+		elseIf a_option == _SlimCompassVisible_T
+			toggle(_LIH_SlimCompassVisible)
+			SetToggleOptionValue(a_option, _LIH_SlimCompassVisible.GetValueInt() as Bool, false)
+		elseIf a_option == _AltSneakMeterVisible_T
+			toggle(_LIH_AltSneakMeterVisible)
+			SetToggleOptionValue(a_option, _LIH_AltSneakMeterVisible.GetValueInt() as Bool, false)
+		elseIf a_option == _ActivateButtonVisible_T
+			toggle(_LIH_ActivateButtonVisible)
+			SetToggleOptionValue(a_option, _LIH_ActivateButtonVisible.GetValueInt() as Bool, false)
+		elseIf a_option == _SneakTextVisible_T
+			toggle(_LIH_SneakTextVisible)
+			SetToggleOptionValue(a_option, _LIH_SneakTextVisible.GetValueInt() as Bool, false)
+		elseIf a_option == _UndiscoveredMarkersVisible_T
+			toggle(_LIH_UndiscoveredMarkersVisible)
+			SetToggleOptionValue(a_option, _LIH_UndiscoveredMarkersVisible.GetValueInt() as Bool, false)
+		elseIf a_option == _LocationMarkersVisible_T
+			toggle(_LIH_LocationMarkersVisible)
+			SetToggleOptionValue(a_option, _LIH_LocationMarkersVisible.GetValueInt() as Bool, false)
+		elseIf a_option == _EnemyMarkersVisible_T
+			toggle(_LIH_EnemyMarkersVisible)
+			SetToggleOptionValue(a_option, _LIH_EnemyMarkersVisible.GetValueInt() as Bool, false)
+		elseIf a_option == _PlayerSetMarkerVisible_T
+			toggle(_LIH_PlayerSetMarkerVisible)
+			SetToggleOptionValue(a_option, _LIH_PlayerSetMarkerVisible.GetValueInt() as Bool, false)
+		elseIf a_option == _QuestDoorMarkersVisible_T
+			toggle(_LIH_QuestDoorMarkersVisible)
+			SetToggleOptionValue(a_option, _LIH_QuestDoorMarkersVisible.GetValueInt() as Bool, false)
+		elseIf a_option == _QuestMarkersVisible_T
+			toggle(_LIH_QuestMarkersVisible)
+			SetToggleOptionValue(a_option, _LIH_QuestMarkersVisible.GetValueInt() as Bool, false)
+		endIf
+	endIf
+endEvent
+
+
+Event OnOptionMenuOpen(Int a_option)
+	String page = CurrentPage
+endEvent
+
+
+Event OnOptionColorOpen(Int a_option)
+	String page = CurrentPage
+endEvent
+
+
+Event OnOptionHighlight(Int a_option)
+	String page = CurrentPage
+endEvent
+
+
+Event OnOptionColorAccept(Int a_option, Int a_color)
+	String page = CurrentPage
+endEvent
+
+
+Event OnOptionSliderOpen(Int a_option)
+	String page = CurrentPage
+	if page == "HUD Visibility"
+		if a_option == _CrosshairAlpha_S
+			SetSliderDialogStartValue(_LIH_CrosshairAlpha.GetValueInt() as Float)
+			SetSliderDialogDefaultValue(100 as Float)
+			SetSliderDialogRange(0 as Float, 100 as Float)
+			SetSliderDialogInterval(1 as Float)
+		elseIf a_option == _SneakCrosshairAlpha_S
+			SetSliderDialogStartValue(_LIH_SneakCrosshairAlpha.GetValueInt() as Float)
+			SetSliderDialogDefaultValue(100 as Float)
+			SetSliderDialogRange(0 as Float, 100 as Float)
+			SetSliderDialogInterval(1 as Float)
+		elseIf a_option == _MagickaAlpha_S
+			SetSliderDialogStartValue(_LIH_MagickaAlpha.GetValueInt() as Float)
+			SetSliderDialogDefaultValue(100 as Float)
+			SetSliderDialogRange(0 as Float, 100 as Float)
+			SetSliderDialogInterval(1 as Float)
+		elseIf a_option == _HealthAlpha_S
+			SetSliderDialogStartValue(_LIH_HealthAlpha.GetValueInt() as Float)
+			SetSliderDialogDefaultValue(100 as Float)
+			SetSliderDialogRange(0 as Float, 100 as Float)
+			SetSliderDialogInterval(1 as Float)
+		elseIf a_option == _StaminaAlpha_S
+			SetSliderDialogStartValue(_LIH_StaminaAlpha.GetValueInt() as Float)
+			SetSliderDialogDefaultValue(100 as Float)
+			SetSliderDialogRange(0 as Float, 100 as Float)
+			SetSliderDialogInterval(1 as Float)
+		elseIf a_option == _EnchantmentAlpha_S
+			SetSliderDialogStartValue(_LIH_EnchantmentAlpha.GetValueInt() as Float)
+			SetSliderDialogDefaultValue(100 as Float)
+			SetSliderDialogRange(0 as Float, 100 as Float)
+			SetSliderDialogInterval(1 as Float)
+		elseIf a_option == _ItemAlpha_S
+			SetSliderDialogStartValue(_LIH_ItemAlpha.GetValueInt() as Float)
+			SetSliderDialogDefaultValue(100 as Float)
+			SetSliderDialogRange(0 as Float, 100 as Float)
+			SetSliderDialogInterval(1 as Float)
+		elseIf a_option == _InfoAlpha_S
+			SetSliderDialogStartValue(_LIH_InfoAlpha.GetValueInt() as Float)
+			SetSliderDialogDefaultValue(100 as Float)
+			SetSliderDialogRange(0 as Float, 100 as Float)
+			SetSliderDialogInterval(1 as Float)
+		elseIf a_option == _SeparatorAlpha_S
+			SetSliderDialogStartValue(_LIH_SeparatorAlpha.GetValueInt() as Float)
+			SetSliderDialogDefaultValue(100 as Float)
+			SetSliderDialogRange(0 as Float, 100 as Float)
+			SetSliderDialogInterval(1 as Float)
+		elseIf a_option == _SubtitleAlpha_S
+			SetSliderDialogStartValue(_LIH_SubtitleAlpha.GetValueInt() as Float)
+			SetSliderDialogDefaultValue(100 as Float)
+			SetSliderDialogRange(0 as Float, 100 as Float)
+			SetSliderDialogInterval(1 as Float)
+		elseIf a_option == _ArrowsAlpha_S
+			SetSliderDialogStartValue(_LIH_ArrowsAlpha.GetValueInt() as Float)
+			SetSliderDialogDefaultValue(100 as Float)
+			SetSliderDialogRange(0 as Float, 100 as Float)
+			SetSliderDialogInterval(1 as Float)
+		endIf
+	endIf
+endEvent
+
+
+Event OnOptionSliderAccept(Int a_option, Float a_value)
+	String page = CurrentPage
+	if page == "HUD Visibility"
+		if a_option == _CrosshairAlpha_S
+			SetSliderOptionValue(a_option, a_value, "{0}", false)
+			_LIH_CrosshairAlpha.SetValue(a_value)
+		elseIf a_option == _SneakCrosshairAlpha_S
+			SetSliderOptionValue(a_option, a_value, "{0}", false)
+			_LIH_SneakCrosshairAlpha.SetValue(a_value)
+		elseIf a_option == _MagickaAlpha_S
+			SetSliderOptionValue(a_option, a_value, "{0}", false)
+			_LIH_MagickaAlpha.SetValue(a_value)
+		elseIf a_option == _HealthAlpha_S
+			SetSliderOptionValue(a_option, a_value, "{0}", false)
+			_LIH_HealthAlpha.SetValue(a_value)
+		elseIf a_option == _StaminaAlpha_S
+			SetSliderOptionValue(a_option, a_value, "{0}", false)
+			_LIH_StaminaAlpha.SetValue(a_value)
+		elseIf a_option == _EnchantmentAlpha_S
+			SetSliderOptionValue(a_option, a_value, "{0}", false)
+			_LIH_EnchantmentAlpha.SetValue(a_value)
+		elseIf a_option == _ItemAlpha_S
+			SetSliderOptionValue(a_option, a_value, "{0}", false)
+			_LIH_ItemAlpha.SetValue(a_value)
+		elseIf a_option == _InfoAlpha_S
+			SetSliderOptionValue(a_option, a_value, "{0}", false)
+			_LIH_InfoAlpha.SetValue(a_value)
+		elseIf a_option == _SeparatorAlpha_S
+			SetSliderOptionValue(a_option, a_value, "{0}", false)
+			_LIH_SeparatorAlpha.SetValue(a_value)
+		elseIf a_option == _SubtitleAlpha_S
+			SetSliderOptionValue(a_option, a_value, "{0}", false)
+			_LIH_SubtitleAlpha.SetValue(a_value)
+		elseIf a_option == _ArrowsAlpha_S
+			SetSliderOptionValue(a_option, a_value, "{0}", false)
+			_LIH_ArrowsAlpha.SetValue(a_value)
+		endIf
+	endIf
+endEvent
+
+
+Event OnOptionMenuAccept(Int a_option, Int a_index)
+	String page = CurrentPage
+endEvent
+
+
+Event OnVersionUpdate(Int a_version)
+endEvent
+
+
+Event OnOptionDefault(Int a_option)
+	String page = CurrentPage
+endEvent
+
+
+; -------------------------------------------------------------------------------------------------
+; Events
+; -------------------------------------------------------------------------------------------------
+
+function OnGameReload()
+	parent.OnGameReload()
+	show("_root.HUDDummy", 0 as Bool)
+	show("_root.HUDMovieBaseInstance", 0 as Bool)
+	_LIH_SelectedItem = "None"
+	_LIH_SelectedDesc = "None"
+	_LIH_Reset.SetValueInt(0)
+	_LIH_Selected.SetValueInt(0)
+	Float _Version = 1.1
+
+	if _LIH_Version.Getvalue() < _Version
+		if _LIH_Version.GetValueInt() > 0
+			_LIH_Default.SetValueInt(2)
+			ApplySettings()
+		else
+			_LIH_Default.SetValueInt(0)
+			ResetDefaults()
+		endIf
+		_LIH_Version.SetValue(_Version)
+		debug.Notification("Updating to HUD version " + _Version as String)
+	else
+		debug.Notification("Initializing HUD version " + _Version as String)
+		ApplySettings()
+	endIf
+endFunction
+
+
+; -------------------------------------------------------------------------------------------------
+; Functions
+; -------------------------------------------------------------------------------------------------
+
+Float function getHUDNumber(String element, String attribute) global
+	return ui.GetNumber("HUD Menu", element + "." + attribute)
+endFunction
+
+
+function setHUDNumber(String element, String attribute, Float value) global
+	ui.SetNumber("HUD Menu", element + "." + attribute, value)
+endFunction
+
+
+function setHUDBool(String element, String attribute, Bool value) global
+	ui.SetBool("HUD Menu", element + "." + attribute, value)
+endFunction
+
+
+function setHUDString(String element, String attribute, String value) global
+	ui.SetString("HUD Menu", element + "." + attribute, value)
+endFunction
+
+
+function hide(String clip, Bool visible)
+	isClip = clip
+	if visible == true
+		visible = false
+	else
+		visible = true
+	endIf
+	LIH_ConfigMenu.setHUDBool(isClip, "_visible", visible)
+endFunction
+
+
+function ResetItem()
 	if _LIH_SelectedItem == "Magica"
 		_LIH_MagickaX.SetValue(_LIH_DefMagickaX.Getvalue())
 		_LIH_MagickaY.SetValue(_LIH_DefMagickaY.Getvalue())
@@ -566,8 +881,8 @@ function ResetItem()
 	UpdateItem()
 endFunction
 
-function ApplyHUD()
 
+function ApplyHUD()
 	LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.RolloverNameInstance", "_alpha", _LIH_ItemAlpha.GetValueInt() as Float)
 	LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.RolloverInfoInstance", "_alpha", _LIH_InfoAlpha.GetValueInt() as Float)
 	LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.GrayBarInstance", "_alpha", _LIH_SeparatorAlpha.GetValueInt() as Float)
@@ -691,8 +1006,8 @@ function ApplyHUD()
 	endIf
 endFunction
 
-function MoveDown()
 
+function MoveDown()
 	if _LIH_SelectedItem == "Magica"
 		_LIH_MagickaY.SetValue(_LIH_MagickaY.Getvalue() + _LIH_Step.Getvalue())
 		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Magica", "_y", _LIH_MagickaY.Getvalue())
@@ -770,168 +1085,14 @@ function MoveDown()
 	UpdateItem()
 endFunction
 
-Event OnOptionKeyMapChange(Int a_option, Int a_keyCode, String a_conflictControl, String a_conflictName)
-
-	String page = CurrentPage
-	if page == "HUD Position"
-		if a_option == _HotKey_K
-			SetKeyMapOptionValue(a_option, a_keyCode, false)
-			_LIH_Key.SetValue(a_keyCode as Float)
-		elseIf a_option == _LeftKey_K
-			SetKeyMapOptionValue(a_option, a_keyCode, false)
-			_LIH_LeftKey.SetValue(a_keyCode as Float)
-		elseIf a_option == _RightKey_K
-			SetKeyMapOptionValue(a_option, a_keyCode, false)
-			_LIH_RightKey.SetValue(a_keyCode as Float)
-		elseIf a_option == _UpKey_K
-			SetKeyMapOptionValue(a_option, a_keyCode, false)
-			_LIH_UpKey.SetValue(a_keyCode as Float)
-		elseIf a_option == _DownKey_K
-			SetKeyMapOptionValue(a_option, a_keyCode, false)
-			_LIH_DownKey.SetValue(a_keyCode as Float)
-		elseIf a_option == _PrevKey_K
-			SetKeyMapOptionValue(a_option, a_keyCode, false)
-			_LIH_PrevKey.SetValue(a_keyCode as Float)
-		elseIf a_option == _NextKey_K
-			SetKeyMapOptionValue(a_option, a_keyCode, false)
-			_LIH_NextKey.SetValue(a_keyCode as Float)
-		elseIf a_option == _ScaleUpKey_K
-			SetKeyMapOptionValue(a_option, a_keyCode, false)
-			_LIH_ScaleUpKey.SetValue(a_keyCode as Float)
-		elseIf a_option == _ScaleDownKey_K
-			SetKeyMapOptionValue(a_option, a_keyCode, false)
-			_LIH_ScaleDownKey.SetValue(a_keyCode as Float)
-		elseIf a_option == _StepKey_K
-			SetKeyMapOptionValue(a_option, a_keyCode, false)
-			_LIH_StepKey.SetValue(a_keyCode as Float)
-		elseIf a_option == _RotateKey_K
-			SetKeyMapOptionValue(a_option, a_keyCode, false)
-			_LIH_RotateKey.SetValue(a_keyCode as Float)
-		elseIf a_option == _ResetKey_K
-			SetKeyMapOptionValue(a_option, a_keyCode, false)
-			_LIH_ResetKey.SetValue(a_keyCode as Float)
-		endIf
-	endIf
-endEvent
 
 function show(String clip, Bool visible)
-
 	isClip = clip
 	LIH_ConfigMenu.setHUDBool(isClip, "_visible", visible)
 endFunction
 
-Event OnOptionSelect(Int a_option)
-
-	String page = CurrentPage
-	if page == "General Settings"
-		if a_option == _Enabled_T
-			toggle(_LIH_Enabled)
-			SetToggleOptionValue(a_option, _LIH_Enabled.GetValueInt() as Bool, false)
-		elseIf a_option == _Reset_T
-			toggle(_LIH_Reset)
-			SetToggleOptionValue(a_option, _LIH_Reset.GetValueInt() as Bool, false)
-		elseIf a_option == _Load_T
-			toggle(_LIH_Load)
-			SetToggleOptionValue(a_option, _LIH_Load.GetValueInt() as Bool, false)
-; -------- added by towawot -----
-		elseIf a_option == _Load2_T
-			bool continue = ShowMessage("do you want to load personal setting?", true, "$Yes", "$No")
-			if (continue)
-				toggle3(_LIH_Load)
-				SetToggleOptionValue(a_option, _LIH_Load.GetValueInt() as Bool, false)
-			endif
-		elseIf a_option == _Save_T
-			bool continue = ShowMessage("do you want to save current setting?", true, "$Yes", "$No")
-			if (continue)
-				toggle2(_LIH_Load)
-				SetToggleOptionValue(a_option, _LIH_Load.GetValueInt() as Bool, false)
-			endif
-; -------- end -----
-		elseIf a_option == _DebugVisible_T
-			toggle(_LIH_DebugVisible)
-			SetToggleOptionValue(a_option, _LIH_DebugVisible.GetValueInt() as Bool, false)
-		endIf
-	elseIf page == "HUD Visibility"
-		if a_option == _BarsAlwaysVisible_T
-			toggle(_LIH_BarsAlwaysVisible)
-			SetToggleOptionValue(a_option, _LIH_BarsAlwaysVisible.GetValueInt() as Bool, false)
-		elseIf a_option == _AltHealthBarVisible_T
-			toggle(_LIH_AltHealthBarVisible)
-			SetToggleOptionValue(a_option, _LIH_AltHealthBarVisible.GetValueInt() as Bool, false)
-		elseIf a_option == _SneakCrosshairVisible_T
-			toggle(_LIH_SneakCrosshairVisible)
-			SetToggleOptionValue(a_option, _LIH_SneakCrosshairVisible.GetValueInt() as Bool, false)
-		elseIf a_option == _AltCrosshairVisible_T
-			toggle(_LIH_AltCrosshairVisible)
-			SetToggleOptionValue(a_option, _LIH_AltCrosshairVisible.GetValueInt() as Bool, false)
-		elseIf a_option == _SlimCompassVisible_T
-			toggle(_LIH_SlimCompassVisible)
-			SetToggleOptionValue(a_option, _LIH_SlimCompassVisible.GetValueInt() as Bool, false)
-		elseIf a_option == _AltSneakMeterVisible_T
-			toggle(_LIH_AltSneakMeterVisible)
-			SetToggleOptionValue(a_option, _LIH_AltSneakMeterVisible.GetValueInt() as Bool, false)
-		elseIf a_option == _ActivateButtonVisible_T
-			toggle(_LIH_ActivateButtonVisible)
-			SetToggleOptionValue(a_option, _LIH_ActivateButtonVisible.GetValueInt() as Bool, false)
-		elseIf a_option == _SneakTextVisible_T
-			toggle(_LIH_SneakTextVisible)
-			SetToggleOptionValue(a_option, _LIH_SneakTextVisible.GetValueInt() as Bool, false)
-		elseIf a_option == _UndiscoveredMarkersVisible_T
-			toggle(_LIH_UndiscoveredMarkersVisible)
-			SetToggleOptionValue(a_option, _LIH_UndiscoveredMarkersVisible.GetValueInt() as Bool, false)
-		elseIf a_option == _LocationMarkersVisible_T
-			toggle(_LIH_LocationMarkersVisible)
-			SetToggleOptionValue(a_option, _LIH_LocationMarkersVisible.GetValueInt() as Bool, false)
-		elseIf a_option == _EnemyMarkersVisible_T
-			toggle(_LIH_EnemyMarkersVisible)
-			SetToggleOptionValue(a_option, _LIH_EnemyMarkersVisible.GetValueInt() as Bool, false)
-		elseIf a_option == _PlayerSetMarkerVisible_T
-			toggle(_LIH_PlayerSetMarkerVisible)
-			SetToggleOptionValue(a_option, _LIH_PlayerSetMarkerVisible.GetValueInt() as Bool, false)
-		elseIf a_option == _QuestDoorMarkersVisible_T
-			toggle(_LIH_QuestDoorMarkersVisible)
-			SetToggleOptionValue(a_option, _LIH_QuestDoorMarkersVisible.GetValueInt() as Bool, false)
-		elseIf a_option == _QuestMarkersVisible_T
-			toggle(_LIH_QuestMarkersVisible)
-			SetToggleOptionValue(a_option, _LIH_QuestMarkersVisible.GetValueInt() as Bool, false)
-		endIf
-	endIf
-endEvent
-
-function OnGameReload()
-
-	parent.OnGameReload()
-	show("_root.HUDDummy", 0 as Bool)
-	show("_root.HUDMovieBaseInstance", 0 as Bool)
-	_LIH_SelectedItem = "None"
-	_LIH_SelectedDesc = "None"
-	_LIH_Reset.SetValueInt(0)
-	_LIH_Selected.SetValueInt(0)
-	Float _Version = 1.10000
-	if _LIH_Version.Getvalue() < _Version
-		if _LIH_Version.GetValueInt() > 0
-			_LIH_Default.SetValueInt(2)
-			ApplySettings()
-		else
-			_LIH_Default.SetValueInt(0)
-			ResetDefaults()
-		endIf
-		_LIH_Version.SetValue(_Version)
-		debug.Notification("Updating to HUD version " + _Version as String)
-	else
-		debug.Notification("Initializing HUD version " + _Version as String)
-		ApplySettings()
-	endIf
-endFunction
-
-Event OnOptionMenuOpen(Int a_option)
-{Called when a menu option has been selected}
-
-	String page = CurrentPage
-endEvent
 
 function UpdateItem()
-
 	_LIH_XItem = 0 as Float
 	_LIH_YItem = 0 as Float
 	_LIH_ScaleItem = 0
@@ -1159,31 +1320,16 @@ function UpdateItem()
 	LIH_ConfigMenu.setHUDString("_root.HUDDummy.guideLines_mc.HUDDisplayInfo", "text", _LIH_SelectedDesc + " / Step: " + _LIH_Step.Getvalue() as String + " units " + " X: " + _LIH_XItem as String + " Y: " + _LIH_YItem as String + " S: " + _LIH_ScaleItem as String + "%" + " R/A: " + _LIH_RotateItem as String + " " + _LIH_AlignItem)
 endFunction
 
-function setPages()
 
+function setPages()
 	Pages = new String[3]
 	Pages[0] = "General Settings"
 	Pages[1] = "HUD Visibility"
 	Pages[2] = "HUD Position"
 endFunction
 
-Event OnOptionColorOpen(Int a_option)
-{Called when a color option has been selected}
-
-	String page = CurrentPage
-endEvent
-
-Event OnConfigClose()
-
-	if _LIH_Reset.GetValueInt() == 1
-		ResetDefaults()
-	else
-		ApplySettings()
-	endIf
-endEvent
 
 function ResetDefaults()
-
 	_LIH_UndiscoveredMarkersVisible.SetValueInt(1)
 	_LIH_LocationMarkersVisible.SetValueInt(1)
 	_LIH_EnemyMarkersVisible.SetValueInt(1)
@@ -1301,8 +1447,8 @@ function ResetDefaults()
 	ApplySettings()
 endFunction
 
-function ZoomOut()
 
+function ZoomOut()
 	if _LIH_SelectedItem == "Magica"
 		_LIH_MagickaS.SetValueInt(_LIH_MagickaS.GetValueInt() - _LIH_Step.GetValueInt())
 		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Magica", "_xscale", _LIH_MagickaS.GetValueInt() as Float)
@@ -1405,8 +1551,8 @@ function ZoomOut()
 	UpdateItem()
 endFunction
 
-function LoadDummy()
 
+function LoadDummy()
 	LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.CompassShoutMeterHolder.CompassFrameAlt", "_visible", _LIH_SlimCompassVisible.GetValueInt() as Float)
 	LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.CompassShoutMeterHolder.CompassFrame", "_visible", _LIH_SlimCompassVisible.GetValueInt() as Float)
 	LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.RolloverNameInstance", "_alpha", _LIH_ItemAlpha.GetValueInt() as Float)
@@ -1517,8 +1663,8 @@ function LoadDummy()
 	LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.HUDInfoAlign", "_alpha", _LIH_InfoAlign.Getvalue())
 endFunction
 
-function ApplySettings()
 
+function ApplySettings()
 	if _LIH_Enabled.GetValueInt() > 0 && _LIH_Reset.GetValueInt() < 1
 		if _LIH_DebugVisible.GetValueInt() == 1
 			debug.Notification("Applying settings...")
@@ -1527,15 +1673,15 @@ function ApplySettings()
 		ApplyChanges()
 		if _LIH_Default.GetValueInt() == 2
 			if _LIH_DebugVisible.GetValueInt() == 1
-				debug.Notification("Restoring saved HUD position")
+				debug.Notification("Restoring saved HUD position...")
 			endIf
 		elseIf _LIH_DebugVisible.GetValueInt() == 1
-			debug.Notification("Restoring default HUD position")
+			debug.Notification("Restoring default HUD position...")
 		endIf
 		ApplyHUD()
 	endIf
 	if _LIH_Enabled.GetValueInt() == 0 && _LIH_Default.GetValueInt() > 0
-		debug.Notification("Mod disabled...")
+		debug.Notification("Disabling mod...")
 		LIH_MainInstance.deactivate()
 		_LIH_Default.SetValueInt(1)
 		_LIH_Reset.SetValueInt(1)
@@ -1547,11 +1693,10 @@ function ApplySettings()
 		ResetDefaults()
 	elseIf _LIH_Load.GetValueInt() > 0
 		if _LIH_DebugVisible.GetValueInt() == 1
-; -------- changed by towawot -----
 			if _LIH_Load.GetValueInt() == 2
-				debug.Notification("saved priset HUD values...")
+				debug.Notification("Saved preset HUD values.")
 			else
-				debug.Notification("Restoring saved HUD values...")
+				debug.Notification("Restored saved HUD values.")
 			endif
 		endIf
 
@@ -1562,12 +1707,11 @@ function ApplySettings()
 		else
 			LoadPreset()
 		endif
-; -------- end -----
 	endIf
 endFunction
 
-function MoveRight()
 
+function MoveRight()
 	if _LIH_SelectedItem == "Magica"
 		_LIH_MagickaX.SetValue(_LIH_MagickaX.Getvalue() + _LIH_Step.Getvalue())
 		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Magica", "_x", _LIH_MagickaX.Getvalue())
@@ -1645,8 +1789,8 @@ function MoveRight()
 	UpdateItem()
 endFunction
 
-function LoadPreset()
 
+function LoadPreset()
 	_LIH_UndiscoveredMarkersVisible.SetValueInt(0)
 	_LIH_LocationMarkersVisible.SetValueInt(1)
 	_LIH_EnemyMarkersVisible.SetValueInt(0)
@@ -1757,9 +1901,8 @@ function LoadPreset()
 	ApplySettings()
 endFunction
 
-; -------- added by towawot -----
-function toggle2(globalvariable value)
 
+function toggle2(globalvariable value)
 	if value.GetValueInt() == 0
 		value.SetValueInt(2)
 	else
@@ -1767,8 +1910,8 @@ function toggle2(globalvariable value)
 	endIf
 endFunction
 
-function toggle3(globalvariable value)
 
+function toggle3(globalvariable value)
 	if value.GetValueInt() == 0
 		value.SetValueInt(3)
 	else
@@ -1776,10 +1919,9 @@ function toggle3(globalvariable value)
 	endIf
 endFunction
 
+
 function LoadPreset_New()
-	; get a reference to the FISS Interface
 	FISSInterface fiss = FISSFactory.getFISS()
-	; check if FISS is installed
 	If fiss
 		fiss.beginLoad("LessIntrusiveHUD2.xml")
 		_LIH_BarsAlwaysVisible.SetValueInt(fiss.loadInt("_LIH_BarsAlwaysVisible"))
@@ -1889,10 +2031,7 @@ function LoadPreset_New()
 		_LIH_HUDMsgAlign.SetValueInt(fiss.loadInt("_LIH_HUDMsgAlign"))
 		_LIH_InfoAlign.SetValueInt(fiss.loadInt("_LIH_InfoAlign"))
 		string loadResult = fiss.endLoad()
-		; check the result
-		if loadResult != ""
-			debug.Trace(loadResult)
-		endif
+
 		_LIH_Reset.SetValueInt(0)
 		_LIH_Load.SetValueInt(0)
 		ApplySettings()
@@ -1901,8 +2040,8 @@ function LoadPreset_New()
 	endif
 endFunction
 
-function SavePreset_New()
 
+function SavePreset_New()
 	FISSInterface fiss = FISSFactory.getFISS()
 	If fiss
 		fiss.beginSave("LessIntrusiveHUD2.xml", "LessIntrusiveHUD2")
@@ -2013,30 +2152,14 @@ function SavePreset_New()
 		fiss.saveInt("_LIH_HUDMsgAlign", _LIH_HUDMsgAlign.GetValueInt())
 		fiss.saveInt("_LIH_InfoAlign", _LIH_InfoAlign.GetValueInt())
 		string saveResult = fiss.endSave()
-		if saveResult != ""
-			debug.Trace(saveResult)
-		endif
 	endif
 
 	_LIH_Reset.SetValueInt(0)
 	_LIH_Load.SetValueInt(0)
 endFunction
-; -------- end -----
 
-Event OnOptionHighlight(Int a_option)
-{Called when highlighting an option}
-
-	String page = CurrentPage
-endEvent
-
-Event OnOptionColorAccept(Int a_option, Int a_color)
-{Called when a new color has been accepted}
-
-	String page = CurrentPage
-endEvent
 
 function ZoomIn()
-
 	if _LIH_SelectedItem == "Magica"
 		_LIH_MagickaS.SetValueInt(_LIH_MagickaS.GetValueInt() + _LIH_Step.GetValueInt())
 		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Magica", "_xscale", _LIH_MagickaS.GetValueInt() as Float)
@@ -2139,13 +2262,13 @@ function ZoomIn()
 	UpdateItem()
 endFunction
 
-function ToggleHUD()
 
+function ToggleHUD()
 	if _LIH_Toggle.GetValueInt() > 0
 		_LIH_Toggle.SetValueInt(0)
 		_LIH_Selected.SetValueInt(0)
 		if _LIH_DebugVisible.GetValueInt() == 1
-			debug.Notification("Exit Edit HUD Mode")
+			debug.Notification("Exiting HUD Edit Mode...")
 		endIf
 		show("_root.HUDDummy", 0 as Bool)
 		show("_root.HUDDummy.guideLines_mc", 0 as Bool)
@@ -2155,7 +2278,7 @@ function ToggleHUD()
 		_LIH_Toggle.SetValueInt(1)
 		_LIH_Selected.SetValueInt(1)
 		if _LIH_DebugVisible.GetValueInt() == 1
-			debug.Notification("Enter Edit HUD Mode")
+			debug.Notification("Entering HUD Edit Mode...")
 		endIf
 		show("_root.HUDDummy", 1 as Bool)
 		show("_root.HUDDummy.guideLines_mc", 1 as Bool)
@@ -2164,10 +2287,8 @@ function ToggleHUD()
 	endIf
 endFunction
 
-; Skipped compiler generated GetState
 
 function PreviousItem()
-
 	_LIH_Selected.SetValueInt(_LIH_Selected.GetValueInt() - 1)
 	if _LIH_Selected.GetValueInt() == 0
 		_LIH_Selected.SetValueInt(25)
@@ -2175,8 +2296,8 @@ function PreviousItem()
 	CheckItem()
 endFunction
 
-function CheckItem()
 
+function CheckItem()
 	if _LIH_Selected.GetValueInt() == 0
 		_LIH_SelectedItem = "None"
 		_LIH_SelectedDesc = "None"
@@ -2262,8 +2383,8 @@ function CheckItem()
 	UpdateItem()
 endFunction
 
-function ApplyChanges()
 
+function ApplyChanges()
 	LoadDummy()
 	LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.BottomLeftLockInstance", "_alpha", _LIH_EnchantmentAlpha.GetValueInt() as Float)
 	LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.BottomRightLockInstance", "_alpha", _LIH_EnchantmentAlpha.GetValueInt() as Float)
@@ -2345,8 +2466,8 @@ function ApplyChanges()
 	endIf
 endFunction
 
-function MoveUp()
 
+function MoveUp()
 	if _LIH_SelectedItem == "Magica"
 		_LIH_MagickaY.SetValue(_LIH_MagickaY.Getvalue() - _LIH_Step.Getvalue())
 		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Magica", "_y", _LIH_MagickaY.Getvalue())
@@ -2424,8 +2545,8 @@ function MoveUp()
 	UpdateItem()
 endFunction
 
-function ToggleStep()
 
+function ToggleStep()
 	if _LIH_Step.Getvalue() == 1.00000
 		_LIH_Step.SetValue(10.0000)
 	elseIf _LIH_Step.Getvalue() == 10.0000
@@ -2436,8 +2557,8 @@ function ToggleStep()
 	UpdateItem()
 endFunction
 
-function ShowAlign()
 
+function ShowAlign()
 	if _LIH_RotateItem == 0
 		_LIH_AlignItem = "(Left)"
 	elseIf _LIH_RotateItem == 50
@@ -2447,8 +2568,8 @@ function ShowAlign()
 	endIf
 endFunction
 
-function NextItem()
 
+function NextItem()
 	_LIH_Selected.SetValueInt(_LIH_Selected.GetValueInt() + 1)
 	if _LIH_Selected.GetValueInt() == 26
 		_LIH_Selected.SetValueInt(1)
@@ -2456,8 +2577,8 @@ function NextItem()
 	CheckItem()
 endFunction
 
-function RotateAlign()
 
+function RotateAlign()
 	if _LIH_SelectedItem == "Magica"
 		_LIH_MagickaR.SetValueInt(_LIH_MagickaR.GetValueInt() + _LIH_Step.GetValueInt())
 		if _LIH_MagickaR.GetValueInt() == 360
@@ -2522,97 +2643,8 @@ function RotateAlign()
 	UpdateItem()
 endFunction
 
-Event OnConfigInit()
-	setPages()
-	OnGameReload()
-	Utility.wait(1.0)
-	LoadPreset_New()
-endEvent
-
-Event OnOptionSliderOpen(Int a_option)
-
-	String page = CurrentPage
-	if page == "HUD Visibility"
-		if a_option == _CrosshairAlpha_S
-			SetSliderDialogStartValue(_LIH_CrosshairAlpha.GetValueInt() as Float)
-			SetSliderDialogDefaultValue(100 as Float)
-			SetSliderDialogRange(0 as Float, 100 as Float)
-			SetSliderDialogInterval(1 as Float)
-		elseIf a_option == _SneakCrosshairAlpha_S
-			SetSliderDialogStartValue(_LIH_SneakCrosshairAlpha.GetValueInt() as Float)
-			SetSliderDialogDefaultValue(100 as Float)
-			SetSliderDialogRange(0 as Float, 100 as Float)
-			SetSliderDialogInterval(1 as Float)
-		elseIf a_option == _MagickaAlpha_S
-			SetSliderDialogStartValue(_LIH_MagickaAlpha.GetValueInt() as Float)
-			SetSliderDialogDefaultValue(100 as Float)
-			SetSliderDialogRange(0 as Float, 100 as Float)
-			SetSliderDialogInterval(1 as Float)
-		elseIf a_option == _HealthAlpha_S
-			SetSliderDialogStartValue(_LIH_HealthAlpha.GetValueInt() as Float)
-			SetSliderDialogDefaultValue(100 as Float)
-			SetSliderDialogRange(0 as Float, 100 as Float)
-			SetSliderDialogInterval(1 as Float)
-		elseIf a_option == _StaminaAlpha_S
-			SetSliderDialogStartValue(_LIH_StaminaAlpha.GetValueInt() as Float)
-			SetSliderDialogDefaultValue(100 as Float)
-			SetSliderDialogRange(0 as Float, 100 as Float)
-			SetSliderDialogInterval(1 as Float)
-		elseIf a_option == _EnchantmentAlpha_S
-			SetSliderDialogStartValue(_LIH_EnchantmentAlpha.GetValueInt() as Float)
-			SetSliderDialogDefaultValue(100 as Float)
-			SetSliderDialogRange(0 as Float, 100 as Float)
-			SetSliderDialogInterval(1 as Float)
-		elseIf a_option == _ItemAlpha_S
-			SetSliderDialogStartValue(_LIH_ItemAlpha.GetValueInt() as Float)
-			SetSliderDialogDefaultValue(100 as Float)
-			SetSliderDialogRange(0 as Float, 100 as Float)
-			SetSliderDialogInterval(1 as Float)
-		elseIf a_option == _InfoAlpha_S
-			SetSliderDialogStartValue(_LIH_InfoAlpha.GetValueInt() as Float)
-			SetSliderDialogDefaultValue(100 as Float)
-			SetSliderDialogRange(0 as Float, 100 as Float)
-			SetSliderDialogInterval(1 as Float)
-		elseIf a_option == _SeparatorAlpha_S
-			SetSliderDialogStartValue(_LIH_SeparatorAlpha.GetValueInt() as Float)
-			SetSliderDialogDefaultValue(100 as Float)
-			SetSliderDialogRange(0 as Float, 100 as Float)
-			SetSliderDialogInterval(1 as Float)
-		elseIf a_option == _SubtitleAlpha_S
-			SetSliderDialogStartValue(_LIH_SubtitleAlpha.GetValueInt() as Float)
-			SetSliderDialogDefaultValue(100 as Float)
-			SetSliderDialogRange(0 as Float, 100 as Float)
-			SetSliderDialogInterval(1 as Float)
-		elseIf a_option == _ArrowsAlpha_S
-			SetSliderDialogStartValue(_LIH_ArrowsAlpha.GetValueInt() as Float)
-			SetSliderDialogDefaultValue(100 as Float)
-			SetSliderDialogRange(0 as Float, 100 as Float)
-			SetSliderDialogInterval(1 as Float)
-		endIf
-	endIf
-endEvent
-
-Event OnOptionMenuAccept(Int a_option, Int a_index)
-{Called when a menu entry has been accepted}
-
-	String page = CurrentPage
-endEvent
-
-Event OnVersionUpdate(Int a_version)
-
-	; Empty function
-endEvent
-
-Event OnOptionDefault(Int a_option)
-{Called when resetting an option to its default value}
-
-	String page = CurrentPage
-endEvent
-
-; Skipped compiler generated GotoState
 
 function MoveLeft()
-
 	if _LIH_SelectedItem == "Magica"
 		_LIH_MagickaX.SetValue(_LIH_MagickaX.Getvalue() - _LIH_Step.Getvalue())
 		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Magica", "_x", _LIH_MagickaX.Getvalue())
@@ -2690,53 +2722,11 @@ function MoveLeft()
 	UpdateItem()
 endFunction
 
-function toggle(globalvariable value)
 
+function toggle(globalvariable value)
 	if value.GetValueInt() == 0
 		value.SetValueInt(1)
 	else
 		value.SetValueInt(0)
 	endIf
 endFunction
-
-
-Event OnOptionSliderAccept(Int a_option, Float a_value)
-
-	String page = CurrentPage
-	if page == "HUD Visibility"
-		if a_option == _CrosshairAlpha_S
-			SetSliderOptionValue(a_option, a_value, "{0}", false)
-			_LIH_CrosshairAlpha.SetValue(a_value)
-		elseIf a_option == _SneakCrosshairAlpha_S
-			SetSliderOptionValue(a_option, a_value, "{0}", false)
-			_LIH_SneakCrosshairAlpha.SetValue(a_value)
-		elseIf a_option == _MagickaAlpha_S
-			SetSliderOptionValue(a_option, a_value, "{0}", false)
-			_LIH_MagickaAlpha.SetValue(a_value)
-		elseIf a_option == _HealthAlpha_S
-			SetSliderOptionValue(a_option, a_value, "{0}", false)
-			_LIH_HealthAlpha.SetValue(a_value)
-		elseIf a_option == _StaminaAlpha_S
-			SetSliderOptionValue(a_option, a_value, "{0}", false)
-			_LIH_StaminaAlpha.SetValue(a_value)
-		elseIf a_option == _EnchantmentAlpha_S
-			SetSliderOptionValue(a_option, a_value, "{0}", false)
-			_LIH_EnchantmentAlpha.SetValue(a_value)
-		elseIf a_option == _ItemAlpha_S
-			SetSliderOptionValue(a_option, a_value, "{0}", false)
-			_LIH_ItemAlpha.SetValue(a_value)
-		elseIf a_option == _InfoAlpha_S
-			SetSliderOptionValue(a_option, a_value, "{0}", false)
-			_LIH_InfoAlpha.SetValue(a_value)
-		elseIf a_option == _SeparatorAlpha_S
-			SetSliderOptionValue(a_option, a_value, "{0}", false)
-			_LIH_SeparatorAlpha.SetValue(a_value)
-		elseIf a_option == _SubtitleAlpha_S
-			SetSliderOptionValue(a_option, a_value, "{0}", false)
-			_LIH_SubtitleAlpha.SetValue(a_value)
-		elseIf a_option == _ArrowsAlpha_S
-			SetSliderOptionValue(a_option, a_value, "{0}", false)
-			_LIH_ArrowsAlpha.SetValue(a_value)
-		endIf
-	endIf
-endEvent
