@@ -1,32 +1,81 @@
 Scriptname HeadtrackingConfigMenu extends SKI_ConfigBase  
 
-int RangeOID
+; -------------------------------------------------------------------------------------------------
+; Properties
+; -------------------------------------------------------------------------------------------------
+
+Actor          Property PlayerRef                         Auto
+GlobalVariable Property HeadtrackingCorpses               Auto
+GlobalVariable Property HeadtrackingExpressions           Auto
+GlobalVariable Property HeadtrackingMoving                Auto
+GlobalVariable Property HeadtrackingRange                 Auto
+GlobalVariable Property HeadtrackingSilent                Auto
+GlobalVariable Property HeadtrackingTimer                 Auto
+GlobalVariable Property HeadtrackingUninstall             Auto
+Perk           Property HeadtrackingRangePerk             Auto
+Quest          Property Headtracking                      Auto
+Spell          Property HeadtrackingPlayer                Auto
+Spell          Property HeadtrackingPlayerNoCorpses       Auto
+Spell          Property HeadtrackingPlayerNoMoving        Auto
+Spell          Property HeadtrackingPlayerNoMovingCorpses Auto
+
+HeadTrackingScript QuestScript
+
+
+; -------------------------------------------------------------------------------------------------
+; Properties
+; -------------------------------------------------------------------------------------------------
+
 int CorpsesOID
-int MovingOID
-int SilentOID
-int TimerOID
-int ExpressionsOID
 int DisableOID
+int ExpressionsOID
+int MovingOID
+int RangeOID
+int SilentOID
 int TextID
+int TimerOID
 
 bool changed
 
-GlobalVariable Property HeadtrackingRange Auto
-GlobalVariable Property HeadtrackingMoving Auto
-GlobalVariable Property HeadtrackingSilent Auto
-GlobalVariable Property HeadtrackingCorpses Auto
-GlobalVariable Property HeadtrackingTimer Auto
-GlobalVariable Property HeadtrackingExpressions Auto
-GlobalVariable Property HeadtrackingUninstall Auto
 
-Quest Property Headtracking Auto
-HeadTrackingScript QuestScript
-Actor Property PlayerRef Auto
-Perk Property HeadtrackingRangePerk Auto
-Spell Property HeadtrackingPlayer Auto
-Spell Property HeadtrackingPlayerNoMoving Auto
-Spell Property HeadtrackingPlayerNoMovingCorpses Auto
-Spell Property HeadtrackingPlayerNoCorpses Auto
+; -------------------------------------------------------------------------------------------------
+; MCM Events
+; -------------------------------------------------------------------------------------------------
+
+Event OnConfigInit()
+	If !Headtracking.IsRunning()
+		Headtracking.Start()
+	EndIf
+	
+	QuestScript = Headtracking as HeadTrackingScript
+	If QuestScript.Version == 0
+		QuestScript.TrackScripts = New HeadtrackingTargetScript[15]
+		int index = 0
+		While index < 15
+			if QuestScript.TrackTargets[index] == None
+				QuestScript.TrackTargets[index] = PlayerRef
+			EndIf
+			index += 1
+		EndWhile
+	ElseIf QuestScript.Version < 30
+		Debug.Notification("Player Headtracking updated to version 3.3!")
+	EndIf
+	QuestScript.Version = GetVersion()
+	Refresh()
+EndEvent
+
+
+Event OnConfigOpen()
+	changed = False
+EndEvent
+
+
+Event OnConfigClose()
+	If changed
+		Refresh()
+	EndIf
+EndEvent
+
 
 event OnPageReset(string page)
 	SetCursorFillMode(LEFT_TO_RIGHT)
@@ -54,6 +103,7 @@ event OnPageReset(string page)
 	EndIf
 endEvent
 
+
 event OnOptionSelect(int option)
 	changed = True
 	If option == MovingOID
@@ -74,6 +124,7 @@ event OnOptionSelect(int option)
 		ForcePageReset()
 	EndIf
 EndEvent
+
 
 event OnOptionDefault(int option)
 	If option == RangeOID
@@ -97,7 +148,6 @@ event OnOptionDefault(int option)
 EndEvent
 
 
-
 event OnOptionSliderOpen(int option)
 	If option == RangeOID
 		SetSliderDialogStartValue(HeadtrackingRange.GetValue())
@@ -117,6 +167,7 @@ event OnOptionSliderOpen(int option)
 		SetSliderDialogInterval(1.0)
 	EndIf
 endEvent
+
 
 event OnOptionSliderAccept(int option, float value)
 	changed = True
@@ -138,6 +189,7 @@ event OnOptionSliderAccept(int option, float value)
 		EndIf
 	EndIf
 EndEvent
+
 
 event OnOptionHighlight(int option)
 	if option == TimerOID
@@ -171,45 +223,6 @@ event OnOptionHighlight(int option)
 	EndIf
 EndEvent
 
-;Event OnGameReload()
-;	parent.OnGameReload()
-;EndEvent
-
-Event OnConfigInit()
-	;parent.OnGameReload()
-	If !Headtracking.IsRunning()
-		Headtracking.Start()
-	EndIf
-	QuestScript = Headtracking as HeadTrackingScript
-	If QuestScript.Version == 0
-		QuestScript.TrackScripts = New HeadtrackingTargetScript[15]
-		int index = 0
-		While index < 15
-			if QuestScript.TrackTargets[index] == None
-				QuestScript.TrackTargets[index] = PlayerRef
-			EndIf
-			index += 1
-		EndWhile
-	ElseIf QuestScript.Version < 30
-		Debug.MessageBox("Player Headtracking updated to version 3.3!")
-	EndIf
-	QuestScript.Version = 33
-	Refresh()
-EndEvent
-
-Event OnConfigOpen()
-	changed = False
-EndEvent
-
-Event OnConfigClose()
-	If changed
-		Refresh()
-	EndIf
-EndEvent
-
-int function GetVersion()
-	return 33
-endFunction
 
 Event OnVersionUpdate(int a_version)
 	if (a_version >= 33 && CurrentVersion < 33)
@@ -222,8 +235,19 @@ Event OnVersionUpdate(int a_version)
 	EndIf
 EndEvent
 
+
+;Event OnGameReload()
+;	parent.OnGameReload()
+;EndEvent
+
+
+; -------------------------------------------------------------------------------------------------
+; Functions
+; -------------------------------------------------------------------------------------------------
+
 Function Refresh()
 	QuestScript = Headtracking as HeadTrackingScript
+
 	if HeadtrackingUninstall.GetValueInt() > 0
 		QuestScript.TrackingProp = False
 		QuestScript.GoToState("Uninstalled")
@@ -236,6 +260,7 @@ Function Refresh()
 		EndWhile
 		Return
 	EndIf
+
 	PlayerRef.RemoveSpell(HeadtrackingPlayer)
 	PlayerRef.RemoveSpell(HeadtrackingPlayerNoMoving)
 	PlayerRef.RemoveSpell(HeadtrackingPlayerNoMovingCorpses)
@@ -243,6 +268,7 @@ Function Refresh()
 	PlayerRef.SetActorValue("WaitingForPlayer", HeadtrackingRange.GetValue())
 	PlayerRef.RemovePerk(HeadtrackingRangePerk)
 	PlayerRef.AddPerk(HeadtrackingRangePerk)
+
 	if HeadtrackingMoving.GetValue()
 		if HeadtrackingCorpses.GetValue()
 			PlayerRef.AddSpell(HeadtrackingPlayer, False)
@@ -256,9 +282,15 @@ Function Refresh()
 			PlayerRef.AddSpell(HeadtrackingPlayerNoMovingCorpses, False)
 		EndIf
 	EndIf
+
 	If QuestScript.GetState() == "Uninstalled"
 		QuestScript.TrackingProp = False
 		QuestScript.GoToState("")
 		QuestScript.RegisterForSingleUpdate(0.5)
 	EndIf
 EndFunction
+
+
+int function GetVersion()
+	return 33
+endFunction
