@@ -5,35 +5,40 @@ Compiled : 2014-07-20 00:21:22
 User     : Safthanspeter
 Computer : HEIKE
 /;
-
 scriptName ADVSitFast_skyUI extends SKI_ConfigBase
 
-;-- Properties --------------------------------------
+; -------------------------------------------------------------------------------------------------
+; Properties
+; -------------------------------------------------------------------------------------------------
 
-globalvariable property GLBSETallowVoice auto
-globalvariable property GLBSETshakeCamera auto
-globalvariable property GLBSETshakeController auto
-globalvariable property GLBallowRelax auto
-globalvariable property GLBautoChill auto
-globalvariable property GLBbuffFollower auto
-globalvariable property GLBbuffNotification auto
-globalvariable property GLBbuffReady auto
-globalvariable property GLBhealthRegen auto
-globalvariable property GLBmagickaRegen auto
-globalvariable property GLBmusic auto
-globalvariable property GLBregenFollower auto
-globalvariable property GLBregenMult auto
-globalvariable property GLBregenVisuals auto
+globalvariable property GLBSETallowVoice       auto
+globalvariable property GLBSETshakeCamera      auto
+globalvariable property GLBSETshakeController  auto
+globalvariable property GLBallowRelax          auto
+globalvariable property GLBautoChill           auto
+globalvariable property GLBbuffFollower        auto
+globalvariable property GLBbuffNotification    auto
+globalvariable property GLBbuffReady           auto
+globalvariable property GLBhealthRegen         auto
+globalvariable property GLBmagickaRegen        auto
+globalvariable property GLBmusic               auto
+globalvariable property GLBregenFollower       auto
+globalvariable property GLBregenMult           auto
+globalvariable property GLBregenVisuals        auto
 globalvariable property GLBregisteredFollowers auto
-globalvariable property GLBsilentBuff auto
-globalvariable property GLBspeechFollower auto
-globalvariable property GLBstaminaRegen auto
-quest property MASTERQuest auto
-referencealias property MASTER auto
+globalvariable property GLBsilentBuff          auto
+globalvariable property GLBspeechFollower      auto
+globalvariable property GLBstaminaRegen        auto
+quest          property MASTERQuest            auto
+referencealias property MASTER                 auto
+
+
+; -------------------------------------------------------------------------------------------------
+; Computed Properties
+; -------------------------------------------------------------------------------------------------
 
 String property DisplayCam hidden
 	String function get()
-
 		if (MASTER as advsitfast_masterquest).SETcameraFrequency == 0
 			return "Never"
 		elseIf (MASTER as advsitfast_masterquest).SETcameraFrequency == 1
@@ -46,12 +51,11 @@ endproperty
 
 String property DisplayRegenMult hidden
 	String function get()
-
-		if GLBregenMult.getValue() == 1.50000
+		if GLBregenMult.getValue() == 1.5
 			return "+1.5"
-		elseIf GLBregenMult.getValue() == 2.50000
+		elseIf GLBregenMult.getValue() == 2.5
 			return "+2.5"
-		elseIf GLBregenMult.getValue() == 3.50000
+		elseIf GLBregenMult.getValue() == 3.5
 			return "+3.5"
 		endIf
 	endFunction
@@ -59,7 +63,6 @@ endproperty
 
 String property DisplayCurrent hidden
 	String function get()
-
 		if (MASTER as advsitfast_masterquest).HoldCrouch
 			return "Hold crouch:"
 		else
@@ -69,45 +72,47 @@ String property DisplayCurrent hidden
 endproperty
 
 
-;-- Variables ---------------------------------------
+; -------------------------------------------------------------------------------------------------
+; Variables
+; -------------------------------------------------------------------------------------------------
 
-Bool UseBuff = true
-Bool UseBuffReady = false
-Bool UseCameraNot = true
-Bool UseClick = false
-Bool UseControllerShake = false
-Bool UseDof = true
-Bool UseFollowerRelax = true
-Bool UseFollowerVoice = true
-Bool UseFurniture = false
-Bool UseKey = false
-Bool UseMeditate = true
-Bool UseMore = false
-Bool UseMusic = false
-Bool UseRegenFollower = true
-Bool UseRegenHealth = false
-Bool UseRegenMagicka = false
-Bool UseRegenStamina = false
-Bool UseRegenVisuals = true
-Bool UseShakeCamera = false
-Bool UseSilentBuff = true
-Bool UseVoice = true
-Bool UseautoChill = true
-Bool UsebuffFollower = true
-Bool Usebuffnotice = true
-Bool UsecamSFX = false
-Bool UsepuffOffSmoke = true
+Bool UseBuff               = true
+Bool UseBuffReady          = false
+Bool UseCameraNot          = true
+Bool UseClick              = false
+Bool UseControllerShake    = false
+Bool UseDof                = true
+Bool UseFollowerRelax      = true
+Bool UseFollowerVoice      = true
+Bool UseFurniture          = false
+Bool UseKey                = false
+Bool UseMeditate           = true
+Bool UseMore               = false
+Bool UseMusic              = false
+Bool UseRegenFollower      = true
+Bool UseRegenHealth        = false
+Bool UseRegenMagicka       = false
+Bool UseRegenStamina       = false
+Bool UseRegenVisuals       = true
+Bool UseShakeCamera        = false
+Bool UseSilentBuff         = true
+Bool UseVoice              = true
+Bool UseautoChill          = true
+Bool UsebuffFollower       = true
+Bool Usebuffnotice         = true
+Bool UsecamSFX             = false
+Bool UsepuffOffSmoke       = true
 
-Float DelayKickinCrouchLay = 1.00000
-Float ValueDOFstrength = 1.00000
-Float delayKickin = 2.00000
-Float delayKickinKeyx = 0.500000
+Float DelayKickinCrouchLay = 1.0
+Float ValueDOFstrength     = 1.0
+Float delayKickin          = 2.0
+Float delayKickinKeyx      = 0.5
 
-Int CTRL_key = 35
-Int CameraHeight = -64
-Int CameraX = 0
-Int FreeSlots = 6
-Int INDEXmethod = 0
+Int CTRL_key               = 35
+Int CameraHeight           = -64
+Int CameraX                = 0
+Int FreeSlots              = 6
+Int INDEXmethod            = 0
 Int Liked
 
 Int OPTFollowerRelax
@@ -153,24 +158,65 @@ Int OPTuseVoice
 String SetEvent
 String[] LISTsitMethod
 
-;-- Functions ---------------------------------------
 
-function OnOptionMenuAccept(Int option, Int index)
+; -------------------------------------------------------------------------------------------------
+; Events
+; -------------------------------------------------------------------------------------------------
 
-	if option == OPTdefineSitMethod
-		INDEXmethod = index
-		self.SetMenuOptionValue(OPTdefineSitMethod, LISTsitMethod[INDEXmethod], false)
-		self.ForcePageReset()
-		return 
-	endIf
+function OnInit()
+	; Active this mod after several seconds delay.
+	utility.wait(27)
+
+	debug.notification("Activating Fast Sit & Relax ...")
+	MASTERQuest.start()
+
+	parent.OnInit()
+
+	UseRegenVisuals = true
+	UseRegenMagicka = true
+	UseRegenStamina = true
+	UseRegenHealth = true
+	UseBuffReady = false
+	UseMusic = false
+
+	GLBSETshakeController.setValue(0.0)
+	GLBSETshakeCamera.setValue(0.0)
+	GLBmusic.setValue(0.0)
+	GLBbuffReady.setValue(0.0)
+	GLBSETallowVoice.setValue(1.0)
+	GLBhealthRegen.setValue(1.0)
+	GLBmagickaRegen.setValue(1.0)
+	GLBstaminaRegen.setValue(1.0)
+	GLBregenVisuals.setValue(1.0)
+	GLBallowRelax.setValue(100.0)
+	GLBbuffFollower.setValue(100.0)
+	GLBspeechFollower.setValue(1.0)
+	GLBbuffNotification.setValue(1.0)
+	GLBregenFollower.setValue(100.0)
+	GLBautoChill.setValue(50.0)
+
+	LISTsitMethod = new String[2]
+	LISTsitMethod[0] = "Hold crouch"
+	LISTsitMethod[1] = "Press Key"
+
+	(MASTER as advsitfast_masterquest).Running = true
+
+	Pages = new String[4]
+	Pages[0] = "Main"
+	Pages[1] = "More"
+	Pages[2] = ""
+	Pages[3] = "[Browse Manual]"
 endFunction
 
 
-function OnPageReset(String page)
+; -------------------------------------------------------------------------------------------------
+; MCM Events
+; -------------------------------------------------------------------------------------------------
 
+function OnPageReset(String page)
 	if SetEvent == ""
 		if page == ""
-			self.LoadCustomContent("FastSit/FastSitLogo.dds", 110 as Float, -20 as Float)
+			self.LoadCustomContent("FastSit/FastSitLogo.dds", 110.0, -20.0)
 			return 
 		elseIf page == "[Browse Manual]"
 			if (MASTER as advsitfast_masterquest).Running == true
@@ -183,38 +229,38 @@ function OnPageReset(String page)
 			self.UnloadCustomContent()
 		endIf
 	elseIf SetEvent == "RestoreCamera"
-		self.LoadCustomContent("FastSit/DSPexit.dds", 120 as Float, 190 as Float)
+		self.LoadCustomContent("FastSit/DSPexit.dds", 120.0, 190.0)
 		(MASTER as advsitfast_masterquest).RestoreCamera()
 		SetEvent = ""
 		return 
 	elseIf SetEvent == "OpenManual"
-		self.LoadCustomContent("FastSit/DSPexit.dds", 120 as Float, 190 as Float)
+		self.LoadCustomContent("FastSit/DSPexit.dds", 120.0, 190.0)
 		(MASTER as advsitfast_masterquest).ShowManual()
 		SetEvent = ""
 		return 
 	elseIf SetEvent == "Stand"
-		self.LoadCustomContent("FastSit/DSPstand.dds", 120 as Float, 190 as Float)
+		self.LoadCustomContent("FastSit/DSPstand.dds", 120.0, 190.0)
 		SetEvent = ""
 		return 
 	elseIf SetEvent == "Reboot"
-		self.LoadCustomContent("FastSit/DSPexit.dds", 120 as Float, 190 as Float)
+		self.LoadCustomContent("FastSit/DSPexit.dds", 120.0, 190.0)
 		MASTER.forceRefTo(game.getPlayer() as objectreference)
 		(MASTER as advsitfast_masterquest).Reboot()
 		SetEvent = ""
 		return 
 	elseIf SetEvent == "RefreshCamera"
-		self.LoadCustomContent("FastSit/DSPexit.dds", 120 as Float, 190 as Float)
+		self.LoadCustomContent("FastSit/DSPexit.dds", 120.0, 190.0)
 		(MASTER as advsitfast_masterquest).RefreshCamera()
 		SetEvent = ""
 		return 
 	elseIf SetEvent == "Follower"
-		self.LoadCustomContent("FastSit/DSPexit.dds", 120 as Float, 190 as Float)
+		self.LoadCustomContent("FastSit/DSPexit.dds", 120.0, 190.0)
 		(MASTER as advsitfast_masterquest).Register = true
 		(MASTER as advsitfast_masterquest).RegisterFollower()
 		SetEvent = ""
 		return 
 	elseIf SetEvent == "Uninstall"
-		self.LoadCustomContent("FastSit/DSPexit.dds", 120 as Float, 190 as Float)
+		self.LoadCustomContent("FastSit/DSPexit.dds", 120.0, 190.0)
 		(MASTER as advsitfast_masterquest).Uninstall()
 		SetEvent = ""
 		return 
@@ -246,15 +292,15 @@ function OnPageReset(String page)
 			OPTregenMult = self.AddTextOption(" Regen Strength:", self.DisplayRegenMult, 0)
 			self.SetCursorPosition(1)
 			self.AddHeaderOption("Lets sit together!", 0)
-			OPTregisterFollower = self.AddTextOption("(Un)Register a Follower", "(" + (FreeSlots - GLBregisteredFollowers.getValue() as Int) as String + ") Slots left", 0)
+			OPTregisterFollower = self.AddTextOption("(Un)Register a Follower", "(" + ((FreeSlots - GLBregisteredFollowers.getValue() as Int) as String) + ") Slots left", 0)
 			self.AddEmptyOption()
 			self.AddHeaderOption("Cinematic Cam", 0)
 			OPTcam = self.AddTextOption("Frequency:", self.DisplayCam, 0)
 			OPTdof = self.AddToggleOption("Use Depth of Field Effect?", UseDof, 0)
 			self.AddEmptyOption()
 			self.AddHeaderOption("Camera Adjustment", 0)
-			OPTcameraHeight = self.AddSliderOption(" Vertical", CameraHeight as Float, "{1}", 0)
-			OPTcameraX = self.AddSliderOption(" Horizontal", CameraX as Float, "{1}", 0)
+			OPTcameraHeight = self.AddSliderOption(" Vertical", (CameraHeight as Float), "{1}", 0)
+			OPTcameraX = self.AddSliderOption(" Horizontal", (CameraX as Float), "{1}", 0)
 			OPTcamera = self.AddToggleOption(" Don't touch my camera!", UseCameraNot, 0)
 			OPTcameraRestore = self.AddTextOption("", "Restore Camera", 0)
 		else
@@ -291,12 +337,9 @@ function OnPageReset(String page)
 			OPTstop = self.AddTextOption("", "[Stop Mod]", 0)
 		endIf
 	elseIf page == "[Open Manual]"
-		
 	endIf
 endFunction
 
-
-; Skipped compiler generated GetState
 
 function OnOptionHighlight(Int option)
 	if option == OPTtoggleInput
@@ -360,6 +403,16 @@ function OnOptionHighlight(Int option)
 endFunction
 
 
+function OnOptionMenuAccept(Int option, Int index)
+	if option == OPTdefineSitMethod
+		INDEXmethod = index
+		self.SetMenuOptionValue(OPTdefineSitMethod, LISTsitMethod[INDEXmethod], false)
+		self.ForcePageReset()
+		return 
+	endIf
+endFunction
+
+
 function OnOptionKeyMapChange(Int option, Int keyCode, String conflictControl, String conflictName)
 	if option == OPTkey
 		CTRL_key = keyCode
@@ -370,84 +423,44 @@ function OnOptionKeyMapChange(Int option, Int keyCode, String conflictControl, S
 endFunction
 
 
-function OnInit()
-	utility.wait(27)
-	debug.notification("Activating Fast Sit & Relax ...")
-	MASTERQuest.start()
-	parent.OnInit()
-	UseRegenVisuals = true
-	UseRegenMagicka = true
-	UseRegenStamina = true
-	UseRegenHealth = true
-	UseBuffReady = false
-	UseMusic = false
-	GLBSETshakeController.setValue(0 as Float)
-	GLBSETshakeCamera.setValue(0 as Float)
-	GLBmusic.setValue(0 as Float)
-	GLBbuffReady.setValue(0 as Float)
-	GLBSETallowVoice.setValue(1 as Float)
-	GLBhealthRegen.setValue(1 as Float)
-	GLBmagickaRegen.setValue(1 as Float)
-	GLBstaminaRegen.setValue(1 as Float)
-	GLBregenVisuals.setValue(1 as Float)
-	GLBallowRelax.setValue(100 as Float)
-	GLBbuffFollower.setValue(100 as Float)
-	GLBspeechFollower.setValue(1 as Float)
-	GLBbuffNotification.setValue(1 as Float)
-	GLBregenFollower.setValue(100 as Float)
-	GLBautoChill.setValue(50 as Float)
-	LISTsitMethod = new String[2]
-	LISTsitMethod[0] = "Hold crouch"
-	LISTsitMethod[1] = "Press Key"
-	(MASTER as advsitfast_masterquest).Running = true
-	Pages = new String[4]
-	Pages[0] = "Main"
-	Pages[1] = "More"
-	Pages[2] = ""
-	Pages[3] = "[Browse Manual]"
-endFunction
-
-
 function OnOptionSliderOpen(Int option)
-
 	if (MASTER as advsitfast_masterquest).HoldCrouch == false
 		if option == OPTdelayKickinKey
 			self.SetSliderDialogStartValue(delayKickinKeyx)
-			self.SetSliderDialogDefaultValue(0.500000)
-			self.SetSliderDialogRange(0.500000, 1.00000)
-			self.SetSliderDialogInterval(0.100000)
+			self.SetSliderDialogDefaultValue(0.5)
+			self.SetSliderDialogRange(0.5, 1.0)
+			self.SetSliderDialogInterval(0.1)
 		endIf
 	else
 		if option == OPTdelayKickin
 			self.SetSliderDialogStartValue(delayKickin)
-			self.SetSliderDialogDefaultValue(1.00000)
-			self.SetSliderDialogRange(0.500000, 2.00000)
-			self.SetSliderDialogInterval(0.100000)
+			self.SetSliderDialogDefaultValue(1.0)
+			self.SetSliderDialogRange(0.5, 2.0)
+			self.SetSliderDialogInterval(0.1)
 		endIf
 		if option == OPTdelayKickinCrouchLay
 			self.SetSliderDialogStartValue(DelayKickinCrouchLay)
-			self.SetSliderDialogDefaultValue(1 as Float)
-			self.SetSliderDialogRange(0.500000, 2.00000)
-			self.SetSliderDialogInterval(0.100000)
+			self.SetSliderDialogDefaultValue(1.0)
+			self.SetSliderDialogRange(0.5, 2.0)
+			self.SetSliderDialogInterval(0.1)
 		endIf
 	endIf
 	if option == OPTcameraHeight
 		self.SetSliderDialogStartValue(CameraHeight as Float)
-		self.SetSliderDialogDefaultValue(1.00000)
-		self.SetSliderDialogRange(-128 as Float, 32 as Float)
-		self.SetSliderDialogInterval(2 as Float)
+		self.SetSliderDialogDefaultValue(1.0)
+		self.SetSliderDialogRange(-128.0, 32.0)
+		self.SetSliderDialogInterval(2.0)
 	endIf
 	if option == OPTcameraX
 		self.SetSliderDialogStartValue(CameraX as Float)
-		self.SetSliderDialogDefaultValue(1.00000)
-		self.SetSliderDialogRange(-64 as Float, 64 as Float)
-		self.SetSliderDialogInterval(2 as Float)
+		self.SetSliderDialogDefaultValue(1.0)
+		self.SetSliderDialogRange(-64.0, 64.0)
+		self.SetSliderDialogInterval(2.0)
 	endIf
 endFunction
 
 
 function OnOptionMenuOpen(Int option)
-
 	if option == OPTdefineSitMethod
 		self.SetMenuDialogOptions(LISTsitMethod)
 		self.SetMenuDialogStartIndex(INDEXmethod)
@@ -467,25 +480,25 @@ function OnOptionSelect(Int option)
 			UsebuffFollower = !UsebuffFollower
 			self.SetToggleOptionValue(OPTbuffFollower, UsebuffFollower, false)
 			if UsebuffFollower == true
-				GLBbuffFollower.setValue(100 as Float)
+				GLBbuffFollower.setValue(100.0)
 			else
-				GLBbuffFollower.setValue(0 as Float)
+				GLBbuffFollower.setValue(0.0)
 			endIf
 		elseIf option == OPTsilentBuff
 			UseSilentBuff = !UseSilentBuff
 			self.SetToggleOptionValue(OPTsilentBuff, UseSilentBuff, false)
 			if UseSilentBuff == true
-				GLBsilentBuff.setValue(100 as Float)
+				GLBsilentBuff.setValue(100.0)
 			else
-				GLBsilentBuff.setValue(0 as Float)
+				GLBsilentBuff.setValue(0.0)
 			endIf
 		elseIf option == OPTFollowerRelax
 			UseFollowerRelax = !UseFollowerRelax
 			self.SetToggleOptionValue(OPTFollowerRelax, UseFollowerRelax, false)
 			if UseFollowerRelax == true
-				GLBallowRelax.setValue(100 as Float)
+				GLBallowRelax.setValue(100.0)
 			else
-				GLBallowRelax.setValue(0 as Float)
+				GLBallowRelax.setValue(0.0)
 			endIf
 		elseIf option == OPTregisterFollower
 			if (MASTER as advsitfast_masterquest).Register == 0 as Bool
@@ -508,12 +521,12 @@ function OnOptionSelect(Int option)
 			self.SetTextOptionValue(OPTcam, self.DisplayCam, false)
 			self.ForcePageReset()
 		elseIf option == OPTregenMult
-			if GLBregenMult.getValue() == 1.50000
-				GLBregenMult.setValue(2.50000)
-			elseIf GLBregenMult.getValue() == 2.50000
-				GLBregenMult.setValue(3.50000)
-			elseIf GLBregenMult.getValue() == 3.50000
-				GLBregenMult.setValue(1.50000)
+			if GLBregenMult.getValue() == 1.5
+				GLBregenMult.setValue(2.5)
+			elseIf GLBregenMult.getValue() == 2.5
+				GLBregenMult.setValue(3.5)
+			elseIf GLBregenMult.getValue() == 3.5
+				GLBregenMult.setValue(1.5)
 			endIf
 			self.SetTextOptionValue(OPTregenMult, self.DisplayRegenMult, false)
 			self.ForcePageReset()
@@ -521,49 +534,49 @@ function OnOptionSelect(Int option)
 			UseRegenVisuals = !UseRegenVisuals
 			self.SetToggleOptionValue(OPTRegenVisuals, UseRegenVisuals, false)
 			if UseRegenVisuals == true
-				GLBregenVisuals.setValue(1 as Float)
+				GLBregenVisuals.setValue(1.0)
 			else
-				GLBregenVisuals.setValue(0 as Float)
+				GLBregenVisuals.setValue(0.0)
 			endIf
 		elseIf option == OPTmusic
 			UseMusic = !UseMusic
 			self.SetToggleOptionValue(OPTmusic, UseMusic, false)
 			if UseMusic == true
-				GLBmusic.setValue(1 as Float)
+				GLBmusic.setValue(1.0)
 			else
-				GLBmusic.setValue(0 as Float)
+				GLBmusic.setValue(0.0)
 			endIf
 		elseIf option == OPTbuffReady
 			UseBuffReady = !UseBuffReady
 			self.SetToggleOptionValue(OPTbuffReady, UseBuffReady, false)
 			if UseBuffReady == true
-				GLBbuffReady.setValue(1 as Float)
+				GLBbuffReady.setValue(1.0)
 			else
-				GLBbuffReady.setValue(0 as Float)
+				GLBbuffReady.setValue(0.0)
 			endIf
 		elseIf option == OPTbuffnotice
 			Usebuffnotice = !Usebuffnotice
 			self.SetToggleOptionValue(OPTbuffnotice, Usebuffnotice, false)
 			if Usebuffnotice == true
-				GLBbuffNotification.setValue(1 as Float)
+				GLBbuffNotification.setValue(1.0)
 			else
-				GLBbuffNotification.setValue(0 as Float)
+				GLBbuffNotification.setValue(0.0)
 			endIf
 		elseIf option == OPTuseVoice
 			UseVoice = !UseVoice
 			self.SetToggleOptionValue(OPTuseVoice, UseVoice, false)
 			if UseVoice == true
-				GLBSETallowVoice.setValue(1 as Float)
+				GLBSETallowVoice.setValue(1.0)
 			else
-				GLBSETallowVoice.setValue(0 as Float)
+				GLBSETallowVoice.setValue(0.0)
 			endIf
 		elseIf option == OPTuseFollowerVoice
 			UseFollowerVoice = !UseFollowerVoice
 			self.SetToggleOptionValue(OPTuseFollowerVoice, UseFollowerVoice, false)
 			if UseFollowerVoice == true
-				GLBspeechFollower.setValue(1 as Float)
+				GLBspeechFollower.setValue(1.0)
 			else
-				GLBspeechFollower.setValue(0 as Float)
+				GLBspeechFollower.setValue(0.0)
 			endIf
 		elseIf option == OPTcamSFX
 			UsecamSFX = !UsecamSFX
@@ -574,9 +587,9 @@ function OnOptionSelect(Int option)
 			self.SetToggleOptionValue(OPTshakeController, UseControllerShake, false)
 			(MASTER as advsitfast_masterquest).SETshakeController = UseControllerShake
 			if UseControllerShake == true
-				GLBSETshakeController.setValue(1 as Float)
+				GLBSETshakeController.setValue(1.0)
 			else
-				GLBSETshakeController.setValue(0 as Float)
+				GLBSETshakeController.setValue(0.0)
 			endIf
 		elseIf option == OPTclick
 			UseClick = !UseClick
@@ -587,9 +600,9 @@ function OnOptionSelect(Int option)
 			self.SetToggleOptionValue(OPTshakeCamera, UseShakeCamera, false)
 			(MASTER as advsitfast_masterquest).SETShakeCamera = UseShakeCamera
 			if UseShakeCamera == true
-				GLBSETshakeCamera.setValue(1 as Float)
+				GLBSETshakeCamera.setValue(1.0)
 			else
-				GLBSETshakeCamera.setValue(0 as Float)
+				GLBSETshakeCamera.setValue(0.0)
 			endIf
 		elseIf option == OPTpuffOffSmoke
 			UsepuffOffSmoke = !UsepuffOffSmoke
@@ -599,17 +612,17 @@ function OnOptionSelect(Int option)
 			UsebuffFollower = !UsebuffFollower
 			self.SetToggleOptionValue(OPTbuffFollower, UsebuffFollower, false)
 			if UsebuffFollower == true
-				GLBbuffFollower.setValue(100 as Float)
+				GLBbuffFollower.setValue(100.0)
 			else
-				GLBbuffFollower.setValue(0 as Float)
+				GLBbuffFollower.setValue(0.0)
 			endIf
 		elseIf option == OPTregenFollower
 			UseRegenFollower = !UseRegenFollower
 			self.SetToggleOptionValue(OPTregenFollower, UseRegenFollower, false)
 			if UseRegenFollower == true
-				GLBregenFollower.setValue(100 as Float)
+				GLBregenFollower.setValue(100.0)
 			else
-				GLBregenFollower.setValue(0 as Float)
+				GLBregenFollower.setValue(0.0)
 			endIf
 		elseIf option == OPTapplyBuff
 			UseBuff = !UseBuff
@@ -623,9 +636,9 @@ function OnOptionSelect(Int option)
 			UseDof = !UseDof
 			self.SetToggleOptionValue(OPTdof, UseDof, false)
 			if UseDof == false
-				(MASTER as advsitfast_masterquest).ValueDOFstrength = 0 as Float
+				(MASTER as advsitfast_masterquest).ValueDOFstrength = 0.0
 			else
-				(MASTER as advsitfast_masterquest).ValueDOFstrength = 1 as Float
+				(MASTER as advsitfast_masterquest).ValueDOFstrength = 1.0
 			endIf
 		elseIf option == OPTfurniture
 			UseFurniture = !UseFurniture
@@ -659,33 +672,33 @@ function OnOptionSelect(Int option)
 			UseRegenHealth = !UseRegenHealth
 			self.SetToggleOptionValue(OPTregenHealth, UseRegenHealth, false)
 			if UseRegenHealth == true
-				GLBhealthRegen.setValue(100 as Float)
+				GLBhealthRegen.setValue(100.0)
 			else
-				GLBhealthRegen.setValue(0 as Float)
+				GLBhealthRegen.setValue(0.0)
 			endIf
 		elseIf option == OPTregenMagicka
 			UseRegenMagicka = !UseRegenMagicka
 			self.SetToggleOptionValue(OPTregenMagicka, UseRegenMagicka, false)
 			if UseRegenMagicka == true
-				GLBmagickaRegen.setValue(100 as Float)
+				GLBmagickaRegen.setValue(100.0)
 			else
-				GLBmagickaRegen.setValue(0 as Float)
+				GLBmagickaRegen.setValue(0.0)
 			endIf
 		elseIf option == OPTautoChill
 			UseautoChill = !UseautoChill
 			self.SetToggleOptionValue(OPTautoChill, UseautoChill, false)
 			if UseautoChill == true
-				GLBautoChill.setValue(50 as Float)
+				GLBautoChill.setValue(50.0)
 			else
-				GLBautoChill.setValue(0 as Float)
+				GLBautoChill.setValue(0.0)
 			endIf
 		elseIf option == OPTregenStamina
 			UseRegenStamina = !UseRegenStamina
 			self.SetToggleOptionValue(OPTregenStamina, UseRegenStamina, false)
 			if UseRegenStamina == true
-				GLBstaminaRegen.setValue(100 as Float)
+				GLBstaminaRegen.setValue(100.0)
 			else
-				GLBstaminaRegen.setValue(0 as Float)
+				GLBstaminaRegen.setValue(0.0)
 			endIf
 		elseIf option == OPTcameraRestore
 			if game.getPlayer().getSitState() == 0
@@ -703,13 +716,7 @@ function OnOptionSelect(Int option)
 endFunction
 
 
-function refresh()
-	self.ForcePageReset()
-endFunction
-
-
 function OnOptionSliderAccept(Int option, Float value)
-
 	if option == OPTdelayKickin
 		delayKickin = value
 		self.SetSliderOptionValue(OPTdelayKickin, delayKickin, "for {1} seconds", false)
@@ -757,4 +764,11 @@ function OnOptionSliderAccept(Int option, Float value)
 	endIf
 endFunction
 
-; Skipped compiler generated GotoState
+
+; -------------------------------------------------------------------------------------------------
+; Events
+; -------------------------------------------------------------------------------------------------
+
+function refresh()
+	self.ForcePageReset()
+endFunction
