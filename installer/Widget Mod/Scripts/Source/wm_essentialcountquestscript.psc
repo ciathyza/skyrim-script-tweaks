@@ -51,6 +51,11 @@ EndProperty
 ; MCM Events
 ; -------------------------------------------------------------------------------------------------
 
+Event OnConfigInit()
+	Visible = false
+EndEvent
+
+
 Event OnWidgetReset()
 	UpdateScale()
 	Parent.OnWidgetReset()
@@ -114,6 +119,10 @@ EndFunction
 
 
 Event OnCrosshairRefChange(ObjectReference ref)
+	if !EssentialVisible
+		Return
+	EndIf
+	
 	If ref
 		If WM_EssentialCounterGlobal.GetValueInt() == 1
 			Target = ref.GetBaseObject() as ActorBase
