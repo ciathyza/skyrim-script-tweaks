@@ -215,6 +215,7 @@ event OnConfigInit()
 	Pages[1] = "Plugins"
 	Pages[2] = "Settings"
 	Pages[3] = "Panel"
+	iNumberActorsAllowedToFollowPlayer = 10
 endEvent
 
 
@@ -514,7 +515,7 @@ event OnOptionSliderOpen(int a_option)
 		SetSliderDialogInterval(1)
 	Elseif (a_option == _NumberActorsToFollow)
 		SetSliderDialogStartValue(iNumberActorsAllowedToFollowPlayer)
-		SetSliderDialogDefaultValue(6)
+		SetSliderDialogDefaultValue(10)
 		SetSliderDialogRange(0, 512)
 		SetSliderDialogInterval(1)
 	Elseif (a_option == _MaximumFollowers)

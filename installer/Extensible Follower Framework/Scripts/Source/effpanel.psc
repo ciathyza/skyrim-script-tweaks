@@ -9,7 +9,7 @@ float _fadeInDuration  = 250.0
 float _fadeOutDuration = 750.0
 float _moveDuration    = 1000.0
 float _removeDuration  = 15000.0
-float _scale           = 0.75
+float _scale           = 0.7
 int _maxEntries        = 10
 
 
@@ -102,7 +102,7 @@ endProperty
 event OnWidgetReset()
 	parent.OnWidgetReset()
 	X = 0.0
-	Y = 200.0
+	Y = 150.0
 	UpdateWidgetScale()
 	UpdateMaxEntries()
 	UpdateFadeInDuration()
