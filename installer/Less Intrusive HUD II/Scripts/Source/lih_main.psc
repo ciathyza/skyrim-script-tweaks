@@ -40,7 +40,25 @@ Bool active
 ; Events
 ; -------------------------------------------------------------------------------------------------
 
+function OnInit()
+	; Execution Delay.
+	Utility.Wait(1.0)
+	self.OnGameReload()
+endFunction
+
+
+function OnGameReload()
+	self.reset()
+endFunction
+
+
 function OnUpdate()
+endFunction
+
+
+function OnMenuOpen(String a_menuName)
+	if a_menuName == "INVENTORY_MENU"
+	endIf
 endFunction
 
 
@@ -96,35 +114,9 @@ function OnKeyUp(Int keyCode, Float holdTime)
 endFunction
 
 
-function OnInit()
-	self.OnGameReload()
-endFunction
-
-
-function OnMenuOpen(String a_menuName)
-	if a_menuName == "INVENTORY_MENU"
-	endIf
-endFunction
-
-
-function OnGameReload()
-	self.reset()
-endFunction
-
-
 ; -------------------------------------------------------------------------------------------------
 ; Functions
 ; -------------------------------------------------------------------------------------------------
-
-function deactivate()
-	self.UnregisterForAllKeys()
-endFunction
-
-
-Bool function isActive()
-	return _LIH_Enabled.GetValueInt() > 0
-endFunction
-
 
 function reset()
 	self.UnRegisterForUpdate()
@@ -145,6 +137,16 @@ function reset()
 	self.RegisterForKey(_LIH_StepKey.GetValueInt())
 	self.RegisterForKey(_LIH_ResetKey.GetValueInt())
 	self.RegisterForKey(_LIH_RotateKey.GetValueInt())
+endFunction
+
+
+function deactivate()
+	self.UnregisterForAllKeys()
+endFunction
+
+
+Bool function isActive()
+	return _LIH_Enabled.GetValueInt() > 0
 endFunction
 
 

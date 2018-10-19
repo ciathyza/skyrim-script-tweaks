@@ -43,6 +43,9 @@ bool changed
 ; -------------------------------------------------------------------------------------------------
 
 Event OnConfigInit()
+	; Execution Delay.
+	Utility.Wait(13.0)
+
 	If !Headtracking.IsRunning()
 		Headtracking.Start()
 	EndIf

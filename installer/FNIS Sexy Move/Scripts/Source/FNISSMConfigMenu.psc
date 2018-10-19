@@ -1,6 +1,15 @@
 Scriptname FNISSMConfigMenu extends SKI_ConfigBase  
 
+; -------------------------------------------------------------------------------------------------
+; Properties
+; -------------------------------------------------------------------------------------------------
+
 FNISSMQuestScript Property FNISSMquest Auto
+
+
+; -------------------------------------------------------------------------------------------------
+; Variables
+; -------------------------------------------------------------------------------------------------
 
 int OId1
 int OId2
@@ -20,71 +29,62 @@ int OId15
 int OId16
 int OId17
 
-bool[] SMno
-int SMnoTotal
-int SMnoMax
-
-bool[] SMweight
-int iSMweight
-
-bool[] SMplayer
-int[] OidPlayer
-int iSMplayer
-
+bool SM360
 bool SMarmor
 bool SMdialog
-bool SMoff
 bool SMnocoin
-bool SM360
+bool SMoff
+bool[] SMno
+bool[] SMplayer
+bool[] SMweight
+int iSMplayer
+int iSMweight
+int SMnoMax
+int SMnoTotal
+int[] OidPlayer
 
 bool isConfigChangedNPC = false
+bool isInitialized = false
 bool isPlayerFemale
-bool ONCE = TRUE
+
+
+; -------------------------------------------------------------------------------------------------
+; MCM Events
+; -------------------------------------------------------------------------------------------------
+
+Event OnConfigInit()
+	; Execution Delay.
+	Utility.Wait(15.0)
+EndEvent
+
 
 Event OnPageReset(string page)
-;DEBUG.TRACE("FNISSM OnPageReset 1")
-	; Disabled so that esp can be merged!
-	;if Game.GetModByName("FNISSexyMove.esp") >= 255
-	;	SetCursorFillMode(TOP_TO_BOTTOM)
-	;	AddHeaderOption("FNISSexyMove.esp not activated")
-	;	return
-	;endif
-	if ( FNISSMquest.StartUpStatus <= 0 )
-		SetCursorFillMode(TOP_TO_BOTTOM)
-		AddHeaderOption("ERRORS when starting FNIS Sexy Move")
+	if (FNISSMquest.StartUpStatus <= 0)
+		Debug.Trace("ERRORS when starting FNIS Sexy Move.")
 		return
 	endif
-	
-;DEBUG.TRACE("FNISSM OnPageReset 2")
-	If ONCE
-		; preset "No Sexy moves NPC"
-		SMno = FNISSMQuest.SMno				; Initial "No Sexy Move 1"
-		SMnoTotal = FNISSMQuest.SMnoTotal	; one move preset
-		SMnoMax = 3							; max 3 noMoves
-		; preset "Move assignment"
-		SMweight = new bool[3]
-		iSMweight = FNISSMQuest.iSMweight	; Initial "Average Move assignment"
+
+	if !isInitialized
+		SMno                = FNISSMQuest.SMno		; Initial "No Sexy Move 1"
+		SMnoTotal           = FNISSMQuest.SMnoTotal	; one move preset
+		SMnoMax             = 3						; max 3 noMoves
+		SMweight            = new bool[3]
+		iSMweight           = FNISSMQuest.iSMweight	; Initial "Average Move assignment"
 		SMweight[iSMweight] = true
-		; preset "player move"
-		SMplayer = new bool[10]
-		OidPlayer = new int[10]
-		iSMplayer = FNISSMQuest.iSMplayer	; Initial "Player Move 5 (NAP)"
+		SMplayer            = new bool[10]
+		OidPlayer           = new int[10]
+		iSMplayer           = FNISSMQuest.iSMplayer	; Initial "Player Move 4 (NAP)"
 		SMplayer[iSMplayer] = true
-		; preset 360 style
-		SM360 = FNISSMQuest.SM360			; Initial "Player moves 360 style"
-		; preset armor weighting
-		SMarmor = FNISSMQuest.SMarmor		; Initial "Armor equipped females equally sexy"
-		; preset assignment dialog
-		SMdialog = FNISSMQuest.SMdialog		; Initial "No assignment dialog"
-		; preset SM temporarily off
-		SMoff = FNISSMQuest.SMoff			; Initial "SM temporarily off" 
-		; preset no coin
-		SMnocoin = FNISSMQuest.SMnocoin		; Initial "no coin" (no coin = don't remember NPC changes")
-		
-		ONCE = false
-	endIf
-	isPlayerFemale = ( Game.GetPlayer().GetLeveledActorBase().GetSex() == 1 )
-	
+		SM360               = FNISSMQuest.SM360		; Initial "Player moves 360 style"
+		SMarmor             = FNISSMQuest.SMarmor	; Initial "Armor equipped females equally sexy"
+		SMdialog            = FNISSMQuest.SMdialog	; Initial "No assignment dialog"
+		SMoff               = FNISSMQuest.SMoff		; Initial "SM temporarily off"
+		SMnocoin            = FNISSMQuest.SMnocoin	; Initial "no coin" (no coin = don't remember NPC changes")
+		isInitialized       = true
+	endif
+
+	isPlayerFemale = (Game.GetPlayer().GetLeveledActorBase().GetSex() == 1)
+
     SetCursorFillMode(TOP_TO_BOTTOM)
 	AddHeaderOption("Don't use certain NPC moves (max. 3)")
 	Oid1 = AddToggleOption("No Sexy Move 1 (female animation)", SMno[1])
@@ -107,7 +107,6 @@ Event OnPageReset(string page)
 	OId10 = AddToggleOption("less sexy", SMweight[0])
 	OId11 = AddToggleOption("equally distributed", SMweight[1])
 	OId12 = AddToggleOption("more sexy", SMweight[2])
-
 	AddEmptyOption()
 	OId13 = AddToggleOption("Armored NPCs less sexy", SMarmor)
 
@@ -136,16 +135,18 @@ Event OnPageReset(string page)
 
 	AddEmptyOption()
 	OId14 = AddToggleOption("NPC assignment dialog", SMdialog)
-
 	AddEmptyOption()
 	OId15 = AddToggleOption("NPC walk assignments temporarily off", SMoff)
-
 	AddEmptyOption()
 	OId16 = AddToggleOption("No need to remember NPC assignments", SMnocoin)
+
+	; Apply default settings.
+	set_SMPlayer(4)
+
 endEvent
 
+
 event OnOptionSelect(int option)
-;DEBUG.TRACE("FNISSM OnOptionSelect 1")
 	; "No sexy move" options
     If (option == OId1)
 		SMno[1] = set_SMno(OId1, SMno[1])
@@ -165,7 +166,6 @@ event OnOptionSelect(int option)
 		SMno[8] = set_SMno(OId8, SMno[8])
     elseIf (option == OId9)
 		SMno[9] = set_SMno(OId9, SMno[9])
-
 	; "Move assignment" options
 	elseIf (option == OId10)
 		set_SMweight(OId10, 0)
@@ -173,28 +173,23 @@ event OnOptionSelect(int option)
 		set_SMweight(OId11, 1)
     elseIf (option == OId12)
 		set_SMweight(OId12, 2)
-
 	; "Armor weighting" option
 	elseIf (option == OId13)
 		SMarmor = !SMarmor
 		SetToggleOptionValue(OId13, SMarmor)
 		isConfigChangedNPC = true
-
 	; "Assignment dialog" option
 	elseIf (option == OId14)
 		SMdialog = !SMdialog
 		SetToggleOptionValue(OId14, SMdialog)
-
 	; "Temporarily off" option
 	elseIf (option == OId15)
 		SMoff = !SMoff
 		SetToggleOptionValue(OId15, SMoff)
-
 	; "No remember" option ("no coin")
 	elseIf (option == OId16)
 		SMnocoin = !SMnocoin
 		SetToggleOptionValue(OId16, SMnocoin)
-
 	; "Player Move" options
 	elseIf isPlayerFemale
 		If (option == OidPlayer[0])
@@ -225,8 +220,8 @@ event OnOptionSelect(int option)
     endIf
 endEvent
 
+
 Event OnConfigClose()
-;DEBUG.TRACE("FNISSM OnConfigClose 1")
 	; Options passed to Quest script
 	If isConfigChangedNPC
 		FNISSMquest.SMno = SMno
@@ -235,16 +230,16 @@ Event OnConfigClose()
 		FNISSMquest.isConfigChangedNPC = true
 		isConfigChangedNPC = false
 	endIf
-	If ( FNISSMquest.iSMplayer != iSMplayer ) || ( FNISSMquest.SM360 != SM360 )
+	If (FNISSMquest.iSMplayer != iSMplayer) || (FNISSMquest.SM360 != SM360)
 		FNISSMquest.iSMplayer = iSMplayer
 		FNISSMquest.SM360 = SM360
 		If isPlayerFemale
 			bool bOk
-			if ( iSMPlayer == 0 )
+			if (iSMPlayer == 0)
 				bOk = FNIS_aa.SetAnimGroup(Game.GetPlayer(), "_mt", 0, 0, "FNIS Sexy Move", true)
 				bOk = bOk && FNIS_aa.SetAnimGroup(Game.GetPlayer(), "_mtx", 0, 0, "FNIS Sexy Move", true)
 			else
-				if ( SM360 && ( FNISSMquest.FNISs3ModID >= 0 ))
+				if (SM360 && (FNISSMquest.FNISs3ModID >= 0))
 					bOk = FNIS_aa.SetAnimGroup(Game.GetPlayer(), "_mt", FNISSMQuest.FNISs3MtBase, iSMPlayer - 1, "FNIS Sexy Move(360)", true)
 					bOk = bOk && FNIS_aa.SetAnimGroup(Game.GetPlayer(), "_mtx", FNISSMQuest.FNISs3MtxBase, iSMPlayer - 1, "FNIS Sexy Move(360)", true)
 				else
@@ -262,8 +257,13 @@ Event OnConfigClose()
 	FNISSMquest.SMnocoin = SMnocoin
 endEvent
 
+
+; -------------------------------------------------------------------------------------------------
+; Functions
+; -------------------------------------------------------------------------------------------------
+
 bool Function set_SMno(int OId, bool Val)
-	If ( SMnoTotal < SMnoMax ) || ( ( SMnoTotal == SMnoMax ) && ( Val == True ) )
+	If (SMnoTotal < SMnoMax) || ((SMnoTotal == SMnoMax) && (Val == True))
 		SetToggleOptionValue(OId, !Val)
 		If Val
 			SMnoTotal -= 1
@@ -277,8 +277,9 @@ bool Function set_SMno(int OId, bool Val)
 	endIf
 endFunction
 
+
 Function set_SMweight(int OId, int i)
-	If ( i != iSMWeight ) 
+	If (i != iSMWeight) 
 		SMweight[i] = true
 		SMweight[iSMweight] = false
 		iSMweight = i
@@ -289,8 +290,9 @@ Function set_SMweight(int OId, int i)
 	endIf
 endFunction
 
+
 Function set_SMplayer(int i)
-	If ( i != iSMplayer ) 
+	If (i != iSMplayer)
 		SMplayer[i] = true
 		SetToggleOptionValue(OidPlayer[i], SMplayer[i])
 		SMplayer[iSMplayer] = false

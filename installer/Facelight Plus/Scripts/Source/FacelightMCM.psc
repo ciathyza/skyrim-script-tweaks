@@ -1,34 +1,48 @@
 ScriptName FacelightMCM extends SKI_ConfigBase  
-{Mod configuration menu for Face Light}
 
+; -------------------------------------------------------------------------------------------------
 ; Properties
-Actor Property player Auto
-Spell Property dummySpell Auto
-Spell Property darkdummySpell Auto
-ReferenceAlias[] Property npc Auto
-Spell Property targetdummySpell Auto
-Spell Property darktargetdummySpell Auto
-Perk Property editmodePerk Auto
-GlobalVariable Property editmodeGlobal Auto
-GlobalVariable Property sneaktoggleGlobal Auto
-GlobalVariable Property hideGlobal Auto
+; -------------------------------------------------------------------------------------------------
 
-; Values
-int playerVal = 2
-int playerHotkeyVal = 33
-bool editmodeVal = false
-bool sneaktoggleVal = true
-int conversationVal = 2
+Actor            Property player               Auto
+GlobalVariable   Property editmodeGlobal       Auto
+GlobalVariable   Property hideGlobal           Auto
+GlobalVariable   Property sneaktoggleGlobal    Auto
+Perk             Property editmodePerk         Auto
+ReferenceAlias[] Property npc                  Auto
+Spell            Property darkdummySpell       Auto
+Spell            Property darktargetdummySpell Auto
+Spell            Property dummySpell           Auto
+Spell            Property targetdummySpell     Auto
+
+
+; -------------------------------------------------------------------------------------------------
+; Variables
+; -------------------------------------------------------------------------------------------------
+
 Actor conversationTarget = none
-bool hideVal = false
-int hideHotkeyVal = -1
-int selectednpcVal = 0
-string[] npcList
+bool editmodeVal         = false
+bool hideVal             = false
+bool sneaktoggleVal      = true
+int conversationVal      = 2
+int editmodeHotkeyVal    = -1
+int hideHotkeyVal        = -1
+int playerHotkeyVal      = 33
+int playerVal            = 2
+int selectednpcVal       = 0
 int[] selectednpcFacelightVal
 string[] facelightList
-int editmodeHotkeyVal = -1
+string[] npcList
+
+
+; -------------------------------------------------------------------------------------------------
+; MCM Events
+; -------------------------------------------------------------------------------------------------
 
 event OnConfigInit()
+	; Execution Delay.
+	Utility.Wait(12.0)
+
 	npcList = new string[15]
 	selectednpcFacelightVal = new int[15]
 	facelightList = new string[3]
@@ -64,6 +78,7 @@ event OnConfigInit()
 	RegisterForKey(editmodeHotkeyVal)
 	RegisterForMenu("Dialogue menu")
 endEvent
+
 
 function UpdateFacelightStatus()
 	if (player.HasSpell(dummySpell))
@@ -115,9 +130,9 @@ function UpdateFacelightStatus()
 	EndWhile
 endFunction
 
+
 event OnPageReset(string page)
 	UpdateFacelightStatus()
-	
     SetCursorFillMode(TOP_TO_BOTTOM)
 	AddHeaderOption("General")
 	AddMenuOptionST("playerST", "Player face light", facelightList[playerVal])
@@ -128,7 +143,6 @@ event OnPageReset(string page)
 	AddMenuOptionST("conversationST", "Conversation face light", facelightList[conversationVal])
 	AddToggleOptionST("hideST", "Hide all face lights", hideVal)
 	AddKeyMapOptionST("hideHotkeyST", "Hide all face lights hotkey", hideHotkeyVal)
-	
 	SetCursorPosition(1)
 	AddHeaderOption("NPC face lights")
 	AddMenuOptionST("selectednpcST", "Selected NPC", npcList[selectednpcVal])
@@ -145,169 +159,6 @@ event OnPageReset(string page)
 	AddTextOptionST("clearallnpcsST", "Clear all NPCs", "")
 endEvent
 
-state playerST
-	event OnMenuOpenST()
-		SetMenuDialogOptions(facelightList)
-		SetMenuDialogStartIndex(playerVal)
-	endEvent
-	
-	event OnMenuAcceptST(int index)
-        playerVal = index
-        SetMenuOptionValueST(facelightList[playerVal])
-		if (playerVal == 2)
-			player.RemoveSpell(darkdummySpell)
-			player.AddSpell(dummySpell)
-		elseIf (playerVal == 1)
-			player.RemoveSpell(dummySpell)
-			player.AddSpell(darkdummySpell)
-		elseIf (playerVal == 0)
-			player.RemoveSpell(dummySpell)
-			player.RemoveSpell(darkdummySpell)
-		endIf
-	endEvent
-endState
-
-state playerHotkeyST
-	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
-        playerHotkeyVal = newKeyCode
-        SetKeyMapOptionValueST(playerHotkeyVal)
-	endEvent
-	
-	event OnDefaultST()
-		playerHotkeyVal = 26
-		SetKeyMapOptionValueST(playerHotkeyVal)
-	endEvent
-endState
-
-state editmodeST
-	event OnSelectST()
-		editmodeVal = !editmodeVal
-		SetToggleOptionValueST(editmodeVal)
-		if (editmodeVal)
-			editmodeGlobal.SetValueInt(1)
-		else
-			editmodeGlobal.SetValueInt(0)
-		endIf
-	endEvent
-endState
-
-state editmodeHotkeyST
-	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
-		editmodeHotkeyVal = newKeyCode
-		SetKeyMapOptionValueST(editmodeHotkeyVal)
-    endEvent
-	
-	event OnDefaultST()
-		editmodeHotkeyVal = 43
-		SetKeyMapOptionValueST(editmodeHotkeyVal)
-	endEvent
-endState
-
-state sneaktoggleST
-	event OnSelectST()
-		sneaktoggleVal = !sneaktoggleVal
-		SetToggleOptionValueST(sneaktoggleVal)
-		if (sneaktoggleVal)
-			sneaktoggleGlobal.SetValueInt(1)
-		else
-			sneaktoggleGlobal.SetValueInt(0)
-		endIf
-	endEvent
-endState
-
-state conversationST
-	event OnMenuOpenST()
-		SetMenuDialogOptions(facelightList)
-		SetMenuDialogStartIndex(conversationVal)
-	endEvent
-	
-	event OnMenuAcceptST(int index)
-        conversationVal = index
-        SetMenuOptionValueST(facelightList[conversationVal])
-	endEvent
-endState
-
-state hideST
-	event OnSelectST()
-		hideVal = !hideVal
-		SetToggleOptionValueST(hideVal)
-		if (hideVal)
-			hideGlobal.SetValueInt(1)
-		else
-			hideGlobal.SetValueInt(0)
-		endIf
-	endEvent
-endState
-
-state hideHotkeyST
-	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
-		hideHotkeyVal = newKeyCode
-		SetKeyMapOptionValueST(hideHotkeyVal)
-	endEvent
-	
-	event OnDefaultST()
-		hideHotkeyVal = 27
-		SetKeyMapOptionValueST(hideHotkeyVal)
-	endEvent
-endState
-
-state selectednpcST
-	event OnMenuOpenST()
-		SetMenuDialogOptions(npcList)
-		SetMenuDialogStartIndex(selectednpcVal)
-	endEvent
-	
-	event OnMenuAcceptST(int index)
-		selectednpcVal = index
-		SetMenuOptionValueST(npcList[selectednpcVal])
-		ForcePageReset()
-	endEvent
-endState
-
-state npcFacelightST
-	event OnMenuOpenST()
-        SetMenuDialogOptions(facelightList)
-        SetMenuDialogStartIndex(selectednpcFacelightVal[selectednpcVal])
-        SetMenuDialogDefaultIndex(0)
-	endEvent
-	
-	event OnMenuAcceptST(int index)
-		selectednpcFacelightVal[selectednpcVal] = index
-		SetMenuOptionValueST(facelightList[selectednpcFacelightVal[selectednpcVal]])
-		if (selectednpcFacelightVal[selectednpcVal] == 2)
-			npc[selectednpcVal].GetActorReference().RemoveSpell(darktargetdummySpell)
-			npc[selectednpcVal].GetActorReference().AddSpell(targetdummySpell)
-		elseIf (selectednpcFacelightVal[selectednpcVal] == 1)
-			npc[selectednpcVal].GetActorReference().RemoveSpell(targetdummySpell)
-			npc[selectednpcVal].GetActorReference().AddSpell(darktargetdummySpell)
-		elseIf (selectednpcFacelightVal[selectednpcVal] == 0)
-			npc[selectednpcVal].GetActorReference().RemoveSpell(targetdummySpell)
-			npc[selectednpcVal].GetActorReference().RemoveSpell(darktargetdummySpell)
-		endIf
-	endEvent
-endState
-
-state clearnpcST
-	event OnSelectST()
-		npc[selectednpcVal].GetActorReference().RemoveSpell(targetdummySpell)
-		npc[selectednpcVal].GetActorReference().RemoveSpell(darktargetdummySpell)
-		npc[selectednpcVal].Clear()
-		ForcePageReset()
-	endEvent
-endState
-
-state clearallnpcsST
-	event OnSelectST()
-		int i = 0
-		While i < 15
-			npc[i].GetActorReference().RemoveSpell(targetdummySpell)
-			npc[i].GetActorReference().RemoveSpell(darktargetdummySpell)
-			npc[i].Clear()
-			i += 1
-		EndWhile
-		ForcePageReset()
-	endEvent
-endState
 
 event OnKeyDown(int keyCode)
 	if (keyCode == playerHotkeyVal)
@@ -340,6 +191,7 @@ event OnKeyDown(int keyCode)
 	endIf
 endEvent
 
+
 Event OnMenuOpen(string menuName)
 	RegisterForMenu("Dialogue menu")
 	if (conversationVal != 0 && menuName == "Dialogue Menu")
@@ -361,6 +213,7 @@ Event OnMenuOpen(string menuName)
 	endif
 EndEvent
 
+
 Event OnMenuClose(string menuName)
 	RegisterForMenu("Dialogue menu")
 	if (conversationVal != 0 && menuName == "Dialogue Menu")
@@ -376,9 +229,190 @@ Event OnMenuClose(string menuName)
 	endif
 EndEvent
 
+
 event OnConfigClose()
 	UnregisterForAllKeys()
 	RegisterForKey(playerHotkeyVal)
 	RegisterForKey(hideHotkeyVal)
 	RegisterForKey(editmodeHotkeyVal)
 endEvent
+
+
+; -------------------------------------------------------------------------------------------------
+; States
+; -------------------------------------------------------------------------------------------------
+
+state playerST
+	event OnMenuOpenST()
+		SetMenuDialogOptions(facelightList)
+		SetMenuDialogStartIndex(playerVal)
+	endEvent
+	
+	event OnMenuAcceptST(int index)
+        playerVal = index
+        SetMenuOptionValueST(facelightList[playerVal])
+		if (playerVal == 2)
+			player.RemoveSpell(darkdummySpell)
+			player.AddSpell(dummySpell)
+		elseIf (playerVal == 1)
+			player.RemoveSpell(dummySpell)
+			player.AddSpell(darkdummySpell)
+		elseIf (playerVal == 0)
+			player.RemoveSpell(dummySpell)
+			player.RemoveSpell(darkdummySpell)
+		endIf
+	endEvent
+endState
+
+
+state playerHotkeyST
+	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
+        playerHotkeyVal = newKeyCode
+        SetKeyMapOptionValueST(playerHotkeyVal)
+	endEvent
+	
+	event OnDefaultST()
+		playerHotkeyVal = 26
+		SetKeyMapOptionValueST(playerHotkeyVal)
+	endEvent
+endState
+
+
+state editmodeST
+	event OnSelectST()
+		editmodeVal = !editmodeVal
+		SetToggleOptionValueST(editmodeVal)
+		if (editmodeVal)
+			editmodeGlobal.SetValueInt(1)
+		else
+			editmodeGlobal.SetValueInt(0)
+		endIf
+	endEvent
+endState
+
+
+state editmodeHotkeyST
+	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
+		editmodeHotkeyVal = newKeyCode
+		SetKeyMapOptionValueST(editmodeHotkeyVal)
+    endEvent
+	
+	event OnDefaultST()
+		editmodeHotkeyVal = 43
+		SetKeyMapOptionValueST(editmodeHotkeyVal)
+	endEvent
+endState
+
+
+state sneaktoggleST
+	event OnSelectST()
+		sneaktoggleVal = !sneaktoggleVal
+		SetToggleOptionValueST(sneaktoggleVal)
+		if (sneaktoggleVal)
+			sneaktoggleGlobal.SetValueInt(1)
+		else
+			sneaktoggleGlobal.SetValueInt(0)
+		endIf
+	endEvent
+endState
+
+
+state conversationST
+	event OnMenuOpenST()
+		SetMenuDialogOptions(facelightList)
+		SetMenuDialogStartIndex(conversationVal)
+	endEvent
+	
+	event OnMenuAcceptST(int index)
+        conversationVal = index
+        SetMenuOptionValueST(facelightList[conversationVal])
+	endEvent
+endState
+
+
+state hideST
+	event OnSelectST()
+		hideVal = !hideVal
+		SetToggleOptionValueST(hideVal)
+		if (hideVal)
+			hideGlobal.SetValueInt(1)
+		else
+			hideGlobal.SetValueInt(0)
+		endIf
+	endEvent
+endState
+
+
+state hideHotkeyST
+	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
+		hideHotkeyVal = newKeyCode
+		SetKeyMapOptionValueST(hideHotkeyVal)
+	endEvent
+	
+	event OnDefaultST()
+		hideHotkeyVal = 27
+		SetKeyMapOptionValueST(hideHotkeyVal)
+	endEvent
+endState
+
+
+state selectednpcST
+	event OnMenuOpenST()
+		SetMenuDialogOptions(npcList)
+		SetMenuDialogStartIndex(selectednpcVal)
+	endEvent
+	
+	event OnMenuAcceptST(int index)
+		selectednpcVal = index
+		SetMenuOptionValueST(npcList[selectednpcVal])
+		ForcePageReset()
+	endEvent
+endState
+
+
+state npcFacelightST
+	event OnMenuOpenST()
+        SetMenuDialogOptions(facelightList)
+        SetMenuDialogStartIndex(selectednpcFacelightVal[selectednpcVal])
+        SetMenuDialogDefaultIndex(0)
+	endEvent
+	
+	event OnMenuAcceptST(int index)
+		selectednpcFacelightVal[selectednpcVal] = index
+		SetMenuOptionValueST(facelightList[selectednpcFacelightVal[selectednpcVal]])
+		if (selectednpcFacelightVal[selectednpcVal] == 2)
+			npc[selectednpcVal].GetActorReference().RemoveSpell(darktargetdummySpell)
+			npc[selectednpcVal].GetActorReference().AddSpell(targetdummySpell)
+		elseIf (selectednpcFacelightVal[selectednpcVal] == 1)
+			npc[selectednpcVal].GetActorReference().RemoveSpell(targetdummySpell)
+			npc[selectednpcVal].GetActorReference().AddSpell(darktargetdummySpell)
+		elseIf (selectednpcFacelightVal[selectednpcVal] == 0)
+			npc[selectednpcVal].GetActorReference().RemoveSpell(targetdummySpell)
+			npc[selectednpcVal].GetActorReference().RemoveSpell(darktargetdummySpell)
+		endIf
+	endEvent
+endState
+
+
+state clearnpcST
+	event OnSelectST()
+		npc[selectednpcVal].GetActorReference().RemoveSpell(targetdummySpell)
+		npc[selectednpcVal].GetActorReference().RemoveSpell(darktargetdummySpell)
+		npc[selectednpcVal].Clear()
+		ForcePageReset()
+	endEvent
+endState
+
+
+state clearallnpcsST
+	event OnSelectST()
+		int i = 0
+		While i < 15
+			npc[i].GetActorReference().RemoveSpell(targetdummySpell)
+			npc[i].GetActorReference().RemoveSpell(darktargetdummySpell)
+			npc[i].Clear()
+			i += 1
+		EndWhile
+		ForcePageReset()
+	endEvent
+endState

@@ -171,7 +171,9 @@ int 		_symbol2VertAlignmentIndex
 ; -------------------------------------------------------------------------------------------------
 
 event OnConfigInit()
-	Utility.Wait(3.0)
+	; Execution Delay.
+	Utility.Wait(8.0)
+
 	InitializeArrays()
 	LoadDefaultsGeneral()
 	LoadDefaultsDisplay()

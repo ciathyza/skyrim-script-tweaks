@@ -164,10 +164,10 @@ String[] LISTsitMethod
 ; -------------------------------------------------------------------------------------------------
 
 function OnInit()
-	; Active this mod after several seconds delay.
-	utility.wait(27)
+	; Execution Delay.
+	Utility.Wait(10.0)
 
-	debug.notification("Activating Fast Sit & Relax ...")
+	debug.notification("Initializing Fast Sit & Relax ...")
 	MASTERQuest.start()
 
 	parent.OnInit()

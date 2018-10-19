@@ -2,263 +2,165 @@ Scriptname WM_MCMScript extends SKI_ConfigBase
 
 Import FISSFactory
 
-GlobalVariable Property WM_EssentialCounterGlobal Auto
+; -------------------------------------------------------------------------------------------------
+; Properties
+; -------------------------------------------------------------------------------------------------
 
-WM_ArrowCountQuestScript Property ArrowScript Auto
-WM_WeightCountQuestScript Property WeightScript Auto
-WM_GoldCountQuestScript Property GoldScript Auto
-WM_BountyCountQuestScript Property BountyScript Auto
-WM_SkillCountQuestScript Property SkillScript Auto
-WM_AthleticCountQuestScript Property SpeedScript Auto
-WM_LockpickCountQuestScript Property LockpickScript Auto
-WM_LightCountQuestScript Property LightScript Auto
-WM_HotkeyCountQuestScript Property HotkeyScript Auto
-WM_HorseCountQuestScript Property HorseScript Auto
-WM_FollowerCountQuestScript Property FollowerScript Auto
-WM_AttributeCountQuestScript Property AttributeScript Auto
-WM_EssentialCountQuestScript Property EssentialScript Auto
+GlobalVariable               Property WM_EssentialCounterGlobal Auto
+WM_ArrowCountQuestScript     Property ArrowScript               Auto
+WM_AthleticCountQuestScript  Property SpeedScript               Auto
+WM_AttributeCountQuestScript Property AttributeScript           Auto
+WM_BountyCountQuestScript    Property BountyScript              Auto
+WM_EssentialCountQuestScript Property EssentialScript           Auto
+WM_FollowerCountQuestScript  Property FollowerScript            Auto
+WM_GoldCountQuestScript      Property GoldScript                Auto
+WM_HorseCountQuestScript     Property HorseScript               Auto
+WM_HotkeyCountQuestScript    Property HotkeyScript              Auto
+WM_LightCountQuestScript     Property LightScript               Auto
+WM_LockpickCountQuestScript  Property LockpickScript            Auto
+WM_MasterManagerScript       Property UpdateScript              Auto
+WM_SkillCountQuestScript     Property SkillScript               Auto
+WM_WeightCountQuestScript    Property WeightScript              Auto
 
-WM_MasterManagerScript Property UpdateScript Auto
 
-Int ArrowWidget
+; -------------------------------------------------------------------------------------------------
+; Variables
+; -------------------------------------------------------------------------------------------------
+
+Float UpdateTimerIndex
+Int ArrowAlpha
+Int ArrowAnchorH
+Int ArrowAnchorV
 Int ArrowPosX
 Int ArrowPosY
-Int ArrowAnchorV
-Int ArrowAnchorH
-Int ArrowAlpha
 Int ArrowScale
-Int WeightWidget
-Int WeightPosX
-Int WeightPosY
-Int WeightAnchorV
-Int WeightAnchorH
-Int WeightAlpha
-Int WeightScale
-Int GoldWidget
-Int GoldPosX
-Int GoldPosY
-Int GoldAnchorV
-Int GoldAnchorH
-Int GoldAlpha
-Int GoldScale
-Int BountyWidget
-Int BountyPosX
-Int BountyPosY
-Int BountyAnchorV
-Int BountyAnchorH
-Int BountyAlpha
-Int BountyScale
-Int SkillWidget
-Int SkillPosX
-Int SkillPosY
-Int SkillAnchorV
-Int SkillAnchorH
-Int SkillAlpha
-Int SkillScale
-Int SpeedWidget
-Int SpeedPosX
-Int SpeedPosY
-Int SpeedAnchorV
-Int SpeedAnchorH
-Int SpeedAlpha
-Int SpeedScale
-Int LockpickWidget
-Int LockpickPosX
-Int LockpickPosY
-Int LockpickAnchorV
-Int LockpickAnchorH
-Int LockpickAlpha
-Int LockpickScale
-Int LightWidget
-Int LightPosX
-Int LightPosY
-Int LightAnchorV
-Int LightAnchorH
-Int LightAlpha
-Int LightScale
-Int HotkeyWidget
-Int HotkeyPosX
-Int HotkeyPosY
-Int HotkeyAnchorV
-Int HotkeyAnchorH
-Int HotkeyAlpha
-Int HotkeyScale
-Int HorseWidget
-Int HorsePosX
-Int HorsePosY
-Int HorseAnchorV
-Int HorseAnchorH
-Int HorseAlpha
-Int HorseScale
-Int FollowerWidget
-Int FollowerPosX
-Int FollowerPosY
-Int FollowerAnchorH
-Int FollowerAnchorV
-Int FollowerAlpha
-Int FollowerScale
-Int AttributeWidget
+Int ArrowWidget
+Int AttributeAlpha
+Int AttributeAnchorH
+Int AttributeAnchorV
 Int AttributePosX
 Int AttributePosY
-Int AttributeAnchorV
-Int AttributeAnchorH
-Int AttributeAlpha
 Int AttributeScale
-Int EssentialWidget
+Int AttributeWidget
+Int BountyAlpha
+Int BountyAnchorH
+Int BountyAnchorV
+Int BountyPosX
+Int BountyPosY
+Int BountyScale
+Int BountyWidget
+Int EssentialAlpha
+Int EssentialAnchorH
+Int EssentialAnchorV
 Int EssentialPosX
 Int EssentialPosY
-Int EssentialAnchorV
-Int EssentialAnchorH
-Int EssentialAlpha
 Int EssentialScale
-
-Int UpdateTimerInt
+Int EssentialWidget
 Int FissLoad
 Int FissSave
-Float UpdateTimerIndex
+Int FollowerAlpha
+Int FollowerAnchorH
+Int FollowerAnchorV
+Int FollowerPosX
+Int FollowerPosY
+Int FollowerScale
+Int FollowerWidget
+Int GoldAlpha
+Int GoldAnchorH
+Int GoldAnchorV
+Int GoldPosX
+Int GoldPosY
+Int GoldScale
+Int GoldWidget
+Int HorseAlpha
+Int HorseAnchorH
+Int HorseAnchorV
+Int HorsePosX
+Int HorsePosY
+Int HorseScale
+Int HorseWidget
+Int HotkeyAlpha
+Int HotkeyAnchorH
+Int HotkeyAnchorV
+Int HotkeyPosX
+Int HotkeyPosY
+Int HotkeyScale
+Int HotkeyWidget
+Int LightAlpha
+Int LightAnchorH
+Int LightAnchorV
+Int LightPosX
+Int LightPosY
+Int LightScale
+Int LightWidget
+Int LockpickAlpha
+Int LockpickAnchorH
+Int LockpickAnchorV
+Int LockpickPosX
+Int LockpickPosY
+Int LockpickScale
+Int LockpickWidget
+Int SkillAlpha
+Int SkillAnchorH
+Int SkillAnchorV
+Int SkillPosX
+Int SkillPosY
+Int SkillScale
+Int SkillWidget
+Int SpeedAlpha
+Int SpeedAnchorH
+Int SpeedAnchorV
+Int SpeedPosX
+Int SpeedPosY
+Int SpeedScale
+Int SpeedWidget
+Int UpdateTimerInt
+Int WeightAlpha
+Int WeightAnchorH
+Int WeightAnchorV
+Int WeightPosX
+Int WeightPosY
+Int WeightScale
+Int WeightWidget
 
 String[] HAnchorArrowString
-String[] VAnchorArrowString
-String[] HAnchorWeightString
-String[] VAnchorWeightString
-String[] HAnchorGoldString
-String[] VAnchorGoldString
-String[] HAnchorBountyString
-String[] VAnchorBountyString
-String[] HAnchorSkillString
-String[] VAnchorSkillString
-String[] HAnchorSpeedString
-String[] VAnchorSpeedString
-String[] HAnchorLockpickString
-String[] VAnchorLockpickString
-String[] HAnchorLightString
-String[] VAnchorLightString
-String[] HAnchorHotkeyString
-String[] VAnchorHotkeyString
-String[] HAnchorHorseString
-String[] VAnchorHorseString
-String[] HAnchorFollowerString
-String[] VAnchorFollowerString
 String[] HAnchorAttributeString
-String[] VAnchorAttributeString
+String[] HAnchorBountyString
 String[] HAnchorEssentialString
+String[] HAnchorFollowerString
+String[] HAnchorGoldString
+String[] HAnchorHorseString
+String[] HAnchorHotkeyString
+String[] HAnchorLightString
+String[] HAnchorLockpickString
+String[] HAnchorSkillString
+String[] HAnchorSpeedString
+String[] HAnchorWeightString
+String[] VAnchorArrowString
+String[] VAnchorAttributeString
+String[] VAnchorBountyString
 String[] VAnchorEssentialString
+String[] VAnchorFollowerString
+String[] VAnchorGoldString
+String[] VAnchorHorseString
+String[] VAnchorHotkeyString
+String[] VAnchorLightString
+String[] VAnchorLockpickString
+String[] VAnchorSkillString
+String[] VAnchorSpeedString
+String[] VAnchorWeightString
 
+
+; -------------------------------------------------------------------------------------------------
+; MCM Events
+; -------------------------------------------------------------------------------------------------
 
 Event OnConfigInit()
-	Utility.Wait(5.0)
+	; Execution Delay.
+	Utility.Wait(7.0)
 
-	HAnchorArrowString = new String[3]
-	HAnchorArrowString[0] = "Left"
-	HAnchorArrowString[1] = "Right"
-	HAnchorArrowString[2] = "Center"	
-	HAnchorWeightString = new String[3]
-	HAnchorWeightString[0] = "Left"
-	HAnchorWeightString[1] = "Right"
-	HAnchorWeightString[2] = "Center"	
-	HAnchorGoldString = new String[3]
-	HAnchorGoldString[0] = "Left"
-	HAnchorGoldString[1] = "Right"
-	HAnchorGoldString[2] = "Center"	
-	HAnchorBountyString = new String[3]
-	HAnchorBountyString[0] = "Left"
-	HAnchorBountyString[1] = "Right"
-	HAnchorBountyString[2] = "Center"	
-	HAnchorSkillString = new String[3]
-	HAnchorSkillString[0] = "Left"
-	HAnchorSkillString[1] = "Right"
-	HAnchorSkillString[2] = "Center"	
-	HAnchorSpeedString = new String[3]
-	HAnchorSpeedString[0] = "Left"
-	HAnchorSpeedString[1] = "Right"
-	HAnchorSpeedString[2] = "Center"	
-	HAnchorLockpickString = new String[3]
-	HAnchorLockpickString[0] = "Left"
-	HAnchorLockpickString[1] = "Right"
-	HAnchorLockpickString[2] = "Center"	
-	HAnchorLightString = new String[3]
-	HAnchorLightString[0] = "Left"
-	HAnchorLightString[1] = "Right"
-	HAnchorLightString[2] = "Center"	
-	HAnchorHotkeyString = new String[3]
-	HAnchorHotkeyString[0] = "Left"
-	HAnchorHotkeyString[1] = "Right"
-	HAnchorHotkeyString[2] = "Center"	
-	HAnchorHorseString = new String[3]
-	HAnchorHorseString[0] = "Left"
-	HAnchorHorseString[1] = "Right"
-	HAnchorHorseString[2] = "Center"		
-	HAnchorFollowerString = new String[3]
-	HAnchorFollowerString[0] = "Left"
-	HAnchorFollowerString[1] = "Right"
-	HAnchorFollowerString[2] = "Center"	
-	HAnchorAttributeString = new String[3]
-	HAnchorAttributeString[0] = "Left"
-	HAnchorAttributeString[1] = "Right"
-	HAnchorAttributeString[2] = "Center"
-	HAnchorEssentialString = new String[3]
-	HAnchorEssentialString[0] = "Left"
-	HAnchorEssentialString[1] = "Right"
-	HAnchorEssentialString[2] = "Center"
-	VAnchorArrowString = new String[3]
-	VAnchorArrowString[0] = "Bottom"
-	VAnchorArrowString[1] = "Top"
-	VAnchorArrowString[2] = "Center"	
-	VAnchorWeightString = new String[3]
-	VAnchorWeightString[0] = "Bottom"
-	VAnchorWeightString[1] = "Top"
-	VAnchorWeightString[2] = "Center"	
-	VAnchorGoldString = new String[3]
-	VAnchorGoldString[0] = "Bottom"
-	VAnchorGoldString[1] = "Top"
-	VAnchorGoldString[2] = "Center"	
-	VAnchorBountyString = new String[3]
-	VAnchorBountyString[0] = "Bottom"
-	VAnchorBountyString[1] = "Top"
-	VAnchorBountyString[2] = "Center"	
-	VAnchorSkillString = new String[3]
-	VAnchorSkillString[0] = "Bottom"
-	VAnchorSkillString[1] = "Top"
-	VAnchorSkillString[2] = "Center"	
-	VAnchorSpeedString = new String[3]
-	VAnchorSpeedString[0] = "Bottom"
-	VAnchorSpeedString[1] = "Top"
-	VAnchorSpeedString[2] = "Center"	
-	VAnchorLockpickString = new String[3]
-	VAnchorLockpickString[0] = "Bottom"
-	VAnchorLockpickString[1] = "Top"
-	VAnchorLockpickString[2] = "Center"	
-	VAnchorLightString = new String[3]
-	VAnchorLightString[0] = "Bottom"
-	VAnchorLightString[1] = "Top"
-	VAnchorLightString[2] = "Center"	
-	VAnchorHotkeyString = new String[3]
-	VAnchorHotkeyString[0] = "Bottom"
-	VAnchorHotkeyString[1] = "Top"
-	VAnchorHotkeyString[2] = "Center"	
-	VAnchorHorseString = new String[3]
-	VAnchorHorseString[0] = "Bottom"
-	VAnchorHorseString[1] = "Top"
-	VAnchorHorseString[2] = "Center"
-	VAnchorFollowerString = new String[3]
-	VAnchorFollowerString[0] = "Bottom"
-	VAnchorFollowerString[1] = "Top"
-	VAnchorFollowerString[2] = "Center"	
-	VAnchorAttributeString = new String[3]
-	VAnchorAttributeString[0] = "Bottom"
-	VAnchorAttributeString[1] = "Top"
-	VAnchorAttributeString[2] = "Center"
-	VAnchorEssentialString = new String[3]
-	VAnchorEssentialString[0] = "Bottom"
-	VAnchorEssentialString[1] = "Top"
-	VAnchorEssentialString[2] = "Center"
-
-	FISSInterface fiss = FISSFactory.getFISS()
-	If fiss
-		fiss.beginLoad("WMUserSettings.xml")		
-		LoadUserPreset()
-	Else
-	EndIf	
+	InitArrays()
+	LoadUserPreset()
 EndEvent
 
 
@@ -393,25 +295,17 @@ Event OnPageReset(string Page)
 		SetCursorPosition(0)
 		AddHeaderOption("General Settings")
 		UpdateTimerInt = AddSliderOption("Update Timer Interval", UpdateScript.UpdateTimer, "{0} sec.")
-		
-		FISSInterface fiss = FISSFactory.getFISS()
-		Int FissFlag = OPTION_FLAG_NONE
-		Int LoadSettingsFlag = OPTION_FLAG_NONE
-		If !fiss
-			FissFlag = OPTION_FLAG_DISABLED
-			LoadSettingsFlag = OPTION_FLAG_DISABLED
-		Else
-			fiss.beginLoad("WMUserSettings.xml")		
-			If fiss.endLoad() != ""
-				LoadSettingsFlag = OPTION_FLAG_DISABLED
-			EndIf
+
+		Int isFISSAvailable = OPTION_FLAG_NONE
+		if !FISSFactory.getFISS()
+			isFISSAvailable = OPTION_FLAG_DISABLED
 		EndIf
 		
-		FissLoad = AddTextOption("Load User Settings?", "Do it!", LoadSettingsFlag)
-		FissSave = AddTextOption("Save User Settings?", "Do it!", FissFlag)		
-		
+		FissLoad = AddTextOption("User Settings", "LOAD", isFISSAvailable)
+		FissSave = AddTextOption("User Settings", "SAVE", isFISSAvailable)		
 	EndIf
 EndEvent
+
 
 Event OnOptionHighlight(Int Option)
 	If (Option == ArrowWidget)
@@ -605,6 +499,7 @@ Event OnOptionHighlight(Int Option)
 	EndIf
 EndEvent
 
+
 Event OnOptionSelect(Int Option)
 	If (Option == ArrowWidget)
 		ArrowScript.Visible = !ArrowScript.Visible
@@ -650,25 +545,14 @@ Event OnOptionSelect(Int Option)
 			WM_EssentialCounterGlobal.SetValueInt(0)
 		EndIf
 	ElseIf (Option == FissLoad)
-		FISSInterface fiss = FISSFactory.getFISS()
-		If fiss
-			fiss.beginLoad("WMUserSettings.xml")		
-			SetTextOptionValue(Option, "Done!")
-			LoadUserPreset()
-		Else
-			Debug.Messagebox("FISS not found, load aborted!")
-		EndIf	
+		String result = LoadUserPreset()
+		SetTextOptionValue(Option, result)
 	ElseIf (Option == FissSave)
-		FISSInterface fiss = FISSFactory.getFISS()
-		fiss.beginLoad("WMUserSettings.xml")		
-		If fiss
-			SetTextOptionValue(Option, "Done!")
-			SaveUserPreset()
-		Else
-			Debug.Messagebox("FISS not found, save aborted!")
-		EndIf	
+		String result = SaveUserPreset()
+		SetTextOptionValue(Option, result)
 	EndIf
 EndEvent
+
 
 Event OnOptionSliderOpen(Int Option)
 	If (Option == ArrowPosX)
@@ -939,6 +823,7 @@ Event OnOptionSliderOpen(Int Option)
 	EndIf
 EndEvent
 
+
 Event OnOptionSliderAccept(Int Option, Float Value)
 	If (Option == ArrowPosX)
 		ArrowScript.SetX(Value)
@@ -1116,6 +1001,7 @@ Event OnOptionSliderAccept(Int Option, Float Value)
 	EndIf
 EndEvent
 
+
 Event OnOptionMenuOpen(Int Option)
 	If (Option == ArrowAnchorH)
 		SetMenuDialogStartIndex(HAnchorArrowString.Find(ArrowScript.HAnchor))
@@ -1223,6 +1109,7 @@ Event OnOptionMenuOpen(Int Option)
 		SetMenuDialogOptions(VAnchorEssentialString)		
 	EndIf
 EndEvent
+
 
 Event OnOptionMenuAccept(Int Option, Int Index)
 	If (Option == ArrowAnchorH)
@@ -1566,282 +1453,406 @@ Event OnOptionMenuAccept(Int Option, Int Index)
 	EndIf
 EndEvent
 
-Function LoadUserPreset()
 
-	FISSInterface fiss = FISSFactory.getFISS()
-	fiss.beginLoad("WMUserSettings.xml")
-	
-	ArrowWidget = fiss.loadInt("FISS_ArrowWidget")
-	ArrowScript.Visible = fiss.loadBool("FISS_ArrowWidgetScript")
-	ArrowPosX = fiss.loadInt("FISS_ArrowPosX")
-	ArrowScript.X = fiss.loadFloat("FISS_ArrowPosXScript")
-	ArrowPosY = fiss.loadInt("FISS_ArrowPosY")
-	ArrowScript.Y = fiss.loadFloat("FISS_ArrowPosYScript")
-	ArrowAlpha = fiss.loadInt("FISS_ArrowAlpha")
-	ArrowScript.Alpha = fiss.loadFloat("FISS_ArrowAlphaScript")
-	ArrowScale = fiss.loadInt("FISS_ArrowScale")
-	ArrowScript.Size = fiss.loadInt("FISS_ArrowScaleScript")
-	WeightWidget = fiss.loadInt("FISS_WeightWidget")
-	WeightScript.Visible = fiss.loadBool("FISS_WeightWidgetScript")
-	WeightPosX = fiss.loadInt("FISS_WeightPosX")
-	WeightScript.X = fiss.loadFloat("FISS_WeightPosXScript")
-	WeightPosY = fiss.loadInt("FISS_WeightPosY")
-	WeightScript.Y = fiss.loadFloat("FISS_WeightPosYScript")
-	WeightAlpha = fiss.loadInt("FISS_WeightAlpha")
-	WeightScript.Alpha = fiss.loadFloat("FISS_WeightAlphaScript")
-	WeightScale = fiss.loadInt("FISS_WeightScale")
-	WeightScript.Size = fiss.loadInt("FISS_WeightScaleScript")
-	GoldWidget = fiss.loadInt("FISS_GoldWidget")
-	GoldScript.Visible = fiss.loadBool("FISS_GoldWidgetScript")
-	GoldPosX = fiss.loadInt("FISS_GoldPosX")
-	GoldScript.X = fiss.loadFloat("FISS_GoldPosXScript")
-	GoldPosY = fiss.loadInt("FISS_GoldPosY")
-	GoldScript.Y = fiss.loadFloat("FISS_GoldPosYScript")
-	GoldAlpha = fiss.loadInt("FISS_GoldAlpha")
-	GoldScript.Alpha = fiss.loadFloat("FISS_GoldAlphaScript")
-	GoldScale = fiss.loadInt("FISS_GoldScale")
-	GoldScript.Size = fiss.loadInt("FISS_GoldScaleScript")
-	BountyWidget = fiss.loadInt("FISS_BountyWidget")
-	BountyScript.Visible = fiss.loadBool("FISS_BountyWidgetScript")
-	BountyPosX = fiss.loadInt("FISS_BountyPosX")
-	BountyScript.X = fiss.loadFloat("FISS_BountyPosXScript")
-	BountyPosY = fiss.loadInt("FISS_BountyPosY")
-	BountyScript.Y = fiss.loadFloat("FISS_BountyPosYScript")
-	BountyAlpha = fiss.loadInt("FISS_BountyAlpha")
-	BountyScript.Alpha = fiss.loadFloat("FISS_BountyAlphaScript")
-	BountyScale = fiss.loadInt("FISS_BountyScale")
-	BountyScript.Size = fiss.loadInt("FISS_BountyScaleScript")
-	SkillWidget = fiss.loadInt("FISS_SkillWidget")
-	SkillScript.Visible = fiss.loadBool("FISS_SkillWidgetScript")
-	SkillPosX = fiss.loadInt("FISS_SkillPosX")
-	SkillScript.X = fiss.loadFloat("FISS_SkillPosXScript")
-	SkillPosY = fiss.loadInt("FISS_SkillPosY")
-	SkillScript.Y = fiss.loadFloat("FISS_SkillPosYScript")
-	SkillAlpha = fiss.loadInt("FISS_SkillAlpha")
-	SkillScript.Alpha = fiss.loadFloat("FISS_SkillAlphaScript")
-	SkillScale = fiss.loadInt("FISS_SkillScale")
-	SkillScript.Size = fiss.loadInt("FISS_SkillScaleScript")
-	SpeedWidget = fiss.loadInt("FISS_SpeedWidget")
-	SpeedScript.Visible = fiss.loadBool("FISS_SpeedWidgetScript")
-	SpeedPosX = fiss.loadInt("FISS_SpeedPosX")
-	SpeedScript.X = fiss.loadFloat("FISS_SpeedPosXScript")
-	SpeedPosY = fiss.loadInt("FISS_SpeedPosY")
-	SpeedScript.Y = fiss.loadFloat("FISS_SpeedPosYScript")
-	SpeedAlpha = fiss.loadInt("FISS_SpeedAlpha")
-	SpeedScript.Alpha = fiss.loadFloat("FISS_SpeedAlphaScript")
-	SpeedScale = fiss.loadInt("FISS_SpeedScale")
-	SpeedScript.Size = fiss.loadInt("FISS_SpeedScaleScript")
-	LockpickWidget = fiss.loadInt("FISS_LockpickWidget")
-	LockpickScript.Visible = fiss.loadBool("FISS_LockpickWidgetScript")
-	LockpickPosX = fiss.loadInt("FISS_LockpickPosX")
-	LockpickScript.X = fiss.loadFloat("FISS_LockpickPosXScript")
-	LockpickPosY = fiss.loadInt("FISS_LockpickPosY")
-	LockpickScript.Y = fiss.loadFloat("FISS_LockpickPosYScript")
-	LockpickAlpha = fiss.loadInt("FISS_LockpickAlpha")
-	LockpickScript.Alpha = fiss.loadFloat("FISS_LockpickAlphaScript")
-	LockpickScale = fiss.loadInt("FISS_LockpickScale")
-	LockpickScript.Size = fiss.loadInt("FISS_LockpickScaleScript")
-	LightWidget = fiss.loadInt("FISS_LightWidget")
-	LightScript.Visible = fiss.loadBool("FISS_LightWidgetScript")
-	LightPosX = fiss.loadInt("FISS_LightPosX")
-	LightScript.X = fiss.loadFloat("FISS_LightPosXScript")
-	LightPosY = fiss.loadInt("FISS_LightPosY")
-	LightScript.Y = fiss.loadFloat("FISS_LightPosYScript")
-	LightAlpha = fiss.loadInt("FISS_LightAlpha")
-	LightScript.Alpha = fiss.loadFloat("FISS_LightAlphaScript")
-	LightScale = fiss.loadInt("FISS_LightScale")
-	LightScript.Size = fiss.loadInt("FISS_LightScaleScript")
-	HotkeyWidget = fiss.loadInt("FISS_HotkeyWidget")
-	HotkeyScript.Visible = fiss.loadBool("FISS_HotkeyWidgetScript")
-	HotkeyPosX = fiss.loadInt("FISS_HotkeyPosX")
-	HotkeyScript.X = fiss.loadFloat("FISS_HotkeyPosXScript")
-	HotkeyPosY = fiss.loadInt("FISS_HotkeyPosY")
-	HotkeyScript.Y = fiss.loadFloat("FISS_HotkeyPosYScript")
-	HotkeyAlpha = fiss.loadInt("FISS_HotkeyAlpha")
-	HotkeyScript.Alpha = fiss.loadFloat("FISS_HotkeyAlphaScript")
-	HotkeyScale = fiss.loadInt("FISS_HotkeyScale")
-	HotkeyScript.Size = fiss.loadInt("FISS_HotkeyScaleScript")	
-	HorseWidget = fiss.loadInt("FISS_HorseWidget")
-	HorseScript.Visible = fiss.loadBool("FISS_HorseWidgetScript")
-	HorsePosX = fiss.loadInt("FISS_HorsePosX")
-	HorseScript.X = fiss.loadFloat("FISS_HorsePosXScript")
-	HorsePosY = fiss.loadInt("FISS_HorsePosY")
-	HorseScript.Y = fiss.loadFloat("FISS_HorsePosYScript")
-	HorseAlpha = fiss.loadInt("FISS_HorseAlpha")
-	HorseScript.Alpha = fiss.loadFloat("FISS_HorseAlphaScript")
-	HorseScale = fiss.loadInt("FISS_HorseScale")
-	HorseScript.Size = fiss.loadInt("FISS_HorseScaleScript")
-	FollowerWidget = fiss.loadInt("FISS_FollowerWidget")
-	FollowerScript.Visible = fiss.loadBool("FISS_FollowerWidgetScript")
-	FollowerPosX = fiss.loadInt("FISS_FollowerPosX")
-	FollowerScript.X = fiss.loadFloat("FISS_FollowerPosXScript")
-	FollowerPosY = fiss.loadInt("FISS_FollowerPosY")
-	FollowerScript.Y = fiss.loadFloat("FISS_FollowerPosYScript")
-	FollowerAlpha = fiss.loadInt("FISS_FollowerAlpha")
-	FollowerScript.Alpha = fiss.loadFloat("FISS_FollowerAlphaScript")
-	FollowerScale = fiss.loadInt("FISS_FollowerScale")
-	FollowerScript.Size = fiss.loadInt("FISS_FollowerScaleScript")
-	AttributeWidget = fiss.loadInt("FISS_AttributeWidget")
-	AttributeScript.Visible = fiss.loadBool("FISS_AttributeWidgetScript")
-	AttributePosX = fiss.loadInt("FISS_AttributePosX")
-	AttributeScript.X = fiss.loadFloat("FISS_AttributePosXScript")
-	AttributePosY = fiss.loadInt("FISS_AttributePosY")
-	AttributeScript.Y = fiss.loadFloat("FISS_AttributePosYScript")
-	AttributeAlpha = fiss.loadInt("FISS_AttributeAlpha")
-	AttributeScript.Alpha = fiss.loadFloat("FISS_AttributeAlphaScript")
-	AttributeScale = fiss.loadInt("FISS_AttributeScale")
-	AttributeScript.Size = fiss.loadInt("FISS_AttributeScaleScript")
-	EssentialWidget = fiss.loadInt("FISS_EssentialWidget")
-	EssentialScript.Visible = fiss.loadBool("FISS_EssentialWidgetScript")
-	EssentialPosX = fiss.loadInt("FISS_EssentialPosX")
-	EssentialScript.X = fiss.loadFloat("FISS_EssentialPosXScript")
-	EssentialPosY = fiss.loadInt("FISS_EssentialPosY")
-	EssentialScript.Y = fiss.loadFloat("FISS_EssentialPosYScript")
-	EssentialAlpha = fiss.loadInt("FISS_EssentialAlpha")
-	EssentialScript.Alpha = fiss.loadFloat("FISS_EssentialAlphaScript")
-	EssentialScale = fiss.loadInt("FISS_EssentialScale")
-	EssentialScript.Size = fiss.loadInt("FISS_EssentialScaleScript")	
-	
-	String loadResult = fiss.endLoad()
+; -------------------------------------------------------------------------------------------------
+; Functions
+; -------------------------------------------------------------------------------------------------
 
+Function InitArrays()
+	HAnchorArrowString = new String[3]
+	HAnchorArrowString[0] = "Left"
+	HAnchorArrowString[1] = "Right"
+	HAnchorArrowString[2] = "Center"	
+	HAnchorWeightString = new String[3]
+	HAnchorWeightString[0] = "Left"
+	HAnchorWeightString[1] = "Right"
+	HAnchorWeightString[2] = "Center"	
+	HAnchorGoldString = new String[3]
+	HAnchorGoldString[0] = "Left"
+	HAnchorGoldString[1] = "Right"
+	HAnchorGoldString[2] = "Center"	
+	HAnchorBountyString = new String[3]
+	HAnchorBountyString[0] = "Left"
+	HAnchorBountyString[1] = "Right"
+	HAnchorBountyString[2] = "Center"	
+	HAnchorSkillString = new String[3]
+	HAnchorSkillString[0] = "Left"
+	HAnchorSkillString[1] = "Right"
+	HAnchorSkillString[2] = "Center"	
+	HAnchorSpeedString = new String[3]
+	HAnchorSpeedString[0] = "Left"
+	HAnchorSpeedString[1] = "Right"
+	HAnchorSpeedString[2] = "Center"	
+	HAnchorLockpickString = new String[3]
+	HAnchorLockpickString[0] = "Left"
+	HAnchorLockpickString[1] = "Right"
+	HAnchorLockpickString[2] = "Center"	
+	HAnchorLightString = new String[3]
+	HAnchorLightString[0] = "Left"
+	HAnchorLightString[1] = "Right"
+	HAnchorLightString[2] = "Center"	
+	HAnchorHotkeyString = new String[3]
+	HAnchorHotkeyString[0] = "Left"
+	HAnchorHotkeyString[1] = "Right"
+	HAnchorHotkeyString[2] = "Center"	
+	HAnchorHorseString = new String[3]
+	HAnchorHorseString[0] = "Left"
+	HAnchorHorseString[1] = "Right"
+	HAnchorHorseString[2] = "Center"		
+	HAnchorFollowerString = new String[3]
+	HAnchorFollowerString[0] = "Left"
+	HAnchorFollowerString[1] = "Right"
+	HAnchorFollowerString[2] = "Center"	
+	HAnchorAttributeString = new String[3]
+	HAnchorAttributeString[0] = "Left"
+	HAnchorAttributeString[1] = "Right"
+	HAnchorAttributeString[2] = "Center"
+	HAnchorEssentialString = new String[3]
+	HAnchorEssentialString[0] = "Left"
+	HAnchorEssentialString[1] = "Right"
+	HAnchorEssentialString[2] = "Center"
+	VAnchorArrowString = new String[3]
+	VAnchorArrowString[0] = "Bottom"
+	VAnchorArrowString[1] = "Top"
+	VAnchorArrowString[2] = "Center"	
+	VAnchorWeightString = new String[3]
+	VAnchorWeightString[0] = "Bottom"
+	VAnchorWeightString[1] = "Top"
+	VAnchorWeightString[2] = "Center"	
+	VAnchorGoldString = new String[3]
+	VAnchorGoldString[0] = "Bottom"
+	VAnchorGoldString[1] = "Top"
+	VAnchorGoldString[2] = "Center"	
+	VAnchorBountyString = new String[3]
+	VAnchorBountyString[0] = "Bottom"
+	VAnchorBountyString[1] = "Top"
+	VAnchorBountyString[2] = "Center"	
+	VAnchorSkillString = new String[3]
+	VAnchorSkillString[0] = "Bottom"
+	VAnchorSkillString[1] = "Top"
+	VAnchorSkillString[2] = "Center"	
+	VAnchorSpeedString = new String[3]
+	VAnchorSpeedString[0] = "Bottom"
+	VAnchorSpeedString[1] = "Top"
+	VAnchorSpeedString[2] = "Center"	
+	VAnchorLockpickString = new String[3]
+	VAnchorLockpickString[0] = "Bottom"
+	VAnchorLockpickString[1] = "Top"
+	VAnchorLockpickString[2] = "Center"	
+	VAnchorLightString = new String[3]
+	VAnchorLightString[0] = "Bottom"
+	VAnchorLightString[1] = "Top"
+	VAnchorLightString[2] = "Center"	
+	VAnchorHotkeyString = new String[3]
+	VAnchorHotkeyString[0] = "Bottom"
+	VAnchorHotkeyString[1] = "Top"
+	VAnchorHotkeyString[2] = "Center"	
+	VAnchorHorseString = new String[3]
+	VAnchorHorseString[0] = "Bottom"
+	VAnchorHorseString[1] = "Top"
+	VAnchorHorseString[2] = "Center"
+	VAnchorFollowerString = new String[3]
+	VAnchorFollowerString[0] = "Bottom"
+	VAnchorFollowerString[1] = "Top"
+	VAnchorFollowerString[2] = "Center"	
+	VAnchorAttributeString = new String[3]
+	VAnchorAttributeString[0] = "Bottom"
+	VAnchorAttributeString[1] = "Top"
+	VAnchorAttributeString[2] = "Center"
+	VAnchorEssentialString = new String[3]
+	VAnchorEssentialString[0] = "Bottom"
+	VAnchorEssentialString[1] = "Top"
+	VAnchorEssentialString[2] = "Center"
 EndFunction
 
-Function SaveUserPreset()
 
+String Function LoadUserPreset()
 	FISSInterface fiss = FISSFactory.getFISS()
-	fiss.beginSave("WMUserSettings.xml", " Widget Mod")
-	
-	fiss.saveInt("FISS_ArrowWidget", ArrowWidget)
-	fiss.saveBool("FISS_ArrowWidgetScript", ArrowScript.Visible)
-	fiss.saveInt("FISS_ArrowPosX", ArrowPosX)
-	fiss.saveFloat("FISS_ArrowPosXScript", ArrowScript.X)
-	fiss.saveInt("FISS_ArrowPosY", ArrowPosY)
-	fiss.saveFloat("FISS_ArrowPosYScript", ArrowScript.Y)
-	fiss.saveInt("FISS_ArrowAlpha", ArrowAlpha)
-	fiss.saveFloat("FISS_ArrowAlphaScript", ArrowScript.Alpha)
-	fiss.saveInt("FISS_ArrowScale", ArrowScale)
-	fiss.saveInt("FISS_ArrowScaleScript", ArrowScript.Size)
-	fiss.saveInt("FISS_WeightWidget", WeightWidget)
-	fiss.saveBool("FISS_WeightWidgetScript", WeightScript.Visible)
-	fiss.saveInt("FISS_WeightPosX", WeightPosX)
-	fiss.saveFloat("FISS_WeightPosXScript", WeightScript.X)
-	fiss.saveInt("FISS_WeightPosY", WeightPosY)
-	fiss.saveFloat("FISS_WeightPosYScript", WeightScript.Y)
-	fiss.saveInt("FISS_WeightAlpha", WeightAlpha)
-	fiss.saveFloat("FISS_WeightAlphaScript", WeightScript.Alpha)
-	fiss.saveInt("FISS_WeightScale", WeightScale)
-	fiss.saveInt("FISS_WeightScaleScript", WeightScript.Size)
-	fiss.saveInt("FISS_GoldWidget", GoldWidget)
-	fiss.saveBool("FISS_GoldWidgetScript", GoldScript.Visible)
-	fiss.saveInt("FISS_GoldPosX", GoldPosX)
-	fiss.saveFloat("FISS_GoldPosXScript", GoldScript.X)
-	fiss.saveInt("FISS_GoldPosY", GoldPosY)
-	fiss.saveFloat("FISS_GoldPosYScript", GoldScript.Y)
-	fiss.saveInt("FISS_GoldAlpha", GoldAlpha)
-	fiss.saveFloat("FISS_GoldAlphaScript", GoldScript.Alpha)
-	fiss.saveInt("FISS_GoldScale", GoldScale)
-	fiss.saveInt("FISS_GoldScaleScript", GoldScript.Size)
-	fiss.saveInt("FISS_BountyWidget", BountyWidget)
-	fiss.saveBool("FISS_BountyWidgetScript", BountyScript.Visible)
-	fiss.saveInt("FISS_BountyPosX", BountyPosX)
-	fiss.saveFloat("FISS_BountyPosXScript", BountyScript.X)
-	fiss.saveInt("FISS_BountyPosY", BountyPosY)
-	fiss.saveFloat("FISS_BountyPosYScript", BountyScript.Y)
-	fiss.saveInt("FISS_BountyAlpha", BountyAlpha)
-	fiss.saveFloat("FISS_BountyAlphaScript", BountyScript.Alpha)
-	fiss.saveInt("FISS_BountyScale", BountyScale)
-	fiss.saveInt("FISS_BountyScaleScript", BountyScript.Size)
-	fiss.saveInt("FISS_SkillWidget", SkillWidget)
-	fiss.saveBool("FISS_SkillWidgetScript", SkillScript.Visible)
-	fiss.saveInt("FISS_SkillPosX", SkillPosX)
-	fiss.saveFloat("FISS_SkillPosXScript", SkillScript.X)
-	fiss.saveInt("FISS_SkillPosY", SkillPosY)
-	fiss.saveFloat("FISS_SkillPosYScript", SkillScript.Y)
-	fiss.saveInt("FISS_SkillAlpha", SkillAlpha)
-	fiss.saveFloat("FISS_SkillAlphaScript", SkillScript.Alpha)
-	fiss.saveInt("FISS_SkillScale", SkillScale)
-	fiss.saveInt("FISS_SkillScaleScript", SkillScript.Size)
-	fiss.saveInt("FISS_SpeedWidget", SpeedWidget)
-	fiss.saveBool("FISS_SpeedWidgetScript", SpeedScript.Visible)
-	fiss.saveInt("FISS_SpeedPosX", SpeedPosX)
-	fiss.saveFloat("FISS_SpeedPosXScript", SpeedScript.X)
-	fiss.saveInt("FISS_SpeedPosY", SpeedPosY)
-	fiss.saveFloat("FISS_SpeedPosYScript", SpeedScript.Y)
-	fiss.saveInt("FISS_SpeedAlpha", SpeedAlpha)
-	fiss.saveFloat("FISS_SpeedAlphaScript", SpeedScript.Alpha)
-	fiss.saveInt("FISS_SpeedScale", SpeedScale)
-	fiss.saveInt("FISS_SpeedScaleScript", SpeedScript.Size)
-	fiss.saveInt("FISS_LockpickWidget", LockpickWidget)
-	fiss.saveBool("FISS_LockpickWidgetScript", LockpickScript.Visible)
-	fiss.saveInt("FISS_LockpickPosX", LockpickPosX)
-	fiss.saveFloat("FISS_LockpickPosXScript", LockpickScript.X)
-	fiss.saveInt("FISS_LockpickPosY", LockpickPosY)
-	fiss.saveFloat("FISS_LockpickPosYScript", LockpickScript.Y)
-	fiss.saveInt("FISS_LockpickAlpha", LockpickAlpha)
-	fiss.saveFloat("FISS_LockpickAlphaScript", LockpickScript.Alpha)
-	fiss.saveInt("FISS_LockpickScale", LockpickScale)
-	fiss.saveInt("FISS_LockpickScaleScript", LockpickScript.Size)
-	fiss.saveInt("FISS_LightWidget", LightWidget)
-	fiss.saveBool("FISS_LightWidgetScript", LightScript.Visible)
-	fiss.saveInt("FISS_LightPosX", LightPosX)
-	fiss.saveFloat("FISS_LightPosXScript", LightScript.X)
-	fiss.saveInt("FISS_LightPosY", LightPosY)
-	fiss.saveFloat("FISS_LightPosYScript", LightScript.Y)
-	fiss.saveInt("FISS_LightAlpha", LightAlpha)
-	fiss.saveFloat("FISS_LightAlphaScript", LightScript.Alpha)
-	fiss.saveInt("FISS_LightScale", LightScale)
-	fiss.saveInt("FISS_LightScaleScript", LightScript.Size)
-	fiss.saveInt("FISS_HotkeyWidget", HotkeyWidget)
-	fiss.saveBool("FISS_HotkeyWidgetScript", HotkeyScript.Visible)
-	fiss.saveInt("FISS_HotkeyPosX", HotkeyPosX)
-	fiss.saveFloat("FISS_HotkeyPosXScript", HotkeyScript.X)
-	fiss.saveInt("FISS_HotkeyPosY", HotkeyPosY)
-	fiss.saveFloat("FISS_HotkeyPosYScript", HotkeyScript.Y)
-	fiss.saveInt("FISS_HotkeyAlpha", HotkeyAlpha)
-	fiss.saveFloat("FISS_HotkeyAlphaScript", HotkeyScript.Alpha)
-	fiss.saveInt("FISS_HotkeyScale", HotkeyScale)
-	fiss.saveInt("FISS_HotkeyScaleScript", HotkeyScript.Size)
-	fiss.saveInt("FISS_HorseWidget", HorseWidget)
-	fiss.saveBool("FISS_HorseWidgetScript", HorseScript.Visible)
-	fiss.saveInt("FISS_HorsePosX", HorsePosX)
-	fiss.saveFloat("FISS_HorsePosXScript", HorseScript.X)
-	fiss.saveInt("FISS_HorsePosY", HorsePosY)
-	fiss.saveFloat("FISS_HorsePosYScript", HorseScript.Y)
-	fiss.saveInt("FISS_HorseAlpha", HorseAlpha)
-	fiss.saveFloat("FISS_HorseAlphaScript", HorseScript.Alpha)
-	fiss.saveInt("FISS_HorseScale", HorseScale)
-	fiss.saveInt("FISS_HorseScaleScript", HorseScript.Size)
-	fiss.saveInt("FISS_FollowerWidget", FollowerWidget)
-	fiss.saveBool("FISS_FollowerWidgetScript", FollowerScript.Visible)
-	fiss.saveInt("FISS_FollowerPosX", FollowerPosX)
-	fiss.saveFloat("FISS_FollowerPosXScript", FollowerScript.X)
-	fiss.saveInt("FISS_FollowerPosY", FollowerPosY)
-	fiss.saveFloat("FISS_FollowerPosYScript", FollowerScript.Y)
-	fiss.saveInt("FISS_FollowerAlpha", FollowerAlpha)
-	fiss.saveFloat("FISS_FollowerAlphaScript", FollowerScript.Alpha)
-	fiss.saveInt("FISS_FollowerScale", FollowerScale)
-	fiss.saveInt("FISS_FollowerScaleScript", FollowerScript.Size)
-	fiss.saveInt("FISS_AttributeWidget", AttributeWidget)
-	fiss.saveBool("FISS_AttributeWidgetScript", AttributeScript.Visible)
-	fiss.saveInt("FISS_AttributePosX", AttributePosX)
-	fiss.saveFloat("FISS_AttributePosXScript", AttributeScript.X)
-	fiss.saveInt("FISS_AttributePosY", AttributePosY)
-	fiss.saveFloat("FISS_AttributePosYScript", AttributeScript.Y)
-	fiss.saveInt("FISS_AttributeAlpha", AttributeAlpha)
-	fiss.saveFloat("FISS_AttributeAlphaScript", AttributeScript.Alpha)
-	fiss.saveInt("FISS_AttributeScale", AttributeScale)
-	fiss.saveInt("FISS_AttributeScaleScript", AttributeScript.Size)		
-	fiss.saveInt("FISS_EssentialWidget", EssentialWidget)
-	fiss.saveBool("FISS_EssentialWidgetScript", EssentialScript.Visible)
-	fiss.saveInt("FISS_EssentialPosX", EssentialPosX)
-	fiss.saveFloat("FISS_EssentialPosXScript", EssentialScript.X)
-	fiss.saveInt("FISS_EssentialPosY", EssentialPosY)
-	fiss.saveFloat("FISS_EssentialPosYScript", EssentialScript.Y)
-	fiss.saveInt("FISS_EssentialAlpha", EssentialAlpha)
-	fiss.saveFloat("FISS_EssentialAlphaScript", EssentialScript.Alpha)
-	fiss.saveInt("FISS_EssentialScale", EssentialScale)
-	fiss.saveInt("FISS_EssentialScaleScript", EssentialScript.Size)		
-	
-	String saveResult = fiss.endSave()	
+	If fiss
+		fiss.beginLoad("WMUserSettings.xml")		
+		ArrowWidget = fiss.loadInt("FISS_ArrowWidget")
+		ArrowScript.Visible = fiss.loadBool("FISS_ArrowWidgetScript")
+		ArrowPosX = fiss.loadInt("FISS_ArrowPosX")
+		ArrowScript.X = fiss.loadFloat("FISS_ArrowPosXScript")
+		ArrowPosY = fiss.loadInt("FISS_ArrowPosY")
+		ArrowScript.Y = fiss.loadFloat("FISS_ArrowPosYScript")
+		ArrowAlpha = fiss.loadInt("FISS_ArrowAlpha")
+		ArrowScript.Alpha = fiss.loadFloat("FISS_ArrowAlphaScript")
+		ArrowScale = fiss.loadInt("FISS_ArrowScale")
+		ArrowScript.Size = fiss.loadInt("FISS_ArrowScaleScript")
+		WeightWidget = fiss.loadInt("FISS_WeightWidget")
+		WeightScript.Visible = fiss.loadBool("FISS_WeightWidgetScript")
+		WeightPosX = fiss.loadInt("FISS_WeightPosX")
+		WeightScript.X = fiss.loadFloat("FISS_WeightPosXScript")
+		WeightPosY = fiss.loadInt("FISS_WeightPosY")
+		WeightScript.Y = fiss.loadFloat("FISS_WeightPosYScript")
+		WeightAlpha = fiss.loadInt("FISS_WeightAlpha")
+		WeightScript.Alpha = fiss.loadFloat("FISS_WeightAlphaScript")
+		WeightScale = fiss.loadInt("FISS_WeightScale")
+		WeightScript.Size = fiss.loadInt("FISS_WeightScaleScript")
+		GoldWidget = fiss.loadInt("FISS_GoldWidget")
+		GoldScript.Visible = fiss.loadBool("FISS_GoldWidgetScript")
+		GoldPosX = fiss.loadInt("FISS_GoldPosX")
+		GoldScript.X = fiss.loadFloat("FISS_GoldPosXScript")
+		GoldPosY = fiss.loadInt("FISS_GoldPosY")
+		GoldScript.Y = fiss.loadFloat("FISS_GoldPosYScript")
+		GoldAlpha = fiss.loadInt("FISS_GoldAlpha")
+		GoldScript.Alpha = fiss.loadFloat("FISS_GoldAlphaScript")
+		GoldScale = fiss.loadInt("FISS_GoldScale")
+		GoldScript.Size = fiss.loadInt("FISS_GoldScaleScript")
+		BountyWidget = fiss.loadInt("FISS_BountyWidget")
+		BountyScript.Visible = fiss.loadBool("FISS_BountyWidgetScript")
+		BountyPosX = fiss.loadInt("FISS_BountyPosX")
+		BountyScript.X = fiss.loadFloat("FISS_BountyPosXScript")
+		BountyPosY = fiss.loadInt("FISS_BountyPosY")
+		BountyScript.Y = fiss.loadFloat("FISS_BountyPosYScript")
+		BountyAlpha = fiss.loadInt("FISS_BountyAlpha")
+		BountyScript.Alpha = fiss.loadFloat("FISS_BountyAlphaScript")
+		BountyScale = fiss.loadInt("FISS_BountyScale")
+		BountyScript.Size = fiss.loadInt("FISS_BountyScaleScript")
+		SkillWidget = fiss.loadInt("FISS_SkillWidget")
+		SkillScript.Visible = fiss.loadBool("FISS_SkillWidgetScript")
+		SkillPosX = fiss.loadInt("FISS_SkillPosX")
+		SkillScript.X = fiss.loadFloat("FISS_SkillPosXScript")
+		SkillPosY = fiss.loadInt("FISS_SkillPosY")
+		SkillScript.Y = fiss.loadFloat("FISS_SkillPosYScript")
+		SkillAlpha = fiss.loadInt("FISS_SkillAlpha")
+		SkillScript.Alpha = fiss.loadFloat("FISS_SkillAlphaScript")
+		SkillScale = fiss.loadInt("FISS_SkillScale")
+		SkillScript.Size = fiss.loadInt("FISS_SkillScaleScript")
+		SpeedWidget = fiss.loadInt("FISS_SpeedWidget")
+		SpeedScript.Visible = fiss.loadBool("FISS_SpeedWidgetScript")
+		SpeedPosX = fiss.loadInt("FISS_SpeedPosX")
+		SpeedScript.X = fiss.loadFloat("FISS_SpeedPosXScript")
+		SpeedPosY = fiss.loadInt("FISS_SpeedPosY")
+		SpeedScript.Y = fiss.loadFloat("FISS_SpeedPosYScript")
+		SpeedAlpha = fiss.loadInt("FISS_SpeedAlpha")
+		SpeedScript.Alpha = fiss.loadFloat("FISS_SpeedAlphaScript")
+		SpeedScale = fiss.loadInt("FISS_SpeedScale")
+		SpeedScript.Size = fiss.loadInt("FISS_SpeedScaleScript")
+		LockpickWidget = fiss.loadInt("FISS_LockpickWidget")
+		LockpickScript.Visible = fiss.loadBool("FISS_LockpickWidgetScript")
+		LockpickPosX = fiss.loadInt("FISS_LockpickPosX")
+		LockpickScript.X = fiss.loadFloat("FISS_LockpickPosXScript")
+		LockpickPosY = fiss.loadInt("FISS_LockpickPosY")
+		LockpickScript.Y = fiss.loadFloat("FISS_LockpickPosYScript")
+		LockpickAlpha = fiss.loadInt("FISS_LockpickAlpha")
+		LockpickScript.Alpha = fiss.loadFloat("FISS_LockpickAlphaScript")
+		LockpickScale = fiss.loadInt("FISS_LockpickScale")
+		LockpickScript.Size = fiss.loadInt("FISS_LockpickScaleScript")
+		LightWidget = fiss.loadInt("FISS_LightWidget")
+		LightScript.Visible = fiss.loadBool("FISS_LightWidgetScript")
+		LightPosX = fiss.loadInt("FISS_LightPosX")
+		LightScript.X = fiss.loadFloat("FISS_LightPosXScript")
+		LightPosY = fiss.loadInt("FISS_LightPosY")
+		LightScript.Y = fiss.loadFloat("FISS_LightPosYScript")
+		LightAlpha = fiss.loadInt("FISS_LightAlpha")
+		LightScript.Alpha = fiss.loadFloat("FISS_LightAlphaScript")
+		LightScale = fiss.loadInt("FISS_LightScale")
+		LightScript.Size = fiss.loadInt("FISS_LightScaleScript")
+		HotkeyWidget = fiss.loadInt("FISS_HotkeyWidget")
+		HotkeyScript.Visible = fiss.loadBool("FISS_HotkeyWidgetScript")
+		HotkeyPosX = fiss.loadInt("FISS_HotkeyPosX")
+		HotkeyScript.X = fiss.loadFloat("FISS_HotkeyPosXScript")
+		HotkeyPosY = fiss.loadInt("FISS_HotkeyPosY")
+		HotkeyScript.Y = fiss.loadFloat("FISS_HotkeyPosYScript")
+		HotkeyAlpha = fiss.loadInt("FISS_HotkeyAlpha")
+		HotkeyScript.Alpha = fiss.loadFloat("FISS_HotkeyAlphaScript")
+		HotkeyScale = fiss.loadInt("FISS_HotkeyScale")
+		HotkeyScript.Size = fiss.loadInt("FISS_HotkeyScaleScript")	
+		HorseWidget = fiss.loadInt("FISS_HorseWidget")
+		HorseScript.Visible = fiss.loadBool("FISS_HorseWidgetScript")
+		HorsePosX = fiss.loadInt("FISS_HorsePosX")
+		HorseScript.X = fiss.loadFloat("FISS_HorsePosXScript")
+		HorsePosY = fiss.loadInt("FISS_HorsePosY")
+		HorseScript.Y = fiss.loadFloat("FISS_HorsePosYScript")
+		HorseAlpha = fiss.loadInt("FISS_HorseAlpha")
+		HorseScript.Alpha = fiss.loadFloat("FISS_HorseAlphaScript")
+		HorseScale = fiss.loadInt("FISS_HorseScale")
+		HorseScript.Size = fiss.loadInt("FISS_HorseScaleScript")
+		FollowerWidget = fiss.loadInt("FISS_FollowerWidget")
+		FollowerScript.Visible = fiss.loadBool("FISS_FollowerWidgetScript")
+		FollowerPosX = fiss.loadInt("FISS_FollowerPosX")
+		FollowerScript.X = fiss.loadFloat("FISS_FollowerPosXScript")
+		FollowerPosY = fiss.loadInt("FISS_FollowerPosY")
+		FollowerScript.Y = fiss.loadFloat("FISS_FollowerPosYScript")
+		FollowerAlpha = fiss.loadInt("FISS_FollowerAlpha")
+		FollowerScript.Alpha = fiss.loadFloat("FISS_FollowerAlphaScript")
+		FollowerScale = fiss.loadInt("FISS_FollowerScale")
+		FollowerScript.Size = fiss.loadInt("FISS_FollowerScaleScript")
+		AttributeWidget = fiss.loadInt("FISS_AttributeWidget")
+		AttributeScript.Visible = fiss.loadBool("FISS_AttributeWidgetScript")
+		AttributePosX = fiss.loadInt("FISS_AttributePosX")
+		AttributeScript.X = fiss.loadFloat("FISS_AttributePosXScript")
+		AttributePosY = fiss.loadInt("FISS_AttributePosY")
+		AttributeScript.Y = fiss.loadFloat("FISS_AttributePosYScript")
+		AttributeAlpha = fiss.loadInt("FISS_AttributeAlpha")
+		AttributeScript.Alpha = fiss.loadFloat("FISS_AttributeAlphaScript")
+		AttributeScale = fiss.loadInt("FISS_AttributeScale")
+		AttributeScript.Size = fiss.loadInt("FISS_AttributeScaleScript")
+		EssentialWidget = fiss.loadInt("FISS_EssentialWidget")
+		EssentialScript.Visible = fiss.loadBool("FISS_EssentialWidgetScript")
+		EssentialPosX = fiss.loadInt("FISS_EssentialPosX")
+		EssentialScript.X = fiss.loadFloat("FISS_EssentialPosXScript")
+		EssentialPosY = fiss.loadInt("FISS_EssentialPosY")
+		EssentialScript.Y = fiss.loadFloat("FISS_EssentialPosYScript")
+		EssentialAlpha = fiss.loadInt("FISS_EssentialAlpha")
+		EssentialScript.Alpha = fiss.loadFloat("FISS_EssentialAlphaScript")
+		EssentialScale = fiss.loadInt("FISS_EssentialScale")
+		EssentialScript.Size = fiss.loadInt("FISS_EssentialScaleScript")	
+		String loadResult = fiss.endLoad()
+		if loadResult == ""
+			return "Done!"
+		Else
+			return loadResult
+		EndIf
+	Else
+		return "FISS not found, load aborted!"
+	EndIf
+EndFunction
 
+
+String Function SaveUserPreset()
+	FISSInterface fiss = FISSFactory.getFISS()
+	If fiss
+		fiss.beginSave("WMUserSettings.xml", "Widget Mod")
+		fiss.saveInt("FISS_ArrowWidget", ArrowWidget)
+		fiss.saveBool("FISS_ArrowWidgetScript", ArrowScript.Visible)
+		fiss.saveInt("FISS_ArrowPosX", ArrowPosX)
+		fiss.saveFloat("FISS_ArrowPosXScript", ArrowScript.X)
+		fiss.saveInt("FISS_ArrowPosY", ArrowPosY)
+		fiss.saveFloat("FISS_ArrowPosYScript", ArrowScript.Y)
+		fiss.saveInt("FISS_ArrowAlpha", ArrowAlpha)
+		fiss.saveFloat("FISS_ArrowAlphaScript", ArrowScript.Alpha)
+		fiss.saveInt("FISS_ArrowScale", ArrowScale)
+		fiss.saveInt("FISS_ArrowScaleScript", ArrowScript.Size)
+		fiss.saveInt("FISS_WeightWidget", WeightWidget)
+		fiss.saveBool("FISS_WeightWidgetScript", WeightScript.Visible)
+		fiss.saveInt("FISS_WeightPosX", WeightPosX)
+		fiss.saveFloat("FISS_WeightPosXScript", WeightScript.X)
+		fiss.saveInt("FISS_WeightPosY", WeightPosY)
+		fiss.saveFloat("FISS_WeightPosYScript", WeightScript.Y)
+		fiss.saveInt("FISS_WeightAlpha", WeightAlpha)
+		fiss.saveFloat("FISS_WeightAlphaScript", WeightScript.Alpha)
+		fiss.saveInt("FISS_WeightScale", WeightScale)
+		fiss.saveInt("FISS_WeightScaleScript", WeightScript.Size)
+		fiss.saveInt("FISS_GoldWidget", GoldWidget)
+		fiss.saveBool("FISS_GoldWidgetScript", GoldScript.Visible)
+		fiss.saveInt("FISS_GoldPosX", GoldPosX)
+		fiss.saveFloat("FISS_GoldPosXScript", GoldScript.X)
+		fiss.saveInt("FISS_GoldPosY", GoldPosY)
+		fiss.saveFloat("FISS_GoldPosYScript", GoldScript.Y)
+		fiss.saveInt("FISS_GoldAlpha", GoldAlpha)
+		fiss.saveFloat("FISS_GoldAlphaScript", GoldScript.Alpha)
+		fiss.saveInt("FISS_GoldScale", GoldScale)
+		fiss.saveInt("FISS_GoldScaleScript", GoldScript.Size)
+		fiss.saveInt("FISS_BountyWidget", BountyWidget)
+		fiss.saveBool("FISS_BountyWidgetScript", BountyScript.Visible)
+		fiss.saveInt("FISS_BountyPosX", BountyPosX)
+		fiss.saveFloat("FISS_BountyPosXScript", BountyScript.X)
+		fiss.saveInt("FISS_BountyPosY", BountyPosY)
+		fiss.saveFloat("FISS_BountyPosYScript", BountyScript.Y)
+		fiss.saveInt("FISS_BountyAlpha", BountyAlpha)
+		fiss.saveFloat("FISS_BountyAlphaScript", BountyScript.Alpha)
+		fiss.saveInt("FISS_BountyScale", BountyScale)
+		fiss.saveInt("FISS_BountyScaleScript", BountyScript.Size)
+		fiss.saveInt("FISS_SkillWidget", SkillWidget)
+		fiss.saveBool("FISS_SkillWidgetScript", SkillScript.Visible)
+		fiss.saveInt("FISS_SkillPosX", SkillPosX)
+		fiss.saveFloat("FISS_SkillPosXScript", SkillScript.X)
+		fiss.saveInt("FISS_SkillPosY", SkillPosY)
+		fiss.saveFloat("FISS_SkillPosYScript", SkillScript.Y)
+		fiss.saveInt("FISS_SkillAlpha", SkillAlpha)
+		fiss.saveFloat("FISS_SkillAlphaScript", SkillScript.Alpha)
+		fiss.saveInt("FISS_SkillScale", SkillScale)
+		fiss.saveInt("FISS_SkillScaleScript", SkillScript.Size)
+		fiss.saveInt("FISS_SpeedWidget", SpeedWidget)
+		fiss.saveBool("FISS_SpeedWidgetScript", SpeedScript.Visible)
+		fiss.saveInt("FISS_SpeedPosX", SpeedPosX)
+		fiss.saveFloat("FISS_SpeedPosXScript", SpeedScript.X)
+		fiss.saveInt("FISS_SpeedPosY", SpeedPosY)
+		fiss.saveFloat("FISS_SpeedPosYScript", SpeedScript.Y)
+		fiss.saveInt("FISS_SpeedAlpha", SpeedAlpha)
+		fiss.saveFloat("FISS_SpeedAlphaScript", SpeedScript.Alpha)
+		fiss.saveInt("FISS_SpeedScale", SpeedScale)
+		fiss.saveInt("FISS_SpeedScaleScript", SpeedScript.Size)
+		fiss.saveInt("FISS_LockpickWidget", LockpickWidget)
+		fiss.saveBool("FISS_LockpickWidgetScript", LockpickScript.Visible)
+		fiss.saveInt("FISS_LockpickPosX", LockpickPosX)
+		fiss.saveFloat("FISS_LockpickPosXScript", LockpickScript.X)
+		fiss.saveInt("FISS_LockpickPosY", LockpickPosY)
+		fiss.saveFloat("FISS_LockpickPosYScript", LockpickScript.Y)
+		fiss.saveInt("FISS_LockpickAlpha", LockpickAlpha)
+		fiss.saveFloat("FISS_LockpickAlphaScript", LockpickScript.Alpha)
+		fiss.saveInt("FISS_LockpickScale", LockpickScale)
+		fiss.saveInt("FISS_LockpickScaleScript", LockpickScript.Size)
+		fiss.saveInt("FISS_LightWidget", LightWidget)
+		fiss.saveBool("FISS_LightWidgetScript", LightScript.Visible)
+		fiss.saveInt("FISS_LightPosX", LightPosX)
+		fiss.saveFloat("FISS_LightPosXScript", LightScript.X)
+		fiss.saveInt("FISS_LightPosY", LightPosY)
+		fiss.saveFloat("FISS_LightPosYScript", LightScript.Y)
+		fiss.saveInt("FISS_LightAlpha", LightAlpha)
+		fiss.saveFloat("FISS_LightAlphaScript", LightScript.Alpha)
+		fiss.saveInt("FISS_LightScale", LightScale)
+		fiss.saveInt("FISS_LightScaleScript", LightScript.Size)
+		fiss.saveInt("FISS_HotkeyWidget", HotkeyWidget)
+		fiss.saveBool("FISS_HotkeyWidgetScript", HotkeyScript.Visible)
+		fiss.saveInt("FISS_HotkeyPosX", HotkeyPosX)
+		fiss.saveFloat("FISS_HotkeyPosXScript", HotkeyScript.X)
+		fiss.saveInt("FISS_HotkeyPosY", HotkeyPosY)
+		fiss.saveFloat("FISS_HotkeyPosYScript", HotkeyScript.Y)
+		fiss.saveInt("FISS_HotkeyAlpha", HotkeyAlpha)
+		fiss.saveFloat("FISS_HotkeyAlphaScript", HotkeyScript.Alpha)
+		fiss.saveInt("FISS_HotkeyScale", HotkeyScale)
+		fiss.saveInt("FISS_HotkeyScaleScript", HotkeyScript.Size)
+		fiss.saveInt("FISS_HorseWidget", HorseWidget)
+		fiss.saveBool("FISS_HorseWidgetScript", HorseScript.Visible)
+		fiss.saveInt("FISS_HorsePosX", HorsePosX)
+		fiss.saveFloat("FISS_HorsePosXScript", HorseScript.X)
+		fiss.saveInt("FISS_HorsePosY", HorsePosY)
+		fiss.saveFloat("FISS_HorsePosYScript", HorseScript.Y)
+		fiss.saveInt("FISS_HorseAlpha", HorseAlpha)
+		fiss.saveFloat("FISS_HorseAlphaScript", HorseScript.Alpha)
+		fiss.saveInt("FISS_HorseScale", HorseScale)
+		fiss.saveInt("FISS_HorseScaleScript", HorseScript.Size)
+		fiss.saveInt("FISS_FollowerWidget", FollowerWidget)
+		fiss.saveBool("FISS_FollowerWidgetScript", FollowerScript.Visible)
+		fiss.saveInt("FISS_FollowerPosX", FollowerPosX)
+		fiss.saveFloat("FISS_FollowerPosXScript", FollowerScript.X)
+		fiss.saveInt("FISS_FollowerPosY", FollowerPosY)
+		fiss.saveFloat("FISS_FollowerPosYScript", FollowerScript.Y)
+		fiss.saveInt("FISS_FollowerAlpha", FollowerAlpha)
+		fiss.saveFloat("FISS_FollowerAlphaScript", FollowerScript.Alpha)
+		fiss.saveInt("FISS_FollowerScale", FollowerScale)
+		fiss.saveInt("FISS_FollowerScaleScript", FollowerScript.Size)
+		fiss.saveInt("FISS_AttributeWidget", AttributeWidget)
+		fiss.saveBool("FISS_AttributeWidgetScript", AttributeScript.Visible)
+		fiss.saveInt("FISS_AttributePosX", AttributePosX)
+		fiss.saveFloat("FISS_AttributePosXScript", AttributeScript.X)
+		fiss.saveInt("FISS_AttributePosY", AttributePosY)
+		fiss.saveFloat("FISS_AttributePosYScript", AttributeScript.Y)
+		fiss.saveInt("FISS_AttributeAlpha", AttributeAlpha)
+		fiss.saveFloat("FISS_AttributeAlphaScript", AttributeScript.Alpha)
+		fiss.saveInt("FISS_AttributeScale", AttributeScale)
+		fiss.saveInt("FISS_AttributeScaleScript", AttributeScript.Size)		
+		fiss.saveInt("FISS_EssentialWidget", EssentialWidget)
+		fiss.saveBool("FISS_EssentialWidgetScript", EssentialScript.Visible)
+		fiss.saveInt("FISS_EssentialPosX", EssentialPosX)
+		fiss.saveFloat("FISS_EssentialPosXScript", EssentialScript.X)
+		fiss.saveInt("FISS_EssentialPosY", EssentialPosY)
+		fiss.saveFloat("FISS_EssentialPosYScript", EssentialScript.Y)
+		fiss.saveInt("FISS_EssentialAlpha", EssentialAlpha)
+		fiss.saveFloat("FISS_EssentialAlphaScript", EssentialScript.Alpha)
+		fiss.saveInt("FISS_EssentialScale", EssentialScale)
+		fiss.saveInt("FISS_EssentialScaleScript", EssentialScript.Size)		
+		String saveResult = fiss.endSave()	
+		if saveResult == ""
+			return "Done!"
+		Else
+			return saveResult
+		EndIf
+	Else
+		return "FISS not found, save aborted!"
+	EndIf
 EndFunction

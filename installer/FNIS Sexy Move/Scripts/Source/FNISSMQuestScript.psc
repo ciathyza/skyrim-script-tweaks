@@ -1,38 +1,45 @@
-Scriptname FNISSMQuestScript extends Quest Conditional 
+Scriptname FNISSMQuestScript extends Quest Conditional
 
+; -------------------------------------------------------------------------------------------------
+; Properties
+; -------------------------------------------------------------------------------------------------
+
+int Property FNISaaCRC Auto
+int Property FNISs3ModID Auto		; Animations for 360 pack
+int Property FNISs3MtBase Auto		; -1: 360 pack not installed
+int Property FNISs3MtxBase Auto
 int Property FNISsmModID Auto		; Standard animations
 int Property FNISsmMtBase Auto
 int Property FNISsmMtxBase Auto
-int Property FNISs3ModID Auto		; Animations for 360 pack
-int Property FNISs3MtBase Auto		; -1: 360 pack not installed 
-int Property FNISs3MtxBase Auto
-int Property FNISaaCRC Auto
 Quest Property FNISSMQuest2 Auto
 Quest Property MQ101 Auto
 
 ; Configuration parameters (default here, updated by FNISSMConfigMenue)
-Bool[] Property SMno Auto
-Int Property SMnoTotal Auto
-Int Property iSMweight = 1 Auto
-Bool Property SMarmor Auto
 Bool Property isConfigChangedNPC Auto
-Int Property iSMplayer = 4 Auto
-Bool Property SMdialog Auto Conditional
-Bool Property SMoff Auto
-Bool Property SMnocoin Auto
 Bool Property SM360 = true Auto
-
+Bool Property SMarmor Auto
+Bool Property SMdialog Auto Conditional
+Bool Property SMnocoin Auto
+Bool Property SMoff Auto
+Bool[] Property SMno Auto
+Int Property iSMplayer = 4 Auto
+Int Property iSMweight = 1 Auto
+Int Property SMnoTotal Auto
 Int Property StartUpStatus Auto Conditional	; 0: OnInit/OnPlayerLoadGame 1: StartUp executed OK -1: StartUp with errors
 
 ; update values
 bool Property isCellLoaded Auto	; check cell
 int Property AliasCount Auto	; alias fill count
-int iUpdate = 0					; count the updates until next search for un-esmified females
-int iOff = 0					; count how often FNIS SM is turned off
-bool SMQuest2Started
 
-;int Property DebugLevel = 2 Auto	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-int Property DebugLevel = 0 Auto
+
+; -------------------------------------------------------------------------------------------------
+; Variables
+; -------------------------------------------------------------------------------------------------
+
+bool SMQuest2Started
+int iOff = 0					; count how often FNIS SM is turned off
+int iUpdate = 0					; count the updates until next search for un-esmified females
+
 
 ; move distribution (number and percentages)
 int nAnims			; no of used animations (excluding the default animation)
@@ -42,47 +49,57 @@ int[] pArmor		; pd (armored females)
 int[] pOld			; pd (old females)
 
 
+; -------------------------------------------------------------------------------------------------
+; Events
+; -------------------------------------------------------------------------------------------------
+
 Event OnInit()
+	; Execution Delay.
+	Utility.Wait(14.0)
+
 	If !self.isRunning()		; if quest isn't started, despite being "start game enabled"
 		self.Start()
 		return
 	endIf
-	
+
 	if !RequirementsAreMet()
 		StartUpStatus = -1
 		return
 	endif
+
 	StartUpStatus = 1
+	SMno          = new bool[10]
+	SMno[1]       = True
+	SMnoTotal     = 1
+	AnimIndex     = new int[10]
+	pAll          = new int[10]
+	pArmor        = new int[10]
+	pOld          = new int[10]
 
-	SMno = new bool[10]
-	SMno[1] = True
-	SMnoTotal = 1
-	AnimIndex = new int[10]
-	pAll = new int[10]
-	pArmor = new int[10]
-	pOld = new int[10]
-
-	Debug.Trace("FNIS SexyMove started.")
+	Debug.Notification("FNIS SexyMove started.")
 
 	FNISsmModID = FNIS_aa.GetAAModID("fsm", "FNIS Sexy Move", true)
 	FNISsmMtBase = FNIS_aa.GetGroupBaseValue(FNISsmModID, FNIS_aa._mt(), "FNIS Sexy Move", true)
 	FNISsmMtxBase = FNIS_aa.GetGroupBaseValue(FNISsmModID, FNIS_aa._mtx(), "FNIS Sexy Move", true)
 	FNISs3ModID = FNIS_aa.GetAAModID("fs3", "FNIS Sexy Move (360)", true)
-	if ( FNISs3ModID >= 0 )		; 360 pack installed
+
+	if (FNISs3ModID >= 0)		; 360 pack installed
 		FNISs3MtBase = FNIS_aa.GetGroupBaseValue(FNISs3ModID, FNIS_aa._mt(), "FNIS Sexy Move(360)", true)
 		FNISs3MtxBase = FNIS_aa.GetGroupBaseValue(FNISs3ModID, FNIS_aa._mtx(), "FNIS Sexy Move(360)", true)
 	endif
+
 	FNISaaCRC = FNIS_aa.GetInstallationCRC()
-
 	RegisterForSingleUpdate(2.0)
-
 	InitializeNPC()
+
 	Utility.Wait(1)
-	If ( Game.GetPlayer().GetLeveledActorBase().GetSex() == 1 ) && MQ101.IsCompleted()			; female player, done with Helgen
+
+	; Apply initial animation state.
+	If (Game.GetPlayer().GetLeveledActorBase().GetSex() == 1)
 		int camState = Game.GetCameraState()
 		Game.ForceThirdPerson()
 		bool bOk
-		if ( iSMPlayer == 0 )
+		if (iSMPlayer == 0)
 			bOk = FNIS_aa.SetAnimGroup(Game.GetPlayer(), "_mt", 0, 0, "FNIS Sexy Move", true)
 			bOk = bOk && FNIS_aa.SetAnimGroup(Game.GetPlayer(), "_mtx", 0, 0, "FNIS Sexy Move", true)
 		else
@@ -97,49 +114,45 @@ Event OnInit()
 		if !bOk
 			Debug.Trace("FNISSM - ERROR cannot set player animvar for group _mt/_mtx")
 		endif
-		
+
 		If camState == 0
 			Game.ForceFirstPerson()
 		endIf
 	endIf
 EndEvent
 
+
 Event OnUpdate()
 	if SMQuest2Started
 		FNISSMQuest2.Stop()
 		SMQuest2Started = false
-		if DebugLevel > 1
-			Debug.Trace("FNISSM Quest2 stopped." + " player.FNISaa_mt: " + Game.GetPlayer().GetAnimationVariableInt("FNISaa_mt"))
-		endif
 	endIf
 
-	if ( FNISsmMtBase == 0 )
+	if (FNISsmMtBase == 0)
+		; Something bad has happend (SM 1.x still running, FNIS not generated): don't continue.
 		Debug.Notification("FNIS Sexy Move stopped working (clean save needed).")
-		return					; something bad has happend (SM 1.x still running, FNIS not generated): don't continue.
+		return
 	endif
-	
-	; check for females by starting Quest2 
-	If !SMoff && !Game.GetPlayer().isInCombat() && ( isCellLoaded || ( iUpdate <= 0 ) || ( AliasCount >= 5 ) )
-		If isConfigChangedNPC				; Re-initialize NPC animation parameters after configuration change
+
+	; Check for females by starting Quest2.
+	If !SMoff && !Game.GetPlayer().isInCombat() && (isCellLoaded || (iUpdate <= 0) || (AliasCount >= 5))
+		; Re-initialize NPC animation parameters after configuration change.
+		If isConfigChangedNPC
 			InitializeNPC()
 			isConfigChangedNPC = false
-		endIf	
+		endIf
 
 		isCellLoaded = false
 		iUpdate = 5
 		AliasCount = 0
-
 		bool bSucc = FNISSMQuest2.Start()
 		SMQuest2Started = true
-		if DebugLevel > 1
-			Debug.Trace("FNISSM Quest2 started " + bSucc + " isCellLoaded:" + isCellLoaded + " iUpdate:" + iUpdate + " AliasCount:" + AliasCount)
-		endif
 		RegisterForSingleUpdate(0.5)		; short update time (to stop or re-start quest2)
 	else
 		iUpdate -= 1
 		RegisterForSingleUpdate(2.0)		; regular update time
 	endIf
-	
+
 	If SMoff								; regular user notification if he has switched of esmifying
 		iOff -= 1
 		If iOff <= 0
@@ -147,10 +160,15 @@ Event OnUpdate()
 			iOff = 50
 		endIf
 	endIf
-endEvent 
+endEvent
 
-int Function getAnimIndex(int[] percentAr)
+
+; -------------------------------------------------------------------------------------------------
+; Functions
+; -------------------------------------------------------------------------------------------------
+
 ; return a random animation idex according to NPC group and probability array
+int Function getAnimIndex(int[] percentAr)
 	int i = 1
 	int ri = Utility.RandomInt(0,99)
 	While i <= 9
@@ -162,26 +180,27 @@ int Function getAnimIndex(int[] percentAr)
 	return nAnims
 endFunction
 
-int Function getRandomAnimation(Actor akFemale)
+
 ; no prior setting, no modder preset: determine a random animation
+int Function getRandomAnimation(Actor akFemale)
 	float AR = 0.0
 	form fRace = akFemale.GetRace() as form
 	Armor fArmor = akFemale.GetWornForm(0x00000004) as Armor
 	If fArmor != none
 		AR = fArmor.GetArmorRating()
 	endIf
-	If ( fRace == Game.GetForm(0x00067cd8) ) || ( fRace == Game.GetForm(0x000a82ba) )	;	(Vampire) Elder?
+	If (fRace == Game.GetForm(0x00067cd8)) || (fRace == Game.GetForm(0x000a82ba))	;	(Vampire) Elder?
 		return AnimIndex[getAnimIndex(pOld)]	; elder race
-	ElseIf ( AR > 1 )
+	ElseIf (AR > 1)
 		return AnimIndex[getAnimIndex(pArmor)]	; armored NPC
 	Else
 		return AnimIndex[getAnimIndex(pAll)]	; all others
 	endIf
 endFunction
-			
 
-Function initializeNPC()
+
 ; initialize probability arrays for different NPC groups (elder, armored, rest) according to configuration
+Function initializeNPC()
 	string SpAll
 	string SpArmor
 	string SpOld
@@ -219,21 +238,22 @@ Function initializeNPC()
 	While i <= 9
 		pAll[i] = StringUtil.Substring(SpAll, 4*i - 4, 3) as int
 		If i < nAnims
-			If ( iSMweight == 0 ) 
-				pAll[i] = ( pAll[i] * ( 1.0 + ( 1.0 * ( nAnims - i ) / nAnims ) ) ) as int
-			ElseIf ( iSMweight == 2 )
-				pAll[i] = ( pAll[i] * ( 1.0 - ( 0.5 * ( nAnims - i ) / nAnims ) ) ) as int
+			If (iSMweight == 0)
+				pAll[i] = (pAll[i] * (1.0 + (1.0 * (nAnims - i) / nAnims ))) as int
+			ElseIf ( iSMweight == 2)
+				pAll[i] = (pAll[i] * (1.0 - (0.5 * (nAnims - i) / nAnims ))) as int
 			endIf
 		endIf
 		If SMarmor
-			pArmor[i] = StringUtil.Substring(SpArmor, 4*i - 4, 3) as int
+			pArmor[i] = StringUtil.Substring(SpArmor, 4 * i - 4, 3) as int
 		Else
 			pArmor[i] = pAll[i]
 		endIf
-		pOld[i] = StringUtil.Substring(SpOld, 4*i - 4, 3) as int
+		pOld[i] = StringUtil.Substring(SpOld, 4 * i - 4, 3) as int
 		i += 1
 	endWhile
 endFunction
+
 
 bool Function RequirementsAreMet()
 	bool isGenerated = FNIS.isGenerated()
@@ -244,16 +264,16 @@ bool Function RequirementsAreMet()
 	if ! (isGenerated && isVersionOK && isSKSE && isFNISesp)
 		string out = "FNIS Sexy Move stopped with ERROR(s):"
 		if ! isVersionOK
-			out = out + "\n- FNIS version " + VersionToString + " older than required" 
+			out = out + "\n- FNIS version " + VersionToString + " older than required."
 		endif
 		if ! isGenerated
-			out = out + "\n- Last FNIS generation failed" 
+			out = out + "\n- Last FNIS generation failed."
 		endif
 		if ! isFNISesp
-			out = out + "\n- FNIS.esp not activated" 
+			out = out + "\n- FNIS.esp not activated."
 		endif
 		if ! isSKSE
-			out = out + "\n- SKSE not started" 
+			out = out + "\n- SKSE not started."
 		endif
 		Debug.Messagebox(out)
 		Debug.Trace(out)

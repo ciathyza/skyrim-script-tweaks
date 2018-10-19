@@ -38,9 +38,8 @@ Weapon bow
 ; -------------------------------------------------------------------------------------------------
 
 event oninit()
-	; Activate the mod after a delay of xx seconds to prevent the Shout Learned effect occuring
-	; right at the beginning after leaving the race menu.
-	utility.wait(35.0)
+	; Execution Delay.
+	Utility.Wait(30.0)
 
 	game.teachword(ChallengeWord)
 	game.unlockword(ChallengeWord)

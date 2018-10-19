@@ -123,7 +123,8 @@ String LastAction
 ; -------------------------------------------------------------------------------------------------
 
 function OnInit()
-	utility.Wait(21.0)
+	; Execution Delay.
+	Utility.Wait(11.0)
 
 	crosshair_hori_idle = ui.GetNumber("HUD Menu", "_root.HUDMovieBaseInstance.CrosshairAlert._x")
 	crosshair_vert_idle = ui.GetNumber("HUD Menu", "_root.HUDMovieBaseInstance.CrosshairAlert._y")

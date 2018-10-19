@@ -242,9 +242,10 @@ String isClip
 ; -------------------------------------------------------------------------------------------------
 
 Event OnConfigInit()
+	; Execution Delay.
+	Utility.Wait(2.0)
 	setPages()
 	OnGameReload()
-	Utility.wait(1.0)
 	LoadPreset_New()
 endEvent
 
@@ -634,6 +635,14 @@ endFunction
 ; -------------------------------------------------------------------------------------------------
 ; Functions
 ; -------------------------------------------------------------------------------------------------
+
+function setPages()
+	Pages = new String[3]
+	Pages[0] = "General Settings"
+	Pages[1] = "HUD Visibility"
+	Pages[2] = "HUD Position"
+endFunction
+
 
 Float function getHUDNumber(String element, String attribute) global
 	return ui.GetNumber("HUD Menu", element + "." + attribute)
@@ -1318,14 +1327,6 @@ function UpdateItem()
 		LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.QuestUpdateBaseInstance.LevelMeterBaseInstance", "_yscale", _LIH_LevelUpS.Getvalue())
 	endIf
 	LIH_ConfigMenu.setHUDString("_root.HUDDummy.guideLines_mc.HUDDisplayInfo", "text", _LIH_SelectedDesc + " / Step: " + _LIH_Step.Getvalue() as String + " units " + " X: " + _LIH_XItem as String + " Y: " + _LIH_YItem as String + " S: " + _LIH_ScaleItem as String + "%" + " R/A: " + _LIH_RotateItem as String + " " + _LIH_AlignItem)
-endFunction
-
-
-function setPages()
-	Pages = new String[3]
-	Pages[0] = "General Settings"
-	Pages[1] = "HUD Visibility"
-	Pages[2] = "HUD Position"
 endFunction
 
 
