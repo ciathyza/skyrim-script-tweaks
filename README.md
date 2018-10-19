@@ -17,4 +17,5 @@ Some mods that either have a heavy impact on mod initialization or should not be
 | Player Headtracking       | 13              |
 | FNIS Sexy Move            | 14              |
 | Draw - A Dueling Mod      | 30              |
+| Lustmord Vampire Armor    | 60              |
 
