@@ -5,23 +5,16 @@ scriptname SKI_ConfigMenu extends SKI_ConfigBase
 ; History
 ;
 ; 1:	- Initial version
-;
 ; 2:	- Added category icon theme option
 ;		- Added noIconColor option
 ;		- Added controls section for gamepad
-;
 ; 3:	- Added disable 3D item positioning option
-;
 ; 4:	- Converted script to use state options
 ;		- Added map menu version check
 ;		- Added active effects widget configuration
-;
 ; 5:	- Fixed 3DItemDisablePositioning
-;
 ; 6:	- Added favorites menu options
-;
 ; 7:	- Changed page layout
-;
 ; 8:	- Removed unsupported icon themes
 
 int function GetVersion()
@@ -39,14 +32,14 @@ string[]	_alignmentValues
 string[]	_sizes
 
 ; State
-int			_itemlistFontSizeIdx		= 1
-int			_itemlistQuantityMinCount	= 6
+int			_itemlistFontSizeIdx		= 0
+int			_itemlistQuantityMinCount	= 10
 
 int			_itemcardAlignIdx			= 2
-float		_itemcardXOffset			= 0.0
-float		_itemcardYOffset			= 0.0
+float		_itemcardXOffset			= 250.0
+float		_itemcardYOffset			= 20.0
 
-float		_3DItemXOffset				= 0.0
+float		_3DItemXOffset				= -12.0
 float		_3DItemYOffset				= 0.0
 float		_3DItemScale				= 1.5
 
@@ -68,7 +61,7 @@ string[]	_categoryIconThemeValues
 
 ; State
 int			_categoryIconThemeIdx		= 0
-bool		_itemlistNoIconColors		= false
+bool		_itemlistNoIconColors		= true
 
 int			_switchTabButton			= 271 ; BACK
 int			_prevColumnButton			= 274 ; LEFT_SHOULDER
@@ -104,13 +97,13 @@ float[]		_alignmentBaseOffsets
 float[]		_vertAlignmentBaseOffsets
 
 ; State
-int			_effectWidgetIconSizeIdx		= 1		; medium
+int			_effectWidgetIconSizeIdx		= 0		; small
 int			_effectWidgetVAnchorIdx			= 0		; top
-int			_effectWidgetHAnchorIdx			= 1		; right
-int			_effectWidgetGroupCount			= 8
-int			_effectWidgetOrientationIdx		= 1		; vertical
-float		_effectWidgetXOffset			= 0.0
-float		_effectWidgetYOffset			= 0.0
+int			_effectWidgetHAnchorIdx			= 0		; left
+int			_effectWidgetGroupCount			= 10
+int			_effectWidgetOrientationIdx		= 0		; horizontal
+float		_effectWidgetXOffset			= 90.0
+float		_effectWidgetYOffset			= 98.0
 
 ; Flags
 int			_effectWidgetFlags

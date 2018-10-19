@@ -26,7 +26,7 @@ string	_orientation		= "vertical"
 
 ; -- Version 3 --
 
-int		_minimumTimeLeft	= 180
+int		_minimumTimeLeft	= 0
 
 ; PROPERTIES --------------------------------------------------------------------------------------
 

@@ -5,78 +5,79 @@ import Math
 ; SCRIPT VERSION ----------------------------------------------------------------------------------
 ;
 ; History
-;
 ; 1:	- Initial version
-;
 ; 2:	- Added check for vampire lord
-;
 ; 3:	- Less eagerly clearing of invalid entries
-
 int function GetVersion()
 	return 3
 endFunction
 
 
-; CONSTANTS ---------------------------------------------------------------------------------------
+; -------------------------------------------------------------------------------------------------
+; Constants
+; -------------------------------------------------------------------------------------------------
 
-string property		FAVORITES_MENU	= "FavoritesMenu" autoReadonly
-string property		MENU_ROOT		= "_root.MenuHolder.Menu_mc" autoReadonly
+int property GROUP_FLAG_UNEQUIP_ARMOR = 1 autoReadonly
+int property GROUP_FLAG_UNEQUIP_HANDS = 2 autoReadonly
+string property FAVORITES_MENU        = "FavoritesMenu" autoReadonly
+string property MENU_ROOT             = "_root.MenuHolder.Menu_mc" autoReadonly
 
-int property		GROUP_FLAG_UNEQUIP_ARMOR	= 1	autoReadonly
-int property		GROUP_FLAG_UNEQUIP_HANDS	= 2	autoReadonly
+
+; -------------------------------------------------------------------------------------------------
+; Properties
+; -------------------------------------------------------------------------------------------------
+
+Actor Property PlayerREF auto
+bool property ButtonHelpEnabled	= true auto
 
 
-; PROPERTIES --------------------------------------------------------------------------------------
-
-; -- Version 1 --
-
-Actor Property		PlayerREF auto
-
-bool property		ButtonHelpEnabled	= true auto
+; -------------------------------------------------------------------------------------------------
+; Computed Properties
+; -------------------------------------------------------------------------------------------------
 
 int property GroupAddKey
 	int function get()
 		return _groupAddKey
 	endFunction
-
 	function set(int a_val)
 		SwapControlKey(a_val, _groupAddKey)
 		_groupAddKey = a_val
 	endFunction
 endProperty
 
+
 int property GroupUseKey
 	int function get()
 		return _groupUseKey
 	endFunction
-
 	function set(int a_val)
 		SwapControlKey(a_val, _groupUseKey)
 		_groupUseKey = a_val
 	endFunction
 endProperty
 
+
 int property SetIconKey
 	int function get()
 		return _setIconKey
 	endFunction
-
 	function set(int a_val)
 		SwapControlKey(a_val, _setIconKey)
 		_setIconKey = a_val
 	endFunction
 endProperty
 
+
 int property SaveEquipStateKey
 	int function get()
 		return _saveEquipStateKey
 	endFunction
-
 	function set(int a_val)
 		SwapControlKey(a_val, _saveEquipStateKey)
 		_saveEquipStateKey = a_val
 	endFunction
 endProperty
+
 
 int property ToggleFocusKey
 	int function get()
@@ -90,145 +91,119 @@ int property ToggleFocusKey
 endProperty
 
 
-; PRIVATE VARIABLES -------------------------------------------------------------------------------
+; -------------------------------------------------------------------------------------------------
+; Private Variables
+; -------------------------------------------------------------------------------------------------
 
-; -- Version 1 --
-
-Form[]				_items1
-Form[]				_items2
-int[]				_itemIds1
-int[]				_itemIds2
-
-int[]				_groupFlags
-
-Form[]				_groupMainHandItems
-int[]				_groupMainHandItemIds
-
-Form[]				_groupOffHandItems
-int[]				_groupOffHandItemIds
-
-Form[]				_groupIconItems
-int[]				_groupIconItemIds
-
-bool				_silenceEquipSounds = false
-
-SoundCategory		_audioCategoryUI
+bool   _silenceEquipSounds = false
+Form[] _groupIconItems
+Form[] _groupMainHandItems
+Form[] _groupOffHandItems
+Form[] _items1
+Form[] _items2
+int[]  _groupFlags
+int[]  _groupIconItemIds
+int[]  _groupMainHandItemIds
+int[]  _groupOffHandItemIds
+int[]  _itemIds1
+int[]  _itemIds2
+SoundCategory _audioCategoryUI
 
 ; Forms to support EquipSlot comparisons
-EquipSlot 			_rightHandSlot
-EquipSlot 			_eitherHandSlot
-EquipSlot 			_leftHandSlot
-EquipSlot 			_bothHandsSlot
-EquipSlot 			_voiceSlot
+EquipSlot _bothHandsSlot
+EquipSlot _eitherHandSlot
+EquipSlot _leftHandSlot
+EquipSlot _rightHandSlot
+EquipSlot _voiceSlot
 
 ; State variables for Group Use
-bool				_usedRightHand		= false
-bool				_usedLeftHand		= false
-bool				_usedVoice			= false
-int					_usedOutfitMask		= 0
+bool _usedRightHand	= false
+bool _usedLeftHand	= false
+bool _usedVoice		= false
+int _usedOutfitMask	= 0
 
 ; Keys
-int					_groupAddKey		= 33 ; F
-int					_groupUseKey		= 19 ; R
-int					_setIconKey			= 56 ; LAlt
-int					_saveEquipStateKey	= 20 ; T
-int					_toggleFocusKey		= 57 ; Space
+int	_groupAddKey		= 33 ; F
+int	_groupUseKey		= 19 ; R
+int	_saveEquipStateKey	= 20 ; T
+int	_setIconKey			= 56 ; LAlt
+int	_toggleFocusKey		= 57 ; Space
 
-int[]				_groupHotkeys
-
-; -- Version 2 --
-
-Race				_vampireLordRace
-
-; -- Version 3 --
-
-bool[]				_itemInvalidFlags1
-bool[]				_itemInvalidFlags2
+bool[] _itemInvalidFlags1
+bool[] _itemInvalidFlags2
+int[] _groupHotkeys
+Race _vampireLordRace
 
 
-; INITIALIZATION ----------------------------------------------------------------------------------
+; -------------------------------------------------------------------------------------------------
+; Init
+; -------------------------------------------------------------------------------------------------
 
 event OnInit()
-	_items1			= new Form[128]
-	_items2			= new Form[128]
-	_itemIds1		= new int[128]
-	_itemIds2		= new int[128]
+	_items1               = new Form[128]
+	_items2               = new Form[128]
+	_itemIds1             = new int[128]
+	_itemIds2             = new int[128]
+	_groupFlags           = new int[8]
+	_groupMainHandItems	  = new Form[8]
+	_groupMainHandItemIds = new int[8]
+	_groupOffHandItems    = new Form[8]
+	_groupOffHandItemIds  = new int[8]
+	_groupIconItems       = new Form[8]
+	_groupIconItemIds     = new int[8]
+	_groupHotkeys         = new int[8]
+	_groupHotkeys[0]      = 2	; 1
+	_groupHotkeys[1]      = 3	; 2
+	_groupHotkeys[2]      = 4	; 3
+	_groupHotkeys[3]      = 5	; 4
+	_groupHotkeys[4]      = 6	; 5
+	_groupHotkeys[5]      = 7	; 6
+	_groupHotkeys[6]      = 8	; 7
+	_groupHotkeys[7]      = 9	; 8
 
-	_groupFlags		= new int[8]
+	_audioCategoryUI      = Game.GetFormFromFile(0x00064451, "Skyrim.esm") as SoundCategory
+	_rightHandSlot        = Game.GetFormFromFile(0x00013f42, "Skyrim.esm") as EquipSlot
+	_leftHandSlot         = Game.GetFormFromFile(0x00013f43, "Skyrim.esm") as EquipSlot
+	_eitherHandSlot	      = Game.GetFormFromFile(0x00013f44, "Skyrim.esm") as EquipSlot
+	_bothHandsSlot        = Game.GetFormFromFile(0x00013f45, "Skyrim.esm") as EquipSlot
+	_voiceSlot            = Game.GetFormFromFile(0x00025bee, "Skyrim.esm") as EquipSlot
 
-	_groupMainHandItems		= new Form[8]
-	_groupMainHandItemIds	= new int[8]
-
-	_groupOffHandItems		= new Form[8]
-	_groupOffHandItemIds	= new int[8]
-	
-	_groupIconItems		= new Form[8]
-	_groupIconItemIds	= new int[8]
-
-	_groupHotkeys = new int[8]
-	_groupHotkeys[0] = 59	; F1
-	_groupHotkeys[1] = 60	; F2
-	_groupHotkeys[2] = 61	; F3
-	_groupHotkeys[3] = 62	; F4
-	_groupHotkeys[4] = -1
-	_groupHotkeys[5] = -1
-	_groupHotkeys[6] = -1
-	_groupHotkeys[7] = -1
-
-	_audioCategoryUI	= Game.GetFormFromFile(0x00064451, "Skyrim.esm") as SoundCategory
-
-	_rightHandSlot 		= Game.GetFormFromFile(0x00013f42, "Skyrim.esm") as EquipSlot
-	_leftHandSlot 		= Game.GetFormFromFile(0x00013f43, "Skyrim.esm") as EquipSlot
-	_eitherHandSlot		= Game.GetFormFromFile(0x00013f44, "Skyrim.esm") as EquipSlot
-	_bothHandsSlot 		= Game.GetFormFromFile(0x00013f45, "Skyrim.esm") as EquipSlot
-	_voiceSlot	 		= Game.GetFormFromFile(0x00025bee, "Skyrim.esm") as EquipSlot
-	
 	OnGameReload()
 endEvent
 
-; @implements SKI_QuestBase
+
 event OnGameReload()
 	CheckVersion()
-
-	RegisterForModEvent("SKIFM_groupAdd", "OnGroupAdd")
-	RegisterForModEvent("SKIFM_groupRemove", "OnGroupRemove")
-	RegisterForModEvent("SKIFM_groupUse", "OnGroupUse")
-	RegisterForModEvent("SKIFM_saveEquipState", "OnSaveEquipState")
-	RegisterForModEvent("SKIFM_setGroupIcon", "OnSetGroupIcon")
+	RegisterForModEvent("SKIFM_groupAdd",         "OnGroupAdd")
+	RegisterForModEvent("SKIFM_groupRemove",      "OnGroupRemove")
+	RegisterForModEvent("SKIFM_groupUse",         "OnGroupUse")
+	RegisterForModEvent("SKIFM_saveEquipState",   "OnSaveEquipState")
+	RegisterForModEvent("SKIFM_setGroupIcon",     "OnSetGroupIcon")
 	RegisterForModEvent("SKIFM_foundInvalidItem", "OnFoundInvalidItem")
-	
 	RegisterForMenu(FAVORITES_MENU)
-	
 	RegisterHotkeys()
-
 	CleanUp()
 endEvent
 
-; @implements SKI_QuestBase
-event OnVersionUpdate(int a_version)
 
-	; Version 2
+event OnVersionUpdate(int a_version)
 	if (a_version >= 2 && CurrentVersion < 2)
 		Debug.Trace(self + ": Updating to script version 2")
-
-		_vampireLordRace	= Game.GetFormFromFile(0x0000283A, "Dawnguard.esm") as Race
+		_vampireLordRace = Game.GetFormFromFile(0x0000283A, "Dawnguard.esm") as Race
 	endIf
-
-	; Version 3
 	if (a_version >= 3 && CurrentVersion < 3)
 		Debug.Trace(self + ": Updating to script version 3")
-
 		_itemInvalidFlags1 = new bool[128]
 		_itemInvalidFlags2 = new bool[128]
 	endIf
-
 endEvent
 
 
-; EVENTS ------------------------------------------------------------------------------------------
+; -------------------------------------------------------------------------------------------------
+; Events
+; -------------------------------------------------------------------------------------------------
 
 event OnMenuOpen(string a_menuName)
-
 	int i = 0
 	while (i < 128)
 		_itemInvalidFlags1[i] = false
@@ -245,9 +220,11 @@ event OnMenuOpen(string a_menuName)
 	InitMenuGroupData()
 endEvent
 
+
 event OnFoundInvalidItem(string a_eventName, string a_strArg, float a_numArg, Form a_sender)
 	InvalidateItem(a_strArg as int,true)
 endEvent
+
 
 event OnGroupAdd(string a_eventName, string a_strArg, float a_numArg, Form a_sender)
 	int		groupIndex = a_numArg as int
@@ -262,6 +239,7 @@ event OnGroupAdd(string a_eventName, string a_strArg, float a_numArg, Form a_sen
 	endIf
 endEvent
 
+
 event OnGroupRemove(string a_eventName, string a_strArg, float a_numArg, Form a_sender)
 	int		groupIndex = a_numArg as int
 	int		itemId = a_strArg as int
@@ -273,10 +251,11 @@ event OnGroupRemove(string a_eventName, string a_strArg, float a_numArg, Form a_
 	endIf
 endEvent
 
+
 ; Read the player's current equipment and save it to the target group
 event OnSaveEquipState(string a_eventName, string a_strArg, float a_numArg, Form a_sender)
 	int groupIndex = a_numArg as int
-	
+
 	int mainHandItemId = UI.GetInt(FAVORITES_MENU, MENU_ROOT + ".rightHandItemId")
 	int offHandItemId = UI.GetInt(FAVORITES_MENU, MENU_ROOT + ".leftHandItemId")
 
@@ -297,9 +276,10 @@ event OnSaveEquipState(string a_eventName, string a_strArg, float a_numArg, Form
 		_groupOffHandItemIds[groupIndex] = 0
 		_groupOffHandItems[groupIndex] = none
 	endIf
-	
+
 	UpdateMenuGroupData(groupIndex)
 endEvent
+
 
 ; This will set a form as the icon form for a group
 event OnSetGroupIcon(string a_eventName, string a_strArg, float a_numArg, Form a_sender)
@@ -313,43 +293,42 @@ event OnSetGroupIcon(string a_eventName, string a_strArg, float a_numArg, Form a
 	UpdateMenuGroupData(groupIndex)
 endEvent
 
+
 event OnGroupUse(string a_eventName, string a_strArg, float a_numArg, Form a_sender)
 	gotoState("PROCESSING")
-
 	GroupUse(a_numArg as int)
-
 	gotoState("")
 endEvent
 
+
 event OnKeyDown(int a_keyCode)
 	gotoState("PROCESSING")
-
 	int groupIndex = _groupHotkeys.Find(a_keyCode)
 	if (groupIndex != -1 && !Utility.IsInMenuMode())
 		GroupUse(groupIndex)
 	endIf
-
 	gotoState("")
 endEvent
 
+
 state PROCESSING
-	
 	event OnGroupUse(string a_eventName, string a_strArg, float a_numArg, Form a_sender)
 	endEvent
-
 	event OnKeyDown(int a_keyCode)
 	endEvent
-
 endState
 
 
-; FUNCTIONS ---------------------------------------------------------------------------------------
+; -------------------------------------------------------------------------------------------------
+; Functions
+; -------------------------------------------------------------------------------------------------
 
 ;get whether a flag is set for the specified group
 bool function GetGroupFlag(int a_groupIndex, int a_flag)
     return LogicalAnd(_groupFlags[a_groupIndex], a_flag) as bool
 endFunction
- 
+
+
 ;set a flag for the specified group
 function SetGroupFlag(int a_groupIndex, int a_flag, bool a_value)
 	if (a_value)
@@ -358,6 +337,7 @@ function SetGroupFlag(int a_groupIndex, int a_flag, bool a_value)
 		_groupFlags[a_groupIndex] = LogicalAnd(_groupFlags[a_groupIndex], LogicalNot(a_flag))
 	endIf
 endFunction
+
 
 int[] function GetGroupHotkeys()
 	; Return a copy
@@ -370,8 +350,8 @@ int[] function GetGroupHotkeys()
 	return result
 endFunction
 
-bool function SetGroupHotkey(int a_groupIndex, int a_keycode)
 
+bool function SetGroupHotkey(int a_groupIndex, int a_keycode)
 	; Special case for unmap
 	if (a_keycode == -1)
 		_groupHotkeys[a_groupIndex] = -1
@@ -411,6 +391,7 @@ bool function SetGroupHotkey(int a_groupIndex, int a_keycode)
 	return true
 endFunction
 
+
 ; Send the group data to the UI, so that when the user selects a group, it can filter its entries.
 function InitControls()
 	int[] args = new int[6]
@@ -423,6 +404,7 @@ function InitControls()
 
 	UI.InvokeIntA(FAVORITES_MENU, MENU_ROOT + ".initControls", args)
 endFunction
+
 
 ; Send the group data to the UI, so that when the user selects a group, it can filter its entries.
 function InitMenuGroupData()
@@ -450,7 +432,7 @@ function InitMenuGroupData()
 		i += 1
 		c += 1
 	endWhile
-	
+
 	i = 0
 	while (i<8)
 		args[c] = _groupIconItemIds[i]
@@ -463,9 +445,9 @@ function InitMenuGroupData()
 	UI.InvokeIntA(FAVORITES_MENU, MENU_ROOT + ".finishGroupData", args)
 endFunction
 
+
 function UpdateMenuGroupData(int a_groupIndex)
 	int offset = 32 * a_groupIndex
-
 	int[] itemIds
 
 	if (offset >= 128)
@@ -477,63 +459,54 @@ function UpdateMenuGroupData(int a_groupIndex)
 
 	; groupIndex, mainHandItemId, offHandItemID, iconItemId, itemIds[32]
 	int[] args = new int[36]
-
 	args[0] = a_groupIndex
 	args[1] = _groupMainHandItemIds[a_groupIndex]
 	args[2] = _groupOffHandItemIds[a_groupIndex]
 	args[3] = _groupIconItemIds[a_groupIndex]
-
 	int i = 4
 	int j = offset
 
 	while (i<36)
 		args[i] = itemIds[j]
-
 		i += 1
 		j += 1
 	endWhile
-	
+
 	; This also unlocks the menu, so no need to call unlock
 	UI.InvokeIntA(FAVORITES_MENU, MENU_ROOT + ".updateGroupData", args)
 endFunction
 
+
 ; Ensure that our data is still valid. Might not be the case if a mod was uninstalled
 function CleanUp()
-	
 	; Note on thread safety:
 	; Since we don't manage an explicit group count, items can just be set or unset from multiple threads
-
 	int i = 0
 	while (i < _items1.length)
-
 		if (_items1[i] == none || _items1[i].GetFormID() == 0)
 			_items1[i] = none
 			_itemIds1[i] = 0
 		endIf
-
 		i += 1
 	endWhile
 
 	i = 0
 	while (i < _items2.length)
-
 		if (_items2[i] == none || _items2[i].GetFormID() == 0)
 			_items2[i] = none
 			_itemIds2[i] = 0
 		endIf
-
 		i += 1
 	endWhile
 endFunction
 
+
 bool function GroupAdd(int a_groupIndex, int a_itemId, Form a_item)
 	int offset = 32 * a_groupIndex
-
 	; Select the target set of arrays, adjust offset
 	Form[] items
 	int[] itemIds
 	bool[] itemInvalidFlags
-
 	if (offset >= 128)
 		offset -= 128
 		items = _items2
@@ -544,15 +517,12 @@ bool function GroupAdd(int a_groupIndex, int a_itemId, Form a_item)
 		itemIds = _itemIds1
 		itemInvalidFlags = _itemInvalidFlags1
 	endIf
-
 	; Prevent the same itemId being added to a group twice
 	if (IsItemIdInGroup(a_groupIndex,a_itemId))
 		return true
 	endIf
-	
 	; Pick next free slot
 	int index = FindFreeIndex(itemIds, itemInvalidFlags, offset)
-	
 	; No more space in group?
 	if (index == -1)
 		return false
@@ -568,13 +538,12 @@ bool function GroupAdd(int a_groupIndex, int a_itemId, Form a_item)
 		_groupIconItems[a_groupIndex] = a_item
 		_groupIconItemIds[a_groupIndex] = a_itemId
 	endIf
-
 	return true
 endFunction
 
+
 bool function GroupRemove(int a_groupIndex, int a_itemId)
 	int offset = 32 * a_groupIndex
-
 	; Select the target set of arrays, adjust offset
 	Form[] items
 	int[] itemIds
@@ -621,9 +590,9 @@ bool function GroupRemove(int a_groupIndex, int a_itemId)
 	return true
 endFunction
 
+
 function GroupUse(int a_groupIndex)
 	int offset = 32 * a_groupIndex
-
 	; Select the target set of arrays, adjust offset
 	Form[] items
 	int[] itemIds
@@ -656,13 +625,13 @@ function GroupUse(int a_groupIndex)
 
 	; Turn off UI sounds to avoid annoying clicking noise while swapping spells
 	_audioCategoryUI.Mute()
-	
+
 	; Unequip hands first?
 	if (GetGroupFlag(a_groupIndex,GROUP_FLAG_UNEQUIP_HANDS))
 		UnequipHand(0)
 		UnequipHand(1)
 	endIf
-	
+
 	; Process main and offhand items
 
 	; Left first, to avoid problems when equipping the same weapon twice
@@ -690,7 +659,7 @@ function GroupUse(int a_groupIndex)
 	while (i < n)
 		Form item = items[i]
 		int itemId = itemIds[i]
-		
+
 		if (item && item != mainHandItem && item != offHandItem && !itemInvalidFlags[i])
 			int itemType = item.GetType()
 
@@ -730,7 +699,7 @@ function GroupUse(int a_groupIndex)
 			h = LeftShift(h,1)
 		endWhile
 	endIf
-	
+
 	_audioCategoryUI.UnMute() ; Turn UI sounds back on
 
 	i = 0
@@ -739,6 +708,7 @@ function GroupUse(int a_groupIndex)
 		i += 1
 	endWhile
 endFunction
+
 
 function UnequipHand(int a_hand)
 	int a_handEx = 1
@@ -757,6 +727,7 @@ function UnequipHand(int a_hand)
 	endIf
 endFunction
 
+
 bool function IsItemValid(Form a_item, int a_itemType)
 	; Player has removed this item from Favorites, so don't use it and queue it for removal
 	if (! Game.IsObjectFavorited(a_item))
@@ -767,13 +738,13 @@ bool function IsItemValid(Form a_item, int a_itemType)
 	if (a_itemType == 22 || a_itemType == 119)
 		return PlayerREF.HasSpell(a_item)
 	; This is an inventory item
-	else 
+	else
 		return PlayerREF.GetItemCount(a_item) > 0
 	endIf
 endFunction
 
-bool function ProcessItem(Form a_item, int a_itemType, bool a_allowDeferring = true, bool a_offHandOnly = false, int a_itemId = 0)
 
+bool function ProcessItem(Form a_item, int a_itemType, bool a_allowDeferring = true, bool a_offHandOnly = false, int a_itemId = 0)
 	; WEAPON ------------
 	if (a_itemType == 41)
 
@@ -819,7 +790,7 @@ bool function ProcessItem(Form a_item, int a_itemType, bool a_allowDeferring = t
 	elseIf (a_itemType == 26)
 		int slotMask = (a_item as Armor).GetslotMask()
 
-		; It's a shield... 
+		; It's a shield...
 		if (slotMask == 512)
 			if (!_usedLeftHand)
 				PlayerREF.EquipItemById(a_item, a_itemId, equipSlot = 0, equipSound = _silenceEquipSounds)
@@ -831,7 +802,7 @@ bool function ProcessItem(Form a_item, int a_itemType, bool a_allowDeferring = t
 			if (a_item == PlayerREF.GetWornForm(slotMask) && a_itemId != PlayerREF.GetWornItemId(slotMask))
 				PlayerREF.UnequipItemEx(a_item)
 			endIf
-			
+
 			PlayerREF.EquipItemById(a_item, a_itemId, equipSlot = 0, equipSound = _silenceEquipSounds)
 			_usedOutfitMask += slotMask
 		endIf
@@ -844,7 +815,7 @@ bool function ProcessItem(Form a_item, int a_itemType, bool a_allowDeferring = t
 		return true
 
 	; SPELL ------------
-	elseIf (a_itemType == 22) 
+	elseIf (a_itemType == 22)
 
 		Spell itemSpell = a_item as Spell
 		EquipSlot spellEquipSlot = itemSpell.GetEquipType()
@@ -894,7 +865,7 @@ bool function ProcessItem(Form a_item, int a_itemType, bool a_allowDeferring = t
 	; SCROLL ------------
 	elseIf (a_itemType == 23)
 		Scroll itemScroll = a_item as Scroll
-		
+
 		; Any scroll needs at least one free hand
 		if (_usedRightHand && _usedLeftHand)
 			return true
@@ -906,14 +877,14 @@ bool function ProcessItem(Form a_item, int a_itemType, bool a_allowDeferring = t
 		;	_usedRightHand = true
 		if (!_usedRightHand && !a_offHandOnly)
 			PlayerREF.EquipItemEX(itemScroll, equipSlot = 1, equipSound = _silenceEquipSounds)
-			_usedRightHand = true			
+			_usedRightHand = true
 		elseIf (!_usedLeftHand)
 			PlayerREF.EquipItemEX(itemScroll, equipSlot = 2, equipSound = _silenceEquipSounds)
 			_usedLeftHand = true
 		endIf
-		
+
 		return true
-		
+
 	; SHOUT ------------
 	elseIf (a_itemType == 119)
 		if (!_usedVoice)
@@ -959,9 +930,9 @@ bool function ProcessItem(Form a_item, int a_itemType, bool a_allowDeferring = t
 	return true
 endFunction
 
+
 function InvalidateItem(int a_itemId, bool redrawIcon = false)
 	int index
-
 	; GroupData
 	index = _itemIds1.Find(a_itemId)
 	if (index != -1)
@@ -997,9 +968,9 @@ function InvalidateItem(int a_itemId, bool redrawIcon = false)
 	endIf
 endFunction
 
+
 int function FindFreeIndex(int[] a_itemIds, bool[] a_itemInvalidFlags, int offset)
 	int i = a_itemIds.Find(0,offset)
-	
 	; First try to find an entry that is 0
 	if (i >= offset && i < offset + 32)
 		return i
@@ -1015,12 +986,11 @@ int function FindFreeIndex(int[] a_itemIds, bool[] a_itemInvalidFlags, int offse
 
 		i += 1
 	endWhile
-	
 	return -1
 endFunction
 
-function ReplaceGroupIcon(int a_groupIndex)
 
+function ReplaceGroupIcon(int a_groupIndex)
 	; If player has MH or OH set for the group, use it first
 	if (_groupMainHandItemIds[a_groupIndex])
 		_groupIconItems[a_groupIndex] = _groupMainHandItems[a_groupIndex]
@@ -1033,7 +1003,6 @@ function ReplaceGroupIcon(int a_groupIndex)
 	endIf
 
 	int offset = a_groupIndex * 32
-
 	; Select the target set of arrays, adjust offset
 	Form[] items
 	int[] itemIds
@@ -1068,10 +1037,10 @@ function ReplaceGroupIcon(int a_groupIndex)
 	_groupIconItemIds[a_groupIndex] = 0
 endFunction
 
-; utility function to see if form is in the specified group. 
+
+; utility function to see if form is in the specified group.
 bool function IsFormInGroup(int a_groupIndex, form a_item)
 	int offset = 32 * a_groupIndex
-
 	; Select the target set of arrays, adjust offset
 	Form[] items
 
@@ -1081,19 +1050,19 @@ bool function IsFormInGroup(int a_groupIndex, form a_item)
 	else
 		items = _items1
 	endIf
-	
+
 	int i = items.Find(a_item,offset)
 	if (i >= offset && i < offset+32)
 		return true
 	endIf
-	
+
 	return false
 endFunction
+
 
 ; utility function to see how many of the form are in a group
 int function GetNumFormsInGroup(int a_groupIndex,form a_item)
 	int offset = 32 * a_groupIndex
-
 	; Select the target set of arrays, adjust offset
 	form[] items
 
@@ -1113,16 +1082,16 @@ int function GetNumFormsInGroup(int a_groupIndex,form a_item)
 		endIf
 		i += 1
 	endWhile
-	
 	return count
 endFunction
+
 
 form function GetFormFromItemId(int a_groupIndex,int itemId)
 	int offset = 32 * a_groupIndex
 	; Select the target set of arrays, adjust offset
 	form[] items
 	int[] itemIds
-	
+
 	if (offset >= 128)
 		offset -= 128
 		items = _items2
@@ -1140,13 +1109,14 @@ form function GetFormFromItemId(int a_groupIndex,int itemId)
 	endIf
 endFunction
 
+
 ; return the Nth itemId
 int function GetNthItemIdInGroup(int a_groupIndex,form a_item,int a_num = 1)
 	int offset = 32 * a_groupIndex
 	; Select the target set of arrays, adjust offset
 	form[] items
 	int[] itemIds
-	
+
 	if (offset >= 128)
 		offset -= 128
 		items = _items2
@@ -1159,7 +1129,6 @@ int function GetNthItemIdInGroup(int a_groupIndex,form a_item,int a_num = 1)
 	int i = offset
 	int n = offset + 32
 	int count = 0
-	
 	int result = offset
 	while (result >= offset && result < n && count < a_num)
 		result = items.Find(a_item,i)
@@ -1172,10 +1141,10 @@ int function GetNthItemIdInGroup(int a_groupIndex,form a_item,int a_num = 1)
 	return 0
 endFunction
 
-; utility function to see if itemId is in the specified group. 
+
+; utility function to see if itemId is in the specified group.
 bool function IsItemIdInGroup(int a_groupIndex, int a_itemId)
 	int offset = 32 * a_groupIndex
-
 	; Select the target set of arrays, adjust offset
 	int[] itemIds
 
@@ -1185,27 +1154,25 @@ bool function IsItemIdInGroup(int a_groupIndex, int a_itemId)
 	else
 		itemIds = _itemIds1
 	endIf
-	
+
 	int i = itemIds.Find(a_itemId,offset)
 	if (i >= offset && i < offset+32)
 		return true
 	endIf
-	
 	return false
 endFunction
 
+
 function RegisterHotkeys()
 	int i = 0
-	
 	while (i < _groupHotkeys.Length)
-		
 		if (_groupHotkeys[i] != -1)
 			RegisterForKey(_groupHotkeys[i])
 		endIf
-
 		i += 1
 	endWhile
 endFunction
+
 
 function SwapControlKey(int a_newKey, int a_curKey)
 	if (a_newKey == _groupAddKey)
@@ -1221,14 +1188,15 @@ function SwapControlKey(int a_newKey, int a_curKey)
 	endIf
 endFunction
 
-; DEBUG ------------------------------------------------------------------------------------------
+
+; -------------------------------------------------------------------------------------------------
+; Debug
+; -------------------------------------------------------------------------------------------------
 
 function PrintGroupItems(int a_groupIndex)
 	;This is here so I can see what's in the group, because the UI is currently broken
 	Debug.Trace("PrintGroupItems called on group " + a_groupIndex)
-
 	int offset = 32 * a_groupIndex
-
 	; Select the target set of arrays, adjust offset
 	Form[] items
 	int[] itemIds
