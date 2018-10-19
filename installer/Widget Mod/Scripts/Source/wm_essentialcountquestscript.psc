@@ -1,12 +1,25 @@
 Scriptname WM_EssentialCountQuestScript extends SKI_WidgetBase
 
+; -------------------------------------------------------------------------------------------------
+; Properties
+; -------------------------------------------------------------------------------------------------
+
 GlobalVariable Property WM_EssentialCounterGlobal Auto
 Keyword Property ActorTypeNPC Auto
+
+
+; -------------------------------------------------------------------------------------------------
+; Variables
+; -------------------------------------------------------------------------------------------------
 
 Bool EssentialVisible = false
 Int	EssentialSize = 100
 ActorBase Target
 
+
+; -------------------------------------------------------------------------------------------------
+; Accessors
+; -------------------------------------------------------------------------------------------------
 
 Bool Property Visible
 	Bool Function Get()
@@ -19,6 +32,7 @@ Bool Property Visible
 		EndIf
 	EndFunction
 EndProperty
+
 
 Int Property Size
 	Int Function Get()
@@ -33,39 +47,9 @@ Int Property Size
 EndProperty
 
 
-Function SetX(Float afX)
-	If (Ready)
-		X = afX
-	EndIf
-EndFunction
-
-Function SetY(Float afY)
-	If (Ready)
-		Y = afY
-	EndIf
-EndFunction
-
-Function SetHorizontalAnchor(String asAnchor)
-	If (Ready)
-		HAnchor = asAnchor
-	EndIf
-EndFunction
-
-Function SetVerticalAnchor(String asAnchor)
-	If (Ready)
-		VAnchor = asAnchor
-	EndIf
-EndFunction
-
-Function SetTransparency(Float afAlpha)
-	If (Ready)
-		Alpha = afAlpha
-	EndIf
-EndFunction
-
-Event OnConfigInit()
-	Visible = false
-EndEvent
+; -------------------------------------------------------------------------------------------------
+; MCM Events
+; -------------------------------------------------------------------------------------------------
 
 Event OnWidgetReset()
 	UpdateScale()
@@ -74,17 +58,60 @@ Event OnWidgetReset()
 	RegisterforCrosshairRef()
 EndEvent
 
+
+; -------------------------------------------------------------------------------------------------
+; Functions
+; -------------------------------------------------------------------------------------------------
+
+Function SetX(Float afX)
+	If (Ready)
+		X = afX
+	EndIf
+EndFunction
+
+
+Function SetY(Float afY)
+	If (Ready)
+		Y = afY
+	EndIf
+EndFunction
+
+
+Function SetHorizontalAnchor(String asAnchor)
+	If (Ready)
+		HAnchor = asAnchor
+	EndIf
+EndFunction
+
+
+Function SetVerticalAnchor(String asAnchor)
+	If (Ready)
+		VAnchor = asAnchor
+	EndIf
+EndFunction
+
+
+Function SetTransparency(Float afAlpha)
+	If (Ready)
+		Alpha = afAlpha
+	EndIf
+EndFunction
+
+
 String Function GetWidgetSource()
 	Return "WM/WM_EssentialCount.swf"
 EndFunction
+
 
 String Function GetWidgetType()
 	Return "WM_EssentialCountQuestScript"
 EndFunction
 
+
 Function UpdateScale()
 	UI.SetInt(HUD_MENU, WidgetRoot + ".Scale", EssentialSize)
 EndFunction
+
 
 Event OnCrosshairRefChange(ObjectReference ref)
 	If ref

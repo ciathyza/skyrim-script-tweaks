@@ -38,22 +38,23 @@ Event OnInit()
 	SkillScript.Visible     = false
 	WeightScript.Visible    = false
 
+	UpdateTimer = 2.0
 	RegisterForSingleUpdate(UpdateTimer)
 EndEvent
 
 
 Event OnUpdate()
 	ArrowScript.UpdateStatus()
-	WeightScript.UpdateStatus()
-	GoldScript.UpdateStatus()
-	BountyScript.UpdateStatus()
-	SkillScript.UpdateStatus()
 	AthleticScript.UpdateStatus()
-	LockpickScript.UpdateStatus()
-	LightScript.UpdateStatus()
-	HotkeyScript.UpdateStatus()
-	HorseScript.UpdateStatus()
-	FollowerScript.UpdateStatus()
 	AttributeScript.UpdateStatus()
+	BountyScript.UpdateStatus()
+	FollowerScript.UpdateStatus()
+	GoldScript.UpdateStatus()
+	HorseScript.UpdateStatus()
+	HotkeyScript.UpdateStatus()
+	LightScript.UpdateStatus()
+	LockpickScript.UpdateStatus()
+	SkillScript.UpdateStatus()
+	WeightScript.UpdateStatus()
 	RegisterForSingleUpdate(UpdateTimer)
 EndEvent
