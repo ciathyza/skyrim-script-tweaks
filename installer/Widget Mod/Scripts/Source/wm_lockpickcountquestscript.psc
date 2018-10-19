@@ -108,15 +108,16 @@ String Function GetWidgetType()
 EndFunction
 
 Function UpdateStatus()
-	If (Ready)
-		Form Lantern = Game.GetFormFromFile(0x06087FFB, "SurvivalistIngenuity.esp") as Form
-		Int LanternCount = PlayerREF.GetItemCount(Lantern) as Int
-		UI.InvokeFloat(HUD_MENU, WidgetRoot + ".setCount", PlayerRef.GetItemCount(Lockpick))
-		UI.InvokeFloat(HUD_MENU, WidgetRoot + ".setCount2", PlayerREF.GetItemCount(Torch01) + LanternCount)
+	if !LockpickVisible || !Ready
+		Return
 	EndIf
+
+	Form Lantern = Game.GetFormFromFile(0x06087FFB, "SurvivalistIngenuity.esp") as Form
+	Int LanternCount = PlayerREF.GetItemCount(Lantern) as Int
+	UI.InvokeFloat(HUD_MENU, WidgetRoot + ".setCount", PlayerRef.GetItemCount(Lockpick))
+	UI.InvokeFloat(HUD_MENU, WidgetRoot + ".setCount2", PlayerREF.GetItemCount(Torch01) + LanternCount)
 EndFunction
 
 Function UpdateScale()
 	UI.SetInt(HUD_MENU, WidgetRoot + ".Scale", LockpickSize) 
 EndFunction
-

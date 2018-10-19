@@ -136,6 +136,10 @@ String Function GetWidgetType()
 EndFunction
 
 Function UpdateStatus()
+	if !HorseVisible
+		Return
+	EndIf
+
 	Actor Horse = Game.GetPlayersLastRiddenHorse() as Actor
 	If Horse != none
 		Int HorseDistance = (PlayerREF.GetDistance(Horse) / 65) as Int ;fires distance in meters

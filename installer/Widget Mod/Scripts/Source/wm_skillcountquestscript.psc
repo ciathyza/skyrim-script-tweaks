@@ -121,11 +121,13 @@ String Function GetWidgetType()
 EndFunction
 
 Function UpdateStatus()
-	If (Ready)
-		UI.InvokeFloat(HUD_MENU, WidgetRoot + ".setCount", Game.GetPlayerExperience())
-		UI.InvokeFloat(HUD_MENU, WidgetRoot + ".setCount2", Game.GetExperienceForLevel(PlayerREF.GetLevel()))
-		UI.InvokeInt(HUD_MENU, WidgetRoot + ".setCount3", PlayerREF.GetLevel())
+	if !SkillVisible || !Ready
+		Return
 	EndIf
+	
+	UI.InvokeFloat(HUD_MENU, WidgetRoot + ".setCount", Game.GetPlayerExperience())
+	UI.InvokeFloat(HUD_MENU, WidgetRoot + ".setCount2", Game.GetExperienceForLevel(PlayerREF.GetLevel()))
+	UI.InvokeInt(HUD_MENU, WidgetRoot + ".setCount3", PlayerREF.GetLevel())
 EndFunction
 
 Function UpdateScale()

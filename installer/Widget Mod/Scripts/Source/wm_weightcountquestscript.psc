@@ -106,10 +106,12 @@ String Function GetWidgetType()
 EndFunction
 
 Function UpdateStatus()
-	If (Ready)
-		UI.InvokeFloat(HUD_MENU, WidgetRoot + ".setCount", PlayerREF.GetActorValue("CarryWeight") as Int)
-		UI.InvokeFloat(HUD_MENU, WidgetRoot + ".setCount2", PlayerREF.GetActorValue("InventoryWeight") as Int)
+	if !WeightVisible || !Ready
+		Return
 	EndIf
+
+	UI.InvokeFloat(HUD_MENU, WidgetRoot + ".setCount", PlayerREF.GetActorValue("CarryWeight") as Int)
+	UI.InvokeFloat(HUD_MENU, WidgetRoot + ".setCount2", PlayerREF.GetActorValue("InventoryWeight") as Int)
 EndFunction
 
 Function UpdateScale()

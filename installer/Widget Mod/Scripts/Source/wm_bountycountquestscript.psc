@@ -33,7 +33,7 @@ Bool Property Visible
 	Function Set(bool a_val)
 		BountyVisible = a_val
 		If (Ready)
-			UI.InvokeBool(HUD_MENU, WidgetRoot + ".setVisible", BountyVisible) 
+			UI.InvokeBool(HUD_MENU, WidgetRoot + ".setVisible", BountyVisible)
 		EndIf
 	EndFunction
 EndProperty
@@ -46,7 +46,7 @@ Int Property Count
 	Function set(int a_val)
 		BountyCount = a_val
 		If (Ready)
-			UI.InvokeInt(HUD_MENU, WidgetRoot + ".setCount", BountyCount) 
+			UI.InvokeInt(HUD_MENU, WidgetRoot + ".setCount", BountyCount)
 		EndIf
 	EndFunction
 EndProperty
@@ -59,7 +59,7 @@ Int Property Count2
 	Function set(int a_val)
 		BountyCount2 = a_val
 		If (Ready)
-			UI.InvokeInt(HUD_MENU, WidgetRoot + ".setCount2", BountyCount2) 
+			UI.InvokeInt(HUD_MENU, WidgetRoot + ".setCount2", BountyCount2)
 		EndIf
 	EndFunction
 EndProperty
@@ -112,7 +112,7 @@ Event OnWidgetReset()
 	Parent.OnWidgetReset()
 	UI.InvokeBool(HUD_MENU, WidgetRoot + ".setVisible", BountyVisible)
 	UI.InvokeInt(HUD_MENU, WidgetRoot + ".setCount", BountyCount)
-	UI.InvokeInt(HUD_MENU, WidgetRoot + ".setCount2", BountyCount2)	
+	UI.InvokeInt(HUD_MENU, WidgetRoot + ".setCount2", BountyCount2)
 EndEvent
 
 String Function GetWidgetSource()
@@ -124,7 +124,11 @@ String Function GetWidgetType()
 EndFunction
 
 Function UpdateStatus()
-	Int BountyAll = CrimeFactionWhiterun.GetCrimeGold() + CrimeFactionEastmarch.GetCrimeGold()  + CrimeFactionFalkreath.GetCrimeGold() + CrimeFactionHaafingar.GetCrimeGold() + CrimeFactionHjaalmarch.GetCrimeGold() + CrimeFactionPale.GetCrimeGold() + CrimeFactionReach.GetCrimeGold() + CrimeFactionRift.GetCrimeGold() + CrimeFactionWinterhold.GetCrimeGold() 
+	if !BountyVisible
+		Return
+	EndIf
+
+	Int BountyAll = CrimeFactionWhiterun.GetCrimeGold() + CrimeFactionEastmarch.GetCrimeGold()  + CrimeFactionFalkreath.GetCrimeGold() + CrimeFactionHaafingar.GetCrimeGold() + CrimeFactionHjaalmarch.GetCrimeGold() + CrimeFactionPale.GetCrimeGold() + CrimeFactionReach.GetCrimeGold() + CrimeFactionRift.GetCrimeGold() + CrimeFactionWinterhold.GetCrimeGold()
 	Int BountyWhiterun = CrimeFactionWhiterun.GetCrimeGold() as Int
 	Int BountyEastmarch = CrimeFactionEastmarch.GetCrimeGold() as Int
 	Int BountyFalkreath = CrimeFactionFalkreath.GetCrimeGold() as Int
@@ -166,10 +170,10 @@ Function UpdateStatus()
 			UI.InvokeFloat(HUD_MENU, WidgetRoot + ".setCount2", BountyWinterhold)
 		Else
 			UI.InvokeFloat(HUD_MENU, WidgetRoot + ".setCount2", 0)
-		EndIf			
+		EndIf
 	EndIf
 EndFunction
 
 Function UpdateScale()
-	UI.SetInt(HUD_MENU, WidgetRoot + ".Scale", BountySize) 
+	UI.SetInt(HUD_MENU, WidgetRoot + ".Scale", BountySize)
 EndFunction

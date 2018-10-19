@@ -92,9 +92,10 @@ String Function GetWidgetType()
 EndFunction
 
 Function UpdateStatus()
-	If (Ready)
-		UI.InvokeFloat(HUD_MENU, WidgetRoot + ".setCount", PlayerRef.GetItemCount(Gold001))			
+	if !GoldVisible || !Ready
+		Return
 	EndIf
+	UI.InvokeFloat(HUD_MENU, WidgetRoot + ".setCount", PlayerRef.GetItemCount(Gold001))			
 EndFunction
 
 Function UpdateScale()

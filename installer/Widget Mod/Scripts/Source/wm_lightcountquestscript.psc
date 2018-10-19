@@ -91,13 +91,12 @@ String Function GetWidgetType()
 EndFunction
 
 Function UpdateStatus()
-	If (Ready)
-		UI.InvokeFloat(HUD_MENU, WidgetRoot + ".setCount", PlayerREF.GetLightLevel() as Int)	
+	if !LightVisible || !Ready
+		Return
 	EndIf
+	UI.InvokeFloat(HUD_MENU, WidgetRoot + ".setCount", PlayerREF.GetLightLevel() as Int)	
 EndFunction
 
 Function UpdateScale()
 	UI.SetInt(HUD_MENU, WidgetRoot + ".Scale", LightSize) 
 EndFunction
-
-

@@ -196,59 +196,61 @@ String Function GetWidgetType()
 EndFunction
 
 Function UpdateStatus()
-	If (Ready)
-		Form Hotkey = Game.GetHotkeyBoundObject(0) as Form 
-		Form Hotkey2 = Game.GetHotkeyBoundObject(1) as Form 
-		Form Hotkey3 = Game.GetHotkeyBoundObject(2) as Form 
-		Form Hotkey4 = Game.GetHotkeyBoundObject(3) as Form 
-		Form Hotkey5 = Game.GetHotkeyBoundObject(4) as Form 
-		Form Hotkey6 = Game.GetHotkeyBoundObject(5) as Form 
-		Form Hotkey7 = Game.GetHotkeyBoundObject(6) as Form 
-		Form Hotkey8 = Game.GetHotkeyBoundObject(7) as Form
-		If Hotkey
-			UI.InvokeString(HUD_MENU, WidgetRoot + ".setLabelText", Hotkey.GetName())
-		ElseIf !Hotkey
-			UI.InvokeString(HUD_MENU, WidgetRoot + ".setLabelText", "Empty")
-		EndIf
-		If Hotkey2
-			UI.InvokeString(HUD_MENU, WidgetRoot + ".setLabelText2", Hotkey2.GetName())
-		ElseIf !Hotkey2
-			UI.InvokeString(HUD_MENU, WidgetRoot + ".setLabelText2", "Empty")
-		EndIf
-		If Hotkey3
-			UI.InvokeString(HUD_MENU, WidgetRoot + ".setLabelText3", Hotkey3.GetName())
-		ElseIf !Hotkey3
-			UI.InvokeString(HUD_MENU, WidgetRoot + ".setLabelText3", "Empty")
-		EndIf
-		If Hotkey4
-			UI.InvokeString(HUD_MENU, WidgetRoot + ".setLabelText4", Hotkey4.GetName())
-		ElseIf !Hotkey4
-			UI.InvokeString(HUD_MENU, WidgetRoot + ".setLabelText4", "Empty")
-		EndIf
-		If Hotkey5
-			UI.InvokeString(HUD_MENU, WidgetRoot + ".setLabelText5", Hotkey5.GetName())
-		ElseIf !Hotkey5
-			UI.InvokeString(HUD_MENU, WidgetRoot + ".setLabelText5", "Empty")
-		EndIf
-		If Hotkey6
-			UI.InvokeString(HUD_MENU, WidgetRoot + ".setLabelText6", Hotkey6.GetName())
-		ElseIf !Hotkey6
-			UI.InvokeString(HUD_MENU, WidgetRoot + ".setLabelText6", "Empty")
-		EndIf
-		If Hotkey7
-			UI.InvokeString(HUD_MENU, WidgetRoot + ".setLabelText7", Hotkey7.GetName())
-		ElseIf !Hotkey7
-			UI.InvokeString(HUD_MENU, WidgetRoot + ".setLabelText7", "Empty")
-		EndIf
-		If Hotkey8
-			UI.InvokeString(HUD_MENU, WidgetRoot + ".setLabelText8", Hotkey8.GetName())
-		ElseIf !Hotkey8
-			UI.InvokeString(HUD_MENU, WidgetRoot + ".setLabelText8", "Empty")
-		EndIf
+	if !HotkeyVisible || !Ready
+		Return
+	EndIf
+
+	Form Hotkey = Game.GetHotkeyBoundObject(0) as Form 
+	Form Hotkey2 = Game.GetHotkeyBoundObject(1) as Form 
+	Form Hotkey3 = Game.GetHotkeyBoundObject(2) as Form 
+	Form Hotkey4 = Game.GetHotkeyBoundObject(3) as Form 
+	Form Hotkey5 = Game.GetHotkeyBoundObject(4) as Form 
+	Form Hotkey6 = Game.GetHotkeyBoundObject(5) as Form 
+	Form Hotkey7 = Game.GetHotkeyBoundObject(6) as Form 
+	Form Hotkey8 = Game.GetHotkeyBoundObject(7) as Form
+
+	If Hotkey
+		UI.InvokeString(HUD_MENU, WidgetRoot + ".setLabelText", Hotkey.GetName())
+	ElseIf !Hotkey
+		UI.InvokeString(HUD_MENU, WidgetRoot + ".setLabelText", "Empty")
+	EndIf
+	If Hotkey2
+		UI.InvokeString(HUD_MENU, WidgetRoot + ".setLabelText2", Hotkey2.GetName())
+	ElseIf !Hotkey2
+		UI.InvokeString(HUD_MENU, WidgetRoot + ".setLabelText2", "Empty")
+	EndIf
+	If Hotkey3
+		UI.InvokeString(HUD_MENU, WidgetRoot + ".setLabelText3", Hotkey3.GetName())
+	ElseIf !Hotkey3
+		UI.InvokeString(HUD_MENU, WidgetRoot + ".setLabelText3", "Empty")
+	EndIf
+	If Hotkey4
+		UI.InvokeString(HUD_MENU, WidgetRoot + ".setLabelText4", Hotkey4.GetName())
+	ElseIf !Hotkey4
+		UI.InvokeString(HUD_MENU, WidgetRoot + ".setLabelText4", "Empty")
+	EndIf
+	If Hotkey5
+		UI.InvokeString(HUD_MENU, WidgetRoot + ".setLabelText5", Hotkey5.GetName())
+	ElseIf !Hotkey5
+		UI.InvokeString(HUD_MENU, WidgetRoot + ".setLabelText5", "Empty")
+	EndIf
+	If Hotkey6
+		UI.InvokeString(HUD_MENU, WidgetRoot + ".setLabelText6", Hotkey6.GetName())
+	ElseIf !Hotkey6
+		UI.InvokeString(HUD_MENU, WidgetRoot + ".setLabelText6", "Empty")
+	EndIf
+	If Hotkey7
+		UI.InvokeString(HUD_MENU, WidgetRoot + ".setLabelText7", Hotkey7.GetName())
+	ElseIf !Hotkey7
+		UI.InvokeString(HUD_MENU, WidgetRoot + ".setLabelText7", "Empty")
+	EndIf
+	If Hotkey8
+		UI.InvokeString(HUD_MENU, WidgetRoot + ".setLabelText8", Hotkey8.GetName())
+	ElseIf !Hotkey8
+		UI.InvokeString(HUD_MENU, WidgetRoot + ".setLabelText8", "Empty")
 	EndIf
 EndFunction
 
 Function UpdateScale()
 	UI.SetInt(HUD_MENU, WidgetRoot + ".Scale", HotkeySize) 
 EndFunction
-

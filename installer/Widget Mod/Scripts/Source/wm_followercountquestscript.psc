@@ -200,6 +200,10 @@ String Function GetWidgetType()
 EndFunction
 
 Function UpdateStatus()
+	if !FollowerVisible
+		Return
+	EndIf
+	
 	Actor Follower = Game.FindClosestReferenceOfAnyTypeInListFromRef(WM_FollowerFormList, PlayerREF, 1048576.0) as Actor
 	If Follower != none
 		If Follower.IsInFaction(CurrentFollowerFaction)

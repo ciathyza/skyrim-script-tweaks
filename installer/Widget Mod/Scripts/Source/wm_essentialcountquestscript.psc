@@ -2,19 +2,20 @@ Scriptname WM_EssentialCountQuestScript extends SKI_WidgetBase
 
 GlobalVariable Property WM_EssentialCounterGlobal Auto
 Keyword Property ActorTypeNPC Auto
+
 Bool EssentialVisible = false
 Int	EssentialSize = 100
 ActorBase Target
+
 
 Bool Property Visible
 	Bool Function Get()
 		Return EssentialVisible
 	EndFunction
-
 	Function Set(bool a_val)
 		EssentialVisible = a_val
 		If (Ready)
-			UI.InvokeBool(HUD_MENU, WidgetRoot + ".setVisible", EssentialVisible) 
+			UI.InvokeBool(HUD_MENU, WidgetRoot + ".setVisible", EssentialVisible)
 		EndIf
 	EndFunction
 EndProperty
@@ -23,7 +24,6 @@ Int Property Size
 	Int Function Get()
 		Return EssentialSize
 	EndFunction
-
 	Function Set(int a_val)
 		EssentialSize = a_val
 		If (Ready)
@@ -31,6 +31,7 @@ Int Property Size
 		EndIf
 	EndFunction
 EndProperty
+
 
 Function SetX(Float afX)
 	If (Ready)
@@ -62,6 +63,10 @@ Function SetTransparency(Float afAlpha)
 	EndIf
 EndFunction
 
+Event OnConfigInit()
+	Visible = false
+EndEvent
+
 Event OnWidgetReset()
 	UpdateScale()
 	Parent.OnWidgetReset()
@@ -78,7 +83,7 @@ String Function GetWidgetType()
 EndFunction
 
 Function UpdateScale()
-	UI.SetInt(HUD_MENU, WidgetRoot + ".Scale", EssentialSize) 
+	UI.SetInt(HUD_MENU, WidgetRoot + ".Scale", EssentialSize)
 EndFunction
 
 Event OnCrosshairRefChange(ObjectReference ref)
@@ -95,7 +100,7 @@ Event OnCrosshairRefChange(ObjectReference ref)
 		Else
 			UI.InvokeBool(HUD_MENU, WidgetRoot + ".setVisible", EssentialVisible)
 		EndIf
-	Else	
-		UI.InvokeBool(HUD_MENU, WidgetRoot + ".setVisible", !EssentialVisible)		
-	EndIf	
+	Else
+		UI.InvokeBool(HUD_MENU, WidgetRoot + ".setVisible", !EssentialVisible)
+	EndIf
 EndEvent
