@@ -1,80 +1,82 @@
 Scriptname EFFCore extends Quest Conditional
 
-DialogueFollowerScript Property FollowerScript Auto
-EFFMenuScript Property XFLMenu Auto
-EFFIdleMonitor Property XFLIdleMonitor Auto
+; -------------------------------------------------------------------------------------------------
+; Properties
+; -------------------------------------------------------------------------------------------------
 
-Topic Property DialogueFollowerDismissTopic Auto ; Don't use the package anymore
+Activator              Property XFL_PortalEffect               Auto
+bool[]                 Property ffRestore                      Auto
+bool[]                 Property tmRestore                      Auto
+DialogueFollowerScript Property FollowerScript                 Auto
+EFFIdleMonitor         Property XFLIdleMonitor                 Auto
+EFFMenuScript          Property XFLMenu                        Auto
+EFFOutfit              Property XFL_OutfitController           Auto
+EFFPanel               Property XFL_Panel                      Auto
+Faction                Property XFL_FollowerFaction            Auto
+float[]                Property recruitTimes                   Auto
+FormList               Property XFL_FollowerList               Auto
+FormList               Property XFL_FollowerPlugins            Auto
+GlobalVariable         Property XFL_Config_AutoInvisiblity     Auto
+GlobalVariable         Property XFL_Config_IgnoreTimeout       Auto
+GlobalVariable         Property XFL_FollowerCountEx            Auto
+GlobalVariable         Property XFL_MaximumFollowers           Auto
+int[]                  Property actorFlags                     Auto
+MagicEffect            Property XFL_FollowerInvisibilityEffect Auto
+MagicEffect            Property XFL_FollowerMuffleEffect       Auto
+Message                Property XFL_FollowerDeathMessage       Auto
+ObjectReference        Property XFL_UnclaimedItems             Auto ; Unclaimed items are moved here
+ObjectReference        Property XFL_UnclaimedItemsStatic       Auto ; Static ref to the unclaimed barrel
+ObjectReference[]      Property XFL_FollowerInventories        Auto ; All follower inventories
+ReferenceAlias[]       Property XFL_FollowerAliases            Auto
+Spell                  Property XFL_FollowerFocusTarget        Auto
+Spell                  Property XFL_FollowerInvisibility       Auto
+Spell                  Property XFL_FollowerMuffled            Auto
+Spell                  Property XFL_FollowerTelepathy          Auto
+Spell                  Property XFL_FollowerTeleportation      Auto
+Spell                  Property XFL_Portal                     Auto
+Topic                  Property DialogueFollowerDismissTopic   Auto ; Don't use the package anymore
 
-GlobalVariable Property XFL_FollowerCountEx Auto
-GlobalVariable Property XFL_MaximumFollowers Auto
-
-GlobalVariable Property XFL_Config_AutoInvisiblity = 0 Auto
-GlobalVariable Property XFL_Config_IgnoreTimeout Auto
-
-ObjectReference Property XFL_UnclaimedItemsStatic Auto ; Static ref to the unclaimed barrel
-ObjectReference Property XFL_UnclaimedItems Auto ; Unclaimed items are moved here
-ObjectReference[] Property XFL_FollowerInventories Auto ; All follower inventories
-
-ReferenceAlias[] Property XFL_FollowerAliases Auto 
-Faction Property XFL_FollowerFaction Auto
-
-Message Property XFL_FollowerDeathMessage Auto
-
-FormList Property XFL_FollowerPlugins Auto
-FormList Property XFL_FollowerList  Auto  
-
-Activator Property XFL_PortalEffect Auto
-Spell Property XFL_Portal Auto
-
-Spell Property XFL_FollowerTelepathy Auto
-Spell Property XFL_FollowerTeleportation Auto
-Spell Property XFL_FollowerFocusTarget Auto
-Spell Property XFL_FollowerInvisibility Auto
-Spell Property XFL_FollowerMuffled Auto
-
-MagicEffect Property XFL_FollowerMuffleEffect Auto
-MagicEffect Property XFL_FollowerInvisibilityEffect Auto
-
-EFFOutfit Property XFL_OutfitController Auto
-EFFPanel Property XFL_Panel Auto
-
-float[] Property recruitTimes Auto
-bool[] Property tmRestore Auto
-bool[] Property ffRestore Auto
-int[] Property actorFlags Auto
-
-Int lastMaximum = 0
-Bool Property XFL_AutoSandboxing = false Auto Conditional
-
-int Property PLUGIN_EVENT_CLEAR_ALL = -1 Autoreadonly
-int Property PLUGIN_EVENT_WAIT = 0x04 Autoreadonly
-int Property PLUGIN_EVENT_SANDBOX = 0x05 Autoreadonly
-int Property PLUGIN_EVENT_FOLLOW = 0x03 Autoreadonly
-int Property PLUGIN_EVENT_ADD_FOLLOWER = 0x00 Autoreadonly
-int Property PLUGIN_EVENT_REMOVE_FOLLOWER = 0x01 Autoreadonly
-int Property PLUGIN_EVENT_REMOVE_DEAD_FOLLOWER = 0x02 Autoreadonly
-
-int Property ACTOR_FLAG_DISABLE_WAIT = 1 Autoreadonly
-int Property ACTOR_FLAG_DISABLE_FOLLOW = 2 Autoreadonly
-int Property ACTOR_FLAG_DISABLE_DISMISS = 4 Autoreadonly
-int Property ACTOR_FLAG_DISABLE_RELAX = 8 Autoreadonly
-int Property ACTOR_FLAG_DISABLE_TRADE_EQUIP = 16 Autoreadonly
-int Property ACTOR_FLAG_DISABLE_TRADE_INVENTORY = 32 Autoreadonly
-int Property ACTOR_FLAG_DISABLE_TRADE_MAGIC = 64 Autoreadonly
-int Property ACTOR_FLAG_DISABLE_STATS = 128 Autoreadonly
-int Property ACTOR_FLAG_DISABLE_MORE = 128 Autoreadonly
+Bool Property XFL_AutoSandboxing                 = false Auto Conditional
+int  Property ACTOR_FLAG_DISABLE_DISMISS         = 4     Autoreadonly
+int  Property ACTOR_FLAG_DISABLE_FOLLOW          = 2     Autoreadonly
+int  Property ACTOR_FLAG_DISABLE_MORE            = 128   Autoreadonly
+int  Property ACTOR_FLAG_DISABLE_RELAX           = 8     Autoreadonly
+int  Property ACTOR_FLAG_DISABLE_STATS           = 128   Autoreadonly
+int  Property ACTOR_FLAG_DISABLE_TRADE_EQUIP     = 16    Autoreadonly
+int  Property ACTOR_FLAG_DISABLE_TRADE_INVENTORY = 32    Autoreadonly
+int  Property ACTOR_FLAG_DISABLE_TRADE_MAGIC     = 64    Autoreadonly
+int  Property ACTOR_FLAG_DISABLE_WAIT            = 1     Autoreadonly
+int  Property PLUGIN_EVENT_ADD_FOLLOWER          = 0x00  Autoreadonly
+int  Property PLUGIN_EVENT_CLEAR_ALL             = -1    Autoreadonly
+int  Property PLUGIN_EVENT_FOLLOW                = 0x03  Autoreadonly
+int  Property PLUGIN_EVENT_REMOVE_DEAD_FOLLOWER  = 0x02  Autoreadonly
+int  Property PLUGIN_EVENT_REMOVE_FOLLOWER       = 0x01  Autoreadonly
+int  Property PLUGIN_EVENT_SANDBOX               = 0x05  Autoreadonly
+int  Property PLUGIN_EVENT_WAIT                  = 0x04  Autoreadonly
 
 ; Check for game extensions
-bool Property SKSEExtended Auto ; SKSE Loaded
-bool Property DLC1Extended Auto ; DLC1 Dawnguard Loaded
-bool Property MENUExtended Auto ; Menu System Loaded
-bool Property APNLExtended Auto ; Actor Panel Loaded
-bool Property SKSEEvents Auto ; SKSE Event Callbacks available
+bool Property APNLExtended Auto ; Actor Panel     Loaded
+bool Property DLC1Extended Auto ; DLC1  Dawnguard Loaded
+bool Property MENUExtended Auto ; Menu  System    Loaded
+bool Property SKSEEvents   Auto ; SKSE  Event     Callbacks available
+bool Property SKSEExtended Auto ; SKSE  Loaded
+
+
+; -------------------------------------------------------------------------------------------------
+; Variables
+; -------------------------------------------------------------------------------------------------
+
+Int lastMaximum = 0
+
+
+; -------------------------------------------------------------------------------------------------
+; Events
+; -------------------------------------------------------------------------------------------------
 
 Event OnInit()
 	XFL_RegisterExtensions()
 EndEvent
+
 
 Function XFL_RegisterExtensions()
 	; Check SKSE version
@@ -160,6 +162,7 @@ Function XFL_RegisterExtensions()
 	Endif
 EndFunction
 
+
 Function XFL_RegisterPlugin(Quest questRef)
 	If XFL_FollowerPlugins
 		If !XFL_FollowerPlugins.HasForm(questRef)
@@ -168,12 +171,14 @@ Function XFL_RegisterPlugin(Quest questRef)
 	EndIf
 EndFunction
 
+
 Event OnControlDown(string control)
 	If control == "Sneak"
 		bool isPlayerSneaking = Game.GetPlayer().IsSneaking()
 		XFL_SneakAll(isPlayerSneaking, isPlayerSneaking)
 	Endif
 EndEvent
+
 
 Function XFL_SetWait(Form follower)
 	Actor FollowerActor = follower as Actor
@@ -194,10 +199,11 @@ Function XFL_SetWait(Form follower)
 		XFL_FollowerAliases[index].RegisterForUpdateGameTime(72)
 	EndIf
 	SetObjectiveDisplayed(100 + index, true)
-	
+
 	XFL_OutfitController.XFL_AddPersistentRef(FollowerActor) ; Add outfit persistence
 	XFL_SendSystemEvent(PLUGIN_EVENT_WAIT, FollowerActor)
 EndFunction
+
 
 Function XFL_SetSandbox(Form follower)
 	Actor FollowerActor = follower as Actor
@@ -214,10 +220,11 @@ Function XFL_SetSandbox(Form follower)
 	FollowerActor.SetActorValue("WaitingForPlayer", 2)
 	FollowerActor.EvaluatePackage()
 	SetObjectiveDisplayed(100 + XFL_GetIndex(FollowerActor), true)
-	
+
 	XFL_OutfitController.XFL_AddPersistentRef(FollowerActor) ; Add outfit persistence
 	XFL_SendSystemEvent(PLUGIN_EVENT_SANDBOX, FollowerActor)
 EndFunction
+
 
 Function XFL_SetFollow(Form follower)
 	Actor FollowerActor = follower as Actor
@@ -239,6 +246,7 @@ Function XFL_SetFollow(Form follower)
 	XFL_SendSystemEvent(PLUGIN_EVENT_FOLLOW, FollowerActor)
 EndFunction
 
+
 Function XFL_AddFollower(Form follower)
 	Actor FollowerActor = follower as Actor
 	If !FollowerActor
@@ -257,15 +265,15 @@ Function XFL_AddFollower(Form follower)
 	Endif
 
 	FollowerActor.RemoveFromFaction(FollowerScript.pDismissedFollower)
-	
+
 	; They don't like us? Force them to!
 	Actor playerActor = Game.GetPlayer()
 	If FollowerActor.GetRelationshipRank(playerActor) < 3 && FollowerActor.GetRelationshipRank(playerActor) >= 0
 		FollowerActor.SetRelationshipRank(playerActor, 3)
 	EndIf
-	
+
 	FollowerActor.AddToFaction(XFL_FollowerFaction)
-	
+
 	int i = XFL_SetAlias(FollowerActor)
 	tmRestore[i] = FollowerActor.IsPlayerTeammate()
 	ffRestore[i] = FollowerActor.IsIgnoringFriendlyHits()
@@ -296,6 +304,7 @@ Function XFL_AddFollower(Form follower)
 	XFL_OutfitController.XFL_RemovePersistentRef(FollowerActor) ; Remove outfit persistence, we don't need it as long as they are with us
 	XFL_SendSystemEvent(PLUGIN_EVENT_ADD_FOLLOWER, FollowerActor)
 EndFunction
+
 
 Function XFL_RemoveFollower(Form follower, Int iMessage = 0, Int iSayLine = 1)
 	Actor FollowerActor = follower as Actor
@@ -336,11 +345,11 @@ Function XFL_RemoveFollower(Form follower, Int iMessage = 0, Int iSayLine = 1)
 		SetObjectiveDisplayed(100 + i, false)
 		;hireling rehire function
 		FollowerScript.HirelingRehireScript.DismissHireling(FollowerActor.GetActorBase())
-		
+
 		If iSayLine == 1
 			FollowerActor.Say(DialogueFollowerDismissTopic)
 		EndIf
-		
+
 		XFL_OutfitController.XFL_AddPersistentRef(FollowerActor) ; Add outfit persistent
 		XFL_FollowerList.RemoveAddedForm(FollowerActor)
 
@@ -357,6 +366,7 @@ Function XFL_RemoveFollower(Form follower, Int iMessage = 0, Int iSayLine = 1)
 		XFL_ClearAlias(FollowerActor)
 	EndIf
 EndFunction
+
 
 ; Follower died, need to remove them from their alias so they can potentially be non-persistent and cleaned up
 Function XFL_RemoveDeadFollower(Form follower)
@@ -393,15 +403,18 @@ Function XFL_RemoveDeadFollower(Form follower)
 	EndIf
 EndFunction
 
+
 ; FollowerCountEx must exist, incase of loose script randomness?
 Bool Function XFL_isRunning()
 	return XFL_FollowerCountEx
 EndFunction
 
+
 ; Actor is part of the vanilla system
 Bool Function XFL_isDefault(Actor follower)
 	return ((FollowerScript.pFollowerAlias.GetReference() as Actor) == follower)
 EndFunction
+
 
 ; Propagate events to all plugins
 Function XFL_SendPluginEvent(int akType, Form akRef1 = None, Form akRef2 = None, int aiValue1 = 0, int aiValue2 = 0)
@@ -417,6 +430,7 @@ Function XFL_SendPluginEvent(int akType, Form akRef1 = None, Form akRef2 = None,
 	EndWhile
 EndFunction
 
+
 EFFPlugin Function XFL_GetPlugin(int akIdentifier)
 	int i = 0
 	While i < XFL_FollowerPlugins.GetSize()
@@ -428,6 +442,7 @@ EFFPlugin Function XFL_GetPlugin(int akIdentifier)
 	EndWhile
 	return None
 EndFunction
+
 
 ; Sends an event to a specific plugin
 ; Receiver quest must be a valid EFFPlugin
@@ -466,6 +481,7 @@ Function XFL_SendActionEvent(int akIdentifier, int akCmd, Form akForm1 = None, F
 	Endif
 EndFunction
 
+
 ; Updates the alias controlling the blades recruitment
 Function XFL_SetLastFollower()
 	EFF_DialogueFollowerScript FollowerScriptEx = FollowerScript As EFF_DialogueFollowerScript
@@ -478,6 +494,7 @@ Function XFL_SetLastFollower()
 		Endif
 	Endif
 EndFunction
+
 
 ; Used to retrieve the last follower based on time recruited
 Actor Function XFL_GetLastFollower()
@@ -495,6 +512,7 @@ Actor Function XFL_GetLastFollower()
 	return foundActor
 EndFunction
 
+
 Actor Function XFL_GetClosestFollower(ObjectReference akSource)
 	int i = 0
 	Actor foundActor = XFL_FollowerAliases[0].GetReference() as Actor
@@ -507,6 +525,7 @@ Actor Function XFL_GetClosestFollower(ObjectReference akSource)
 	EndWhile
 	return foundActor
 EndFunction
+
 
 ; Returns the follower by alias index
 Actor Function XFL_GetFollower(int i)
@@ -522,14 +541,16 @@ Actor Function XFL_GetFollower(int i)
 	return None
 EndFunction
 
+
 ; Returns the alias index of the follower
 Int Function XFL_GetIndex(Actor follower)
 	If !XFL_isRunning()
 		return -1
 	EndIf
-	
+
 	return follower.GetActorValue("FavorActive") as Int
 EndFunction
+
 
 Int Function XFL_GetFollowerFlags(Actor follower)
 	Int index = XFL_GetIndex(follower)
@@ -538,6 +559,7 @@ Int Function XFL_GetFollowerFlags(Actor follower)
 	Endif
 	return 0
 EndFunction
+
 
 bool Function XFL_SetFollowerFlags(Actor follower, Int flags, bool setFlag)
 	Int index = XFL_GetIndex(follower)
@@ -554,6 +576,7 @@ bool Function XFL_SetFollowerFlags(Actor follower, Int flags, bool setFlag)
 	return true
 EndFunction
 
+
 bool Function XFL_HasFollowerFlags(Actor follower, Int flags)
 	Int index = XFL_GetIndex(follower)
 	If index == -1
@@ -565,6 +588,7 @@ bool Function XFL_HasFollowerFlags(Actor follower, Int flags)
 	return false
 EndFunction
 
+
 ; Returns the total number of actual followers
 int Function XFL_GetCount()
 	If !XFL_isRunning() ; Default to vanilla system if plugin is not loaded
@@ -573,7 +597,7 @@ int Function XFL_GetCount()
 		EndIf
 		return 0
 	EndIf
-	
+
 	; Only iterate the last followers added
 	int count = 0
 	int i = 0
@@ -588,6 +612,7 @@ int Function XFL_GetCount()
 	return count
 EndFunction
 
+
 ; Updates the global based on the real number of followers
 Function XFL_SetCount()
 	If !XFL_isRunning()
@@ -597,6 +622,7 @@ Function XFL_SetCount()
 	XFL_FollowerCountEx.SetValue(XFL_GetCount())
 EndFunction
 
+
 ; Variable used to limit recursive behavior
 int Function XFL_GetMaximum()
 	If !XFL_isRunning()
@@ -604,6 +630,7 @@ int Function XFL_GetMaximum()
 	EndIf
 	return lastMaximum
 EndFunction
+
 
 Function XFL_SetMaximum()
 	Int i = lastMaximum
@@ -620,6 +647,7 @@ Function XFL_SetMaximum()
 	EndWhile
 EndFunction
 
+
 ; Forcefully clears all statuses and fires the clearall event
 Function XFL_ForceClearAll()
 	If !XFL_isRunning() ; Default to vanilla system if plugin is not loaded
@@ -629,9 +657,9 @@ Function XFL_ForceClearAll()
 
 	Debug.Notification("EFF Notification: Beginning system purge...")
 	float ftimeStart = Utility.GetCurrentRealTime()
-	
+
 	XFL_SendSystemEvent(PLUGIN_EVENT_CLEAR_ALL) ; Fire clear all before cleanup
-	
+
 	int i = 0
 	While i < XFL_FollowerAliases.Length
 		If XFL_FollowerAliases[i]
@@ -661,7 +689,7 @@ Function XFL_ForceClearAll()
 	XFL_FollowerList.Revert() ; Forcefully clear out the list
 
 	XFL_OutfitController.XFL_ForceClearAll()
-	
+
 	; These need to be updated frequently to avoid some weird multithreading glitches
 	XFL_SetMaximum()
 	XFL_SetCount()
@@ -669,6 +697,7 @@ Function XFL_ForceClearAll()
 	float ftimeEnd = Utility.GetCurrentRealTime()
 	Debug.Notification("EFF Notification: System purge complete after " + (ftimeEnd - ftimeStart) + " second(s).")
 EndFunction
+
 
 ; Checks if this actor is one of our followers
 bool Function XFL_IsFollower(Actor follower)
@@ -684,6 +713,7 @@ bool Function XFL_IsFollower(Actor follower)
 	EndWhile
 	return false
 EndFunction
+
 
 ; Clears the follower by actor
 Function XFL_ClearAlias(Actor follower)
@@ -701,6 +731,7 @@ Function XFL_ClearAlias(Actor follower)
 	XFL_SetLastFollower()
 EndFunction
 
+
 ; Returns the reference alias of the actor
 ReferenceAlias Function XFL_GetAlias(Actor follower)
 	If !XFL_isRunning() ; Default to vanilla system if plugin is not loaded
@@ -710,7 +741,7 @@ ReferenceAlias Function XFL_GetAlias(Actor follower)
 			return None
 		EndIf
 	EndIf
-	
+
 	Int i = XFL_GetIndex(follower)
 	If i != -1
 		return XFL_FollowerAliases[i] ; Return the ReferenceAlias that corresponds to this actor
@@ -718,13 +749,14 @@ ReferenceAlias Function XFL_GetAlias(Actor follower)
 	return None
 EndFunction
 
+
 ; Sets the reference alias by the actor and returns it
 int Function XFL_SetAlias(Actor follower)
 	If !XFL_isRunning() ; Default to vanilla system if plugin is not loaded
 		FollowerScript.pFollowerAlias.ForceRefIfEmpty(follower)
 		return -1
 	EndIf
-	
+
 	int i = 0
 	While i < XFL_FollowerAliases.Length
 		If XFL_FollowerAliases[i] && XFL_FollowerAliases[i].ForceRefIfEmpty(follower)
@@ -742,6 +774,7 @@ int Function XFL_SetAlias(Actor follower)
 	return -1
 EndFunction
 
+
 Function XFL_OpenInventory(Form akRef)
 	Actor FollowerActor = akRef as Actor
 	If !FollowerActor
@@ -757,6 +790,7 @@ Function XFL_OpenInventory(Form akRef)
 		Endif
 	Endif
 EndFunction
+
 
 Function XFL_MoveToInventory(Form akRef, Form akForm, int aiCount)
 	Actor FollowerActor = akRef as Actor
@@ -778,6 +812,7 @@ Function XFL_MoveToInventory(Form akRef, Form akForm, int aiCount)
 	Endif
 EndFunction
 
+
 Function XFL_UpdatePanel(Form akRef)
 	Actor FollowerActor = akRef as Actor
 	If !FollowerActor
@@ -793,6 +828,7 @@ Function XFL_UpdatePanel(Form akRef)
 	Endif
 EndFunction
 
+
 ; Command: Group Dismiss
 Function XFL_RemoveAll(Int iMessage = 0, Int iSayLine = 1)
 	int i = 0
@@ -806,6 +842,7 @@ Function XFL_RemoveAll(Int iMessage = 0, Int iSayLine = 1)
 	XFL_SetMaximum()
 EndFunction
 
+
 ; Command: Group Sandbox
 Function XFL_SandboxAll()
 	int i = 0
@@ -817,6 +854,7 @@ Function XFL_SandboxAll()
 		i += 1
 	EndWhile
 EndFunction
+
 
 ; Command: Group Wait
 Function XFL_WaitAll()
@@ -830,6 +868,7 @@ Function XFL_WaitAll()
 	EndWhile
 EndFunction
 
+
 ; Command: Group Follow
 Function XFL_FollowAll()
 	int i = 0
@@ -842,6 +881,7 @@ Function XFL_FollowAll()
 	EndWhile
 EndFunction
 
+
 ; Command: Evaluate Package
 Function XFL_EvaluateAll()
 	int i = 0
@@ -853,6 +893,7 @@ Function XFL_EvaluateAll()
 		i += 1
 	EndWhile
 EndFunction
+
 
 ; Command: Sneak All
 Function XFL_SneakAll(bool addMuffle = false, bool addInvisibility = false)
@@ -887,6 +928,7 @@ Function XFL_SneakAll(bool addMuffle = false, bool addInvisibility = false)
 	EndWhile
 EndFunction
 
+
 Function XFL_DismissList(Form akRef, Int iMessage = 0, Int iSayLine = 1)
 	Actor akActor = None
 	If akRef
@@ -907,6 +949,7 @@ Function XFL_DismissList(Form akRef, Int iMessage = 0, Int iSayLine = 1)
 	Endif
 	XFL_SetMaximum()
 EndFunction
+
 
 Function XFL_SandboxList(Form akRef)
 	Actor akActor = None
@@ -929,6 +972,7 @@ Function XFL_SandboxList(Form akRef)
 	Endif
 EndFunction
 
+
 Function XFL_WaitList(Form akRef)
 	Actor akActor = None
 	If akRef
@@ -949,6 +993,7 @@ Function XFL_WaitList(Form akRef)
 		XFL_WaitAll()
 	Endif
 EndFunction
+
 
 Function XFL_FollowList(Form akRef)
 	Actor akActor = None
@@ -971,6 +1016,7 @@ Function XFL_FollowList(Form akRef)
 	Endif
 EndFunction
 
+
 Function XFL_AutoSandbox(bool engage)
 	If engage && !XFL_AutoSandboxing ; Enable sandbox
 		XFL_EvaluateAll()
@@ -980,6 +1026,7 @@ Function XFL_AutoSandbox(bool engage)
 		XFL_AutoSandboxing = false
 	Endif
 EndFunction
+
 
 ; Command: Focus Target
 ; Usage:
@@ -1028,6 +1075,7 @@ Function XFL_FocusTarget(Form akTarget, Form akRef, bool safeCheck)
 	Endif
 EndFunction
 
+
 ; Command: Teleport
 ; Usage:
 ; akTarget - Target actor we wish to teleport to
@@ -1069,6 +1117,7 @@ Function XFL_Teleport(Form akTarget, Form akRef)
 	Endif
 EndFunction
 
+
 Function XFL_WarpActor(Actor akActor, Actor dest)
 	;If akActor.GetCurrentLocation().IsLoaded() && akActor.Is3DLoaded()
 	;	XFL_Portal.Cast(akActor, dest) ; Portal spell seems to sometimes mistake when the location is loaded and crashes
@@ -1080,6 +1129,7 @@ Function XFL_WarpActor(Actor akActor, Actor dest)
 		akActor.EnableNoWait(false)
 	Endif
 EndFunction
+
 
 Function XFL_SendSystemEvent(int eventID, ObjectReference akRef1 = None, ObjectReference akRef2 = None, int aiValue1 = 0, int aiValue2 = 0)
 	XFL_SendPluginEvent(eventID, akRef1, akRef2, aiValue1, aiValue2)

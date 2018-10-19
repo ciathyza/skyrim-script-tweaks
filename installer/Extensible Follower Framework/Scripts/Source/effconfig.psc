@@ -56,6 +56,7 @@ float 	_fFollowSpaceBetweenFollowers 		= -1.0
 int 	_iFriendHitNonCombatAllowed 		= -1
 float 	_fFollowerSpacingAtDoors 			= -1.0
 
+
 float Property fAIDistanceTeammateDrawWeapon
 	float Function Get()
 		If _fAIDistanceTeammateDrawWeapon == -1.0
@@ -199,9 +200,11 @@ float Property fFollowStartSprintDistance
 	EndFunction
 EndProperty
 
+
 int function GetVersion()
 	return 1 ; Default version
 endFunction
+
 
 event OnConfigInit()
 	_featPlugins = new int[128]
@@ -214,9 +217,10 @@ event OnConfigInit()
 	Pages[3] = "Panel"
 endEvent
 
+
 event OnVersionUpdate(int a_version)
-	
 endEvent
+
 
 Event OnGameReload()
 	parent.OnGameReload()
@@ -232,12 +236,14 @@ Event OnGameReload()
 	fFollowerSpacingAtDoors = fFollowerSpacingAtDoors
 EndEvent
 
+
 String Function GetFormIDString(Form kForm)
 	String sResult
 	sResult = kForm as String ; [FormName < (FF000000)>]
 	sResult = StringUtil.SubString(sResult,StringUtil.Find(sResult,"(") + 1,8)
 	return sResult
 EndFunction
+
 
 event OnPageReset(string a_page)
 
@@ -287,7 +293,7 @@ event OnPageReset(string a_page)
 		_StartSprintDist = AddSliderOption("Start sprint distance", fFollowStartSprintDistance)
 		_SandboxRadius = AddSliderOption("Sandbox radius", fSandboxSearchRadius)
 		_NumberActorsToFollow = AddSliderOption("Actors to follow", iNumberActorsAllowedToFollowPlayer)
-		
+
 		SetCursorPosition(1)
 
 		AddHeaderOption("Combat")
@@ -313,7 +319,6 @@ event OnPageReset(string a_page)
 		Else
 			_forceRecruit = AddTextOption("Recruit", "None", OPTION_FLAG_DISABLED)
 		Endif
-
 	elseif (a_page == "Panel")
 		SetCursorFillMode(TOP_TO_BOTTOM)
 		If XFLMain.APNLExtended
@@ -334,6 +339,7 @@ event OnPageReset(string a_page)
 	endif
 endEvent
 
+
 string Function GetMenuModeString()
 	string menuString = "Dialogue"
 	if (XFLMenu.XFL_Config_UseMenus.GetValue() as bool)
@@ -346,10 +352,10 @@ string Function GetMenuModeString()
 	return menuString
 EndFunction
 
+
 event OnOptionSelect(int a_option)
 	GlobalVariable toggleOption = None
 	EFFPlugin foundPlugin = None
-
 	bool useMenus = (XFLMenu.XFL_Config_UseMenus.GetValue() as bool)
 	bool useClassic = (XFLMenu.XFL_Config_UseClassicMenus.GetValue() as bool)
 
@@ -454,9 +460,8 @@ event OnOptionSelect(int a_option)
 	Endif
 endEvent
 
-event OnOptionSliderOpen(int a_option)
-	{Called when the user selects a slider option}
 
+event OnOptionSliderOpen(int a_option)
 	if (a_option == _FollowSpace)
 		SetSliderDialogStartValue(fFollowSpaceBetweenFollowers)
 		SetSliderDialogDefaultValue(100)
@@ -583,9 +588,8 @@ event OnOptionSliderOpen(int a_option)
 	endIf
 endEvent
 
+
 event OnOptionSliderAccept(int a_option, float a_value)
-	{Called when the user accepts a new slider value}
-		
 	if (a_option == _FollowSpace)
 		fFollowSpaceBetweenFollowers = a_value
 		SetSliderOptionValue(a_option, a_value)
@@ -670,9 +674,8 @@ event OnOptionSliderAccept(int a_option, float a_value)
 	endIf
 endEvent
 
+
 event OnOptionHighlight(int a_option)
-	{Called when the user highlights an option}
-	
 	if (a_option == _DrawWeapon)
 		SetInfoText("Distance away from the player for the follower to draw their weapon.")
 	elseIf (a_option == _SandboxRadius)
