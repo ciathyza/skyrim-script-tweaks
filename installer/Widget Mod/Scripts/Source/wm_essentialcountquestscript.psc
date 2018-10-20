@@ -56,11 +56,55 @@ Event OnConfigInit()
 EndEvent
 
 
+Event OnGameReload()
+	parent.OnGameReload()
+	Visible = false
+	RegisterForSingleUpdate(0.1)
+EndEvent
+
+
 Event OnWidgetReset()
 	UpdateScale()
 	Parent.OnWidgetReset()
 	UI.InvokeBool(HUD_MENU, WidgetRoot + ".setVisible", !EssentialVisible)
 	RegisterforCrosshairRef()
+EndEvent
+
+
+; -------------------------------------------------------------------------------------------------
+; Events
+; -------------------------------------------------------------------------------------------------
+
+Event OnUpdate()
+	If Ready
+		Visible = false
+	Else
+		RegisterForSingleUpdate(0.1)
+	EndIf
+EndEvent
+
+
+Event OnCrosshairRefChange(ObjectReference ref)
+	if !EssentialVisible || !Ready
+		Return
+	EndIf
+	
+	If ref
+		If WM_EssentialCounterGlobal.GetValueInt() == 1
+			Target = ref.GetBaseObject() as ActorBase
+			If Target
+				If (ref.HasKeyword(ActorTypeNPC) && (Target.IsEssential() || Target.IsProtected()))
+					UI.InvokeBool(HUD_MENU, WidgetRoot + ".setVisible", EssentialVisible)
+				Else
+					UI.InvokeBool(HUD_MENU, WidgetRoot + ".setVisible", !EssentialVisible)
+				EndIf
+			EndIf
+		Else
+			UI.InvokeBool(HUD_MENU, WidgetRoot + ".setVisible", EssentialVisible)
+		EndIf
+	Else
+		UI.InvokeBool(HUD_MENU, WidgetRoot + ".setVisible", !EssentialVisible)
+	EndIf
 EndEvent
 
 
@@ -116,27 +160,3 @@ EndFunction
 Function UpdateScale()
 	UI.SetInt(HUD_MENU, WidgetRoot + ".Scale", EssentialSize)
 EndFunction
-
-
-Event OnCrosshairRefChange(ObjectReference ref)
-	if !EssentialVisible
-		Return
-	EndIf
-	
-	If ref
-		If WM_EssentialCounterGlobal.GetValueInt() == 1
-			Target = ref.GetBaseObject() as ActorBase
-			If Target
-				If (ref.HasKeyword(ActorTypeNPC) && (Target.IsEssential() || Target.IsProtected()))
-					UI.InvokeBool(HUD_MENU, WidgetRoot + ".setVisible", EssentialVisible)
-				Else
-					UI.InvokeBool(HUD_MENU, WidgetRoot + ".setVisible", !EssentialVisible)
-				EndIf
-			EndIf
-		Else
-			UI.InvokeBool(HUD_MENU, WidgetRoot + ".setVisible", EssentialVisible)
-		EndIf
-	Else
-		UI.InvokeBool(HUD_MENU, WidgetRoot + ".setVisible", !EssentialVisible)
-	EndIf
-EndEvent
