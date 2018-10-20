@@ -1,114 +1,116 @@
 Scriptname CustomizableCamera extends SKI_ConfigBase
 
-CustomizableCameraRunner Property CCR Auto
-Actor Property PlayerRef Auto
-
 import Utility
 import Game
 import Debug
 import JsonUtil
 
-; -------------------- OIDs FOR MCM -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+; -------------------------------------------------------------------------------------------------
+; Properties
+; -------------------------------------------------------------------------------------------------
+
+Actor                    Property PlayerRef    Auto
+bool                     Property isRanged     Auto
+bool                     Property View_Mode_ON Auto
+CustomizableCameraRunner Property CCR          Auto
+
+
+; -------------------------------------------------------------------------------------------------
+; MCM OIDs
+; -------------------------------------------------------------------------------------------------
+
+int ApplySettings_T
+int Changestate_Speed_S
+int Enabled_ControlTweaks_B
+int Enabled_Sneaking_B
+int FOV_Slider_S
 int IdleX_S
 int IdleY_S
-
-int MeleeX_S
-int MeleeY_S
-int MeleeZoom_S
-
-int RangedX_S
-int RangedY_S
-int RangedZoom_S
 int Ignore_LeftHand_B
-
-int FOV_Slider_S
-int Vanity_MIN_S
-int Vanity_MAX_S
-int Zoom_Speed_S
-int Zoom_Increments_S
-int Changestate_Speed_S
-int Pitch_Zoom_S
-
-int Toggle_PA_B
-int Toggle_Crosshair_B
-int Sneak_Height_S
-int Enabled_Sneaking_B
-int Enabled_ControlTweaks_B
-
-int Swap_Side_K
-int View_Mode_Key_K
-int View_Mode_X_S
-int View_Mode_Y_S
-int View_Mode_Zoom_S
-int TFC_Key_K
-int TFC_Speed_S
-
 int Load_Profile1_T
 int Load_Profile2_T
 int Load_Profile3_T
 int Load_Profile4_T
 int Load_Profile5_T
+int MeleeX_S
+int MeleeY_S
+int MeleeZoom_S
+int Pitch_Zoom_S
+int RangedX_S
+int RangedY_S
+int RangedZoom_S
 int Save_Profile1_T
 int Save_Profile2_T
 int Save_Profile3_T
 int Save_Profile4_T
 int Save_Profile5_T
-
-int ApplySettings_T
+int Sneak_Height_S
+int Swap_Side_K
+int TFC_Key_K
+int TFC_Speed_S
+int Toggle_Crosshair_B
 int Toggle_Delay_B
+int Toggle_PA_B
 int UnbindKeys_T
+int Vanity_MAX_S
+int Vanity_MIN_S
+int View_Mode_Key_K
+int View_Mode_X_S
+int View_Mode_Y_S
+int View_Mode_Zoom_S
+int Zoom_Increments_S
+int Zoom_Speed_S
 
-; -------------------- VARIABLES -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-float IdleX = 30.0
-float IdleY = -20.0
 
-float MeleeX = 0.0
-float MeleeY = -10.0
-float MeleeZoom = -20.0
-
-float RangedX = 40.0
-float RangedY = -10.0
-float RangedZoom = 75.0
-bool Ignore_LeftHand
-bool Property isRanged Auto
-
-float FOV_Slider = 90.0
-float Vanity_MIN = 200.0
-float Vanity_MAX = 1000.0
-float Zoom_Speed = 20.0
-float Zoom_Increments = 6.0
-float Changestate_Speed = 4.0
-float Pitch_Zoom = 0.0
-
-bool Toggle_PA
-
-bool Toggle_Crosshair
-
-float Sneak_Height = 10.0
-bool Toggled_Sneaking
-bool Enabled_Sneaking = true
-int Sneak_Button
+; -------------------------------------------------------------------------------------------------
+; Variables
+; -------------------------------------------------------------------------------------------------
 
 bool Enabled_ControlTweaks = true
-
-int Swap_Side = 53
-
-int View_Mode_Key = 47
-float View_Mode_X = 0.0
-float View_Mode_Y = -30.0
-float View_Mode_Zoom = 50.0
-bool Property View_Mode_ON Auto
-
-int TFC_Key = 0
-float TFC_Speed = 0.0
-
+bool Enabled_Sneaking      = true
+bool Ignore_LeftHand
+bool Toggle_Crosshair
 bool Toggle_Delay
+bool Toggle_PA
+bool Toggled_Sneaking
 
-string Profile = "1"
+float Changestate_Speed    = 4.0
+float CrosshairValue
+float CrosshairValueAlert
+float FOV_Slider           = 90.0
+float IdleX                = 30.0
+float IdleY                = -20.0
+float MeleeX               = 0.0
+float MeleeY               = -10.0
+float MeleeZoom            = -20.0
+float Pitch_Zoom           = 0.0
+float RangedX              = 40.0
+float RangedY              = -10.0
+float RangedZoom           = 75.0
+float Sneak_Height         = 10.0
+float TFC_Speed            = 0.0
+float Vanity_MAX           = 1000.0
+float Vanity_MIN           = 200.0
+float View_Mode_X          = 0.0
+float View_Mode_Y          = -15.0
+float View_Mode_Zoom       = 50.0
+float Zoom_Increments      = 6.0
+float Zoom_Speed           = 20.0
+
+int LeftArm
+int Sneak_Button
+int Swap_Side              = 53
+int TFC_Key                = 0
+int View_Mode_Key          = 47
+
+string Profile             = "1"
 
 
+; -------------------------------------------------------------------------------------------------
+; MCM Pages
+; -------------------------------------------------------------------------------------------------
 
-; -------------------- MCM PAGES -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Function Pages()
 	Pages = new string[3]
 	Pages[0] = "$PagesEssentials"
@@ -116,40 +118,20 @@ Function Pages()
 	Pages[2] = "$PagesProfilesHelp"
 EndFunction
 
-; -------------------- ESSENTIAL CODE -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+; -------------------------------------------------------------------------------------------------
+; MCM Events
+; -------------------------------------------------------------------------------------------------
+
 Event OnConfigInit()
 	Pages()
 	ApplySettings()
 EndEvent
 
-Event OnGameReload()
-parent.OnGameReload()
-	Pages()
-	ApplySettings()
-	If (Toggle_Delay == True)
-		Wait(7)
-		ApplySettings()
-	EndIf
-EndEvent
 
-Event OnActorAction(int actionType, Actor akActor, Form source, int slot)
- 	If akActor == PlayerRef
-   		CrosshairToggle()
-		If View_Mode_ON == False
-			ApplyALLCam()
-		EndIf
- 	EndIf
-EndEvent
-
-;--------------------------------------------------------------------------------------------------------------
-;			MCM SCRIPTING
-;--------------------------------------------------------------------------------------------------------------
-
-; -------------------- MCM INTERFACE -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Event OnPageReset(string page)
 	If (page == "$PagesEssentials") || (page == "")
 		SetCursorFillMode(TOP_TO_BOTTOM)
-
 		SetCursorPosition(0)
 		AddHeaderOption("$HeaderCamera")
 		IdleX_S = AddSliderOption("$SliderHorizontal", IdleX, "{0}")
@@ -163,7 +145,6 @@ Event OnPageReset(string page)
 		RangedY_S = AddSliderOption("$SliderVertical", RangedY, "{0}")
 		RangedZoom_S = AddSliderOption("$SliderZoom", RangedZoom, "{0}")
 		Ignore_LeftHand_B = AddToggleOption("$OptionIgnoreLeftHand", Ignore_LeftHand)
-
 		SetCursorPosition(1)
 		AddHeaderOption("")
 		FOV_Slider_S = AddSliderOption("$SliderFOV", FOV_Slider, "{0}")
@@ -175,10 +156,8 @@ Event OnPageReset(string page)
 		AddEmptyOption()
 		Changestate_Speed_S = AddSliderOption("$SliderCameraChangingSpeed", Changestate_Speed, "{0}")
 		Pitch_Zoom_S = AddSliderOption("$SliderPitchDownZoom", Pitch_Zoom, "{0}")
-
 	ElseIf (page == "$PagesFeatures")
 		SetCursorFillMode(TOP_TO_BOTTOM)
-
 		SetCursorPosition(0)
 		AddHeaderOption("$PagesFeatures")
 		Toggle_PA_B = AddToggleOption("$OptionProperAiming", Toggle_PA)
@@ -189,7 +168,6 @@ Event OnPageReset(string page)
 		Sneak_Height_S = AddSliderOption("$SliderAdaptiveSneakingHeight", Sneak_Height, "{0}")
 		AddEmptyOption()
 		Enabled_ControlTweaks_B = AddToggleOption("$OptionControlTweaks", Enabled_ControlTweaks)
-
 		SetCursorPosition(1)
 		AddHeaderOption("")
 		Swap_Side_K = AddKeyMapOption("$HotkeySwapSideKey", Swap_Side)
@@ -201,10 +179,8 @@ Event OnPageReset(string page)
 		AddEmptyOption()
 		TFC_Key_K = AddKeyMapOption("$HotkeyTFCModeKey", TFC_Key)
 		TFC_Speed_S = AddSliderOption("$SliderTFCModeSpeed", TFC_Speed, "{1}")
-
 	ElseIf (page == "$PagesProfilesHelp")
 		SetCursorFillMode(TOP_TO_BOTTOM)
-
 		SetCursorPosition(0)
 		AddHeaderOption("$HeaderLoadProfiles")
 		Load_Profile1_T = AddTextOption("$Profile1", "Load")
@@ -215,7 +191,6 @@ Event OnPageReset(string page)
 		AddHeaderOption("$HeaderTroubleshooting")
 		ApplySettings_T = AddTextOption("$OptionApplyCurrentSettings", "")
 		UnbindKeys_T = AddTextOption("$OptionUnbindHotkeys", "")
-
 		SetCursorPosition(1)
 		AddHeaderOption("$HeaderSaveProfiles")
 		Save_Profile1_T = AddTextOption("$Profile1", "Save")
@@ -229,7 +204,6 @@ Event OnPageReset(string page)
 EndEvent
 
 
-; -------------------- TOGGLES OPTIONS -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Event OnOptionSelect(int option)
 
 	If (option == Ignore_LeftHand_B)
@@ -331,7 +305,6 @@ Event OnOptionSelect(int option)
 EndEvent
 
 
-; -------------------- HOTKEYS SETTINGS -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Event OnOptionKeyMapChange(int option, int keyCode, string conflictControl, string conflictName)
 	If (option == View_Mode_Key_K)
 		UnRegisterForKey(View_Mode_Key)
@@ -356,7 +329,7 @@ Event OnOptionKeyMapChange(int option, int keyCode, string conflictControl, stri
 			EndIf
 		Else
 			MessageBox("PapyrusUtil needs to be installed for TFC Mode to work.")
-		Endif		
+		Endif
 	ElseIf (option == Swap_Side_K)
 		UnRegisterForKey(swap_side)
 		Swap_Side = keyCode
@@ -371,81 +344,6 @@ Event OnOptionKeyMapChange(int option, int keyCode, string conflictControl, stri
 EndEvent
 
 
-; --------------------KEY PRESS DOWN -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-Event OnKeyDown(Int KeyCode)
-If (!IsInMenuMode())
-
-	If KeyCode == swap_side
-		If View_Mode_ON == False
-			idleX = -idleX
-			meleeX = -meleeX
-			rangedX = -rangedX
-			ApplyHorizontalCam()
-		Else
-			View_Mode_X = -View_Mode_X
-			SetINIFloat("fOverShoulderPosX:Camera", View_Mode_X)
-			SetINIFloat("fOverShoulderCombatPosX:Camera", View_Mode_X)
-			UpdateThirdPerson()
-		EndIf
-	EndIf
-
-	If KeyCode == View_Mode_Key
-		View_Mode_ON = !View_Mode_ON
-		If (View_Mode_ON == True)
-			SetINIFloat("fOverShoulderCombatAddY:Camera", 0.0)
-			SetINIFloat("fOverShoulderPosX:Camera", View_Mode_X)
-			SetINIFloat("fOverShoulderPosZ:Camera", View_Mode_Y)
-			SetINIFloat("fOverShoulderCombatPosX:Camera", View_Mode_X)
-			SetINIFloat("fOverShoulderCombatPosZ:Camera", View_Mode_Y)
-			UpdateThirdPerson()
-			SetINIFloat("fVanityModeMaxDist:Camera", View_Mode_Zoom)
-			SetINIFloat("fVanityModeMinDist:Camera", View_Mode_Zoom)
-			CrosshairToggle(True)
-		Else
-			ApplyALLCam()
-			ApplyMiscCamera()
-		EndIf
-	EndIf
-
-	If Keycode == Sneak_Button
-		If View_Mode_ON == False && PlayerRef.IsSwimming() == False
-			If PlayerRef.IsSneaking() == True
-				Toggled_Sneaking = True
-				RegisterForSingleUpdate(0.75)
-			Else
-				Toggled_Sneaking = False
-			EndIf
-			ApplyVerticalCam()
-		EndIf
-	EndIf
-
-	If KeyCode == TFC_Key
-		MiscUtil.ToggleFreeCamera()
-	EndIf
-
-EndIf
-EndEvent
-
-
-; -------------------- OnUpdate SNEAKING FIXER -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-;In case player gets out of sneaking without pressing button, example: mining, swimming. 
-;Runs only when sneaking and Adaptive Sneaking enabled.
-
-Event OnUpdate()
-	If Toggled_Sneaking == True && GetPlayer().IsSneaking() == False
-		If GetPlayer().IsSwimming() == False && View_Mode_ON == False
-			Toggled_Sneaking = False
-			ApplyALLCam()
-		Else
-			RegisterForSingleUpdate(0.75)
-		EndIf
-	ElseIf Toggled_Sneaking == True && GetPlayer().IsSneaking() == True
-		RegisterForSingleUpdate(0.75)
-	EndIf
-EndEvent
-
-
-; -------------------- SLIDERS SETTINGS -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Event OnOptionSliderAccept(int option, float value)
 	If (option == IdleX_S)
 		IdleX = value
@@ -552,122 +450,102 @@ Event OnOptionSliderAccept(int option, float value)
 EndEvent
 
 
-; -------------------- SLIDERS > DEFAULT / MIN / MAX -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Event OnOptionSliderOpen(int option)
 	If (option == IdleX_S)
 		SetSliderDialogStartValue(IdleX)
 		SetSliderDialogDefaultValue(0.0)
 		SetSliderDialogRange(-100.0, 100.0)
 		SetSliderDialogInterval(1.0)
-
 	ElseIf (option == IdleY_S)
 		SetSliderDialogStartValue(IdleY)
 		SetSliderDialogDefaultValue(-20.0)
 		SetSliderDialogRange(-100.0, 100.0)
 		SetSliderDialogInterval(1.0)
-
 	ElseIf (option == MeleeX_S)
 		SetSliderDialogStartValue(MeleeX)
 		SetSliderDialogDefaultValue(0.0)
 		SetSliderDialogRange(-100.0, 100.0)
 		SetSliderDialogInterval(1.0)
-
 	ElseIf (option == MeleeY_S)
 		SetSliderDialogStartValue(MeleeY)
 		SetSliderDialogDefaultValue(-10.0)
 		SetSliderDialogRange(-100.0, 100.0)
 		SetSliderDialogInterval(1.0)
-
     ElseIf (option == MeleeZoom_S)
 		SetSliderDialogStartValue(MeleeZoom)
 		SetSliderDialogDefaultValue(-20.0)
 		SetSliderDialogRange(-500.0, 500.0)
 		SetSliderDialogInterval(1.0)
-
 	ElseIf (option == RangedX_S)
 		SetSliderDialogStartValue(RangedX)
 		SetSliderDialogDefaultValue(40.0)
 		SetSliderDialogRange(-100.0, 100.0)
 		SetSliderDialogInterval(1.0)
-
 	ElseIf (option == RangedY_S)
 		SetSliderDialogStartValue(RangedY)
 		SetSliderDialogDefaultValue(-10.0)
 		SetSliderDialogRange(-100.0, 100.0)
 		SetSliderDialogInterval(1.0)
-
     ElseIf (option == RangedZoom_S)
 		SetSliderDialogStartValue(RangedZoom)
 		SetSliderDialogDefaultValue(75.0)
 		SetSliderDialogRange(-500.0, 500.0)
 		SetSliderDialogInterval(1.0)
-
 	ElseIf (option == FOV_Slider_S)
 		SetSliderDialogStartValue(FOV_Slider)
 		SetSliderDialogDefaultValue(65.0)
 		SetSliderDialogRange(10.0, 150.0)
 		SetSliderDialogInterval(1.0)
-
 	ElseIf (option == Vanity_MAX_S)
 		SetSliderDialogStartValue(Vanity_MAX)
 		SetSliderDialogDefaultValue(280.0)
 		SetSliderDialogRange(0.0, 1000.0)
 		SetSliderDialogInterval(1.0)
-
 	ElseIf (option == Vanity_MIN_S)
 		SetSliderDialogStartValue(Vanity_MIN)
 		SetSliderDialogDefaultValue(185.0)
 		SetSliderDialogRange(0.0, 1000.0)
 		SetSliderDialogInterval(1.0)
-
 	ElseIf (option == Zoom_Speed_S)
 		SetSliderDialogStartValue(Zoom_Speed)
 		SetSliderDialogDefaultValue(5.0)
 		SetSliderDialogRange(1.0, 20.0)
 		SetSliderDialogInterval(1.0)
-
 	ElseIf (option == Zoom_Increments_S)
 		SetSliderDialogStartValue(Zoom_Increments)
 		SetSliderDialogDefaultValue(3.0)
 		SetSliderDialogRange(1.0, 7.0)
 		SetSliderDialogInterval(1.0)
-
 	ElseIf (option == Pitch_Zoom_S)
 		SetSliderDialogStartValue(Pitch_Zoom)
 		SetSliderDialogDefaultValue(0.0)
 		SetSliderDialogRange(-500.0, 500.0)
 		SetSliderDialogInterval(1.0)
-
 	ElseIf (option == Changestate_Speed_S)
 		SetSliderDialogStartValue(Changestate_Speed)
 		SetSliderDialogDefaultValue(4.0)
 		SetSliderDialogRange(1.0, 20.0)
 		SetSliderDialogInterval(1.0)
-
 	ElseIf (option == Sneak_Height_S)
 		SetSliderDialogStartValue(Sneak_Height)
 		SetSliderDialogDefaultValue(30.0)
 		SetSliderDialogRange(-100.0, 100.0)
 		SetSliderDialogInterval(1.0)
-
 	elseIf (option == View_Mode_X_S)
 		SetSliderDialogStartValue(View_Mode_X)
 		SetSliderDialogDefaultValue(0.0)
 		SetSliderDialogRange(-200.0, 200.0)
 		SetSliderDialogInterval(1.0)
-
 	elseIf (option == View_Mode_Y_S)
 		SetSliderDialogStartValue(View_Mode_Y)
 		SetSliderDialogDefaultValue(-10.0)
 		SetSliderDialogRange(-100.0, 1000.0)
 		SetSliderDialogInterval(1.0)
-
 	elseIf (option == View_Mode_Zoom_S)
 		SetSliderDialogStartValue(View_Mode_Zoom)
 		SetSliderDialogDefaultValue(70.0)
 		SetSliderDialogRange(0.0, 100000.0)
 		SetSliderDialogInterval(5.0)
-
 	ElseIf (option == TFC_Speed_S)
 		SetSliderDialogStartValue(TFC_Speed)
 		SetSliderDialogDefaultValue(0.0)
@@ -677,7 +555,6 @@ Event OnOptionSliderOpen(int option)
 EndEvent
 
 
-; -------------------- HIGHLIGHTED OPTION DESCRIPTIONS -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Event OnOptionHighlight(int option)
 	If (option == IdleX_S)
 		SetInfoText("$DescriptionIdleX")
@@ -749,66 +626,145 @@ Event OnOptionHighlight(int option)
 EndEvent
 
 
+; -------------------------------------------------------------------------------------------------
+; Events
+; -------------------------------------------------------------------------------------------------
 
-;--------------------------------------------------------------------------------------------------------------
-;			FUNCTIONS
-;--------------------------------------------------------------------------------------------------------------
+Event OnGameReload()
+	parent.OnGameReload()
+	Pages()
+	ApplySettings()
+	If (Toggle_Delay == True)
+		Wait(7)
+		ApplySettings()
+	EndIf
+EndEvent
 
 
+Event OnActorAction(int actionType, Actor akActor, Form source, int slot)
+ 	If akActor == PlayerRef
+   		CrosshairToggle()
+		If View_Mode_ON == False
+			ApplyALLCam()
+		EndIf
+ 	EndIf
+EndEvent
 
-; -------------------- APPLY SETTINGS -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-float CrosshairValue
-float CrosshairValueAlert
+
+Event OnKeyDown(Int KeyCode)
+	If (!IsInMenuMode())
+		If KeyCode == swap_side
+			If View_Mode_ON == False
+				idleX = -idleX
+				meleeX = -meleeX
+				rangedX = -rangedX
+				ApplyHorizontalCam()
+			Else
+				View_Mode_X = -View_Mode_X
+				SetINIFloat("fOverShoulderPosX:Camera", View_Mode_X)
+				SetINIFloat("fOverShoulderCombatPosX:Camera", View_Mode_X)
+				UpdateThirdPerson()
+			EndIf
+		EndIf
+		If KeyCode == View_Mode_Key
+			View_Mode_ON = !View_Mode_ON
+			If (View_Mode_ON == True)
+				SetINIFloat("fOverShoulderCombatAddY:Camera", 0.0)
+				SetINIFloat("fOverShoulderPosX:Camera", View_Mode_X)
+				SetINIFloat("fOverShoulderPosZ:Camera", View_Mode_Y)
+				SetINIFloat("fOverShoulderCombatPosX:Camera", View_Mode_X)
+				SetINIFloat("fOverShoulderCombatPosZ:Camera", View_Mode_Y)
+				UpdateThirdPerson()
+				SetINIFloat("fVanityModeMaxDist:Camera", View_Mode_Zoom)
+				SetINIFloat("fVanityModeMinDist:Camera", View_Mode_Zoom)
+				CrosshairToggle(True)
+			Else
+				ApplyALLCam()
+				ApplyMiscCamera()
+			EndIf
+		EndIf
+		If Keycode == Sneak_Button
+			If View_Mode_ON == False && PlayerRef.IsSwimming() == False
+				If PlayerRef.IsSneaking() == True
+					Toggled_Sneaking = True
+					RegisterForSingleUpdate(0.75)
+				Else
+					Toggled_Sneaking = False
+				EndIf
+				ApplyVerticalCam()
+			EndIf
+		EndIf
+		If KeyCode == TFC_Key
+			MiscUtil.ToggleFreeCamera()
+		EndIf
+	EndIf
+EndEvent
+
+
+;In case player gets out of sneaking without pressing button, example: mining, swimming.
+;Runs only when sneaking and Adaptive Sneaking enabled.
+Event OnUpdate()
+	If Toggled_Sneaking == True && GetPlayer().IsSneaking() == False
+		If GetPlayer().IsSwimming() == False && View_Mode_ON == False
+			Toggled_Sneaking = False
+			ApplyALLCam()
+		Else
+			RegisterForSingleUpdate(0.75)
+		EndIf
+	ElseIf Toggled_Sneaking == True && GetPlayer().IsSneaking() == True
+		RegisterForSingleUpdate(0.75)
+	EndIf
+EndEvent
+
+
+; -------------------------------------------------------------------------------------------------
+; Functions
+; -------------------------------------------------------------------------------------------------
 
 Function ApplySettings()
-
 		View_Mode_ON = False
-
 		DetectRanged()
 		ApplyMiscCamera()
 		ApplyALLCam()
-
 		RegisterForActorAction(8)
 		RegisterForActorAction(10)
 
 		If swap_side != 0
-		UnRegisterForKey(swap_side)
-		RegisterForKey(swap_side)
+			UnRegisterForKey(swap_side)
+			RegisterForKey(swap_side)
 		EndIf
 
 		If View_Mode_Key != 0
-		UnRegisterForKey(View_Mode_Key)
-		RegisterForKey(View_Mode_Key)
+			UnRegisterForKey(View_Mode_Key)
+			RegisterForKey(View_Mode_Key)
 		EndIf
 
 		If TFC_Key != 0
-		UnRegisterForKey(TFC_Key)
-		RegisterForKey(TFC_Key)
+			UnRegisterForKey(TFC_Key)
+			RegisterForKey(TFC_Key)
 		EndIf
+
 		If TFC_Speed > 0.0
-		MiscUtil.SetFreeCameraSpeed(TFC_Speed)
+			MiscUtil.SetFreeCameraSpeed(TFC_Speed)
 		EndIf
 
 		ProperAiming(True)
 		AdaptiveSneaking()
 		ImprovedControls()
-
 EndFunction
-
 
 
 Function ApplyMiscCamera()
-		SetINIFloat("fVanityModeMinDist:Camera", Vanity_MIN)
-		SetINIFloat("fVanityModeMaxDist:Camera", Vanity_MAX)
-		SetINIFloat("fMouseWheelZoomSpeed:Camera", Zoom_Speed)
-		ZoomIncrement()
-		SetINIFloat("fPitchZoomOutMaxDist:Camera", Pitch_Zoom)
-		SetINIFloat("fDefaultWorldFOV:Display", FOV_Slider)
-		SetINIFloat("fDefault1stPersonFOV:Display", FOV_Slider)
-		SetINIFloat("fShoulderDollySpeed:Camera", Changestate_Speed)
-		UpdateThirdPerson()
+	SetINIFloat("fVanityModeMinDist:Camera", Vanity_MIN)
+	SetINIFloat("fVanityModeMaxDist:Camera", Vanity_MAX)
+	SetINIFloat("fMouseWheelZoomSpeed:Camera", Zoom_Speed)
+	ZoomIncrement()
+	SetINIFloat("fPitchZoomOutMaxDist:Camera", Pitch_Zoom)
+	SetINIFloat("fDefaultWorldFOV:Display", FOV_Slider)
+	SetINIFloat("fDefault1stPersonFOV:Display", FOV_Slider)
+	SetINIFloat("fShoulderDollySpeed:Camera", Changestate_Speed)
+	UpdateThirdPerson()
 EndFunction
-
 
 
 Function ApplyHorizontalCam()
@@ -821,7 +777,6 @@ Function ApplyHorizontalCam()
 	SetINIFloat("fOverShoulderCombatPosX:Camera", meleeX)
 	UpdateThirdPerson()
 EndFunction
-
 
 
 Function ApplyVerticalCam()
@@ -850,7 +805,6 @@ Function ApplyVerticalCam()
 EndFunction
 
 
-
 Function ApplyALLCam()
 	SetINIFloat("fOverShoulderPosX:Camera", idleX)
     If PlayerRef.IsSneaking() == True && Enabled_Sneaking == True
@@ -858,8 +812,9 @@ Function ApplyALLCam()
 	Else
 		SetINIFloat("fOverShoulderPosZ:Camera", idleY)
 	EndIf
+
 	;---RANGED + MAGIC
-	If isRanged == True 
+	If isRanged == True
 		SetINIFloat("fOverShoulderCombatPosX:Camera", rangedX)
 		If PlayerRef.IsSneaking() == True && Enabled_Sneaking == True
 			SetINIFloat("fOverShoulderCombatPosZ:Camera", rangedY + sneak_height)
@@ -871,6 +826,7 @@ Function ApplyALLCam()
 		CrosshairToggle()
 		Return
 	EndIf
+
 	;---MELEE
 	SetINIFloat("fOverShoulderCombatPosX:Camera", meleeX)
 	If PlayerRef.IsSneaking() == True && Enabled_Sneaking == True
@@ -878,11 +834,11 @@ Function ApplyALLCam()
 	Else
 		SetINIFloat("fOverShoulderCombatPosZ:Camera", meleeY)
 	EndIf
+
 	SetINIFloat("fOverShoulderCombatAddY:Camera", meleeZoom)
 	UpdateThirdPerson()
 	CrosshairToggle()
 EndFunction
-
 
 
 Function ZoomIncrement()
@@ -912,13 +868,8 @@ Function ZoomIncrement()
 EndFunction
 
 
-; -------------------- CROSSHAIR and RANGED CHECK -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-int LeftArm
-
 Function DetectRanged()
 	LeftArm = PlayerRef.GetEquippedItemType(0)
-	
 	If PlayerRef.GetEquippedItemType(1) >= 7
 		isRanged = True
 		Return
@@ -933,20 +884,16 @@ Function DetectRanged()
 			Return
 		EndIf
 	EndIf
-
 	isRanged = False
 EndFunction
 
 
-
 Function CrosshairToggle(bool Bypass = False)
-
 	If Bypass == True
 		UI.SetNumber("HUD Menu", "_root.HUDMovieBaseInstance.CrosshairInstance._y", -115.300003 - 5000.0)
 		UI.SetNumber("HUD Menu", "_root.HUDMovieBaseInstance.CrosshairAlert._visible", -115.300003 - 5000.0)
 		Return
 	EndIf
-
 	If Toggle_Crosshair == True
 		If View_Mode_ON == False
 			If PlayerRef.IsWeaponDrawn() == False
@@ -975,32 +922,32 @@ Function CrosshairToggle(bool Bypass = False)
 EndFunction
 
 
-
-; -------------------- MISC FUNCTIONS -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Function ProperAiming(bool IgnoreOff = False)
-			If Toggle_PA == True
-				SetGameSettingFloat("fAutoAimMaxDegrees", 10.0)
-				SetGameSettingFloat("fAutoAimMaxDistance", 8000.0)
-				SetGameSettingFloat("fAutoAimScreenPercentage", 0.0)
-				SetGameSettingFloat("fAutoAimMaxDegrees3rdPerson", 20.0)
-				Return
-			ElseIf Toggle_PA == False && IgnoreOff == False
-				SetGameSettingFloat("fAutoAimMaxDegrees", 1.0)
-				SetGameSettingFloat("fAutoAimMaxDistance", 1800.0)
-				SetGameSettingFloat("fAutoAimScreenPercentage", 6.0)
-				SetGameSettingFloat("fAutoAimMaxDegrees3rdPerson", 2.0)
-			EndIf
-		EndFunction
+	If Toggle_PA == True
+		SetGameSettingFloat("fAutoAimMaxDegrees", 10.0)
+		SetGameSettingFloat("fAutoAimMaxDistance", 8000.0)
+		SetGameSettingFloat("fAutoAimScreenPercentage", 0.0)
+		SetGameSettingFloat("fAutoAimMaxDegrees3rdPerson", 20.0)
+		Return
+	ElseIf Toggle_PA == False && IgnoreOff == False
+		SetGameSettingFloat("fAutoAimMaxDegrees", 1.0)
+		SetGameSettingFloat("fAutoAimMaxDistance", 1800.0)
+		SetGameSettingFloat("fAutoAimScreenPercentage", 6.0)
+		SetGameSettingFloat("fAutoAimMaxDegrees3rdPerson", 2.0)
+	EndIf
+EndFunction
 
-		Function AdaptiveSneaking()
-			If Enabled_Sneaking == True
-				UnRegisterForKey(Sneak_Button)
-				Sneak_Button = Input.GetMappedKey("Sneak")
-				RegisterForKey(Sneak_Button)
-			Else
-				UnRegisterForKey(Sneak_Button)
-			EndIf
-		EndFunction
+
+Function AdaptiveSneaking()
+	If Enabled_Sneaking == True
+		UnRegisterForKey(Sneak_Button)
+		Sneak_Button = Input.GetMappedKey("Sneak")
+		RegisterForKey(Sneak_Button)
+	Else
+		UnRegisterForKey(Sneak_Button)
+	EndIf
+EndFunction
+
 
 Function ImprovedControls()
 	If Enabled_ControlTweaks == True
@@ -1031,94 +978,87 @@ Function ImprovedControls()
 EndFunction
 
 
-; -------------------- PROFILES -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Function LoadSaveProfile(bool Load = True)
-If PapyrusUtil.GetVersion() > 1
-	If Load == True
-		If JsonExists("../Customizable Camera/profile" +Profile+ "")
-			IdleX = GetFloatValue("../Customizable Camera/profile" +Profile+ ".json", "IdleX")
-			IdleY = GetFloatValue("../Customizable Camera/profile" +Profile+ ".json", "IdleY")
-			MeleeX = GetFloatValue("../Customizable Camera/profile" +Profile+ ".json", "MeleeX")
-			MeleeY = GetFloatValue("../Customizable Camera/profile" +Profile+ ".json", "MeleeY")
-			MeleeZoom = GetFloatValue("../Customizable Camera/profile" +Profile+ ".json", "MeleeZoom")
-			RangedX = GetFloatValue("../Customizable Camera/profile" +Profile+ ".json", "RangedX")
-			RangedY = GetFloatValue("../Customizable Camera/profile" +Profile+ ".json", "RangedY")
-			RangedZoom = GetFloatValue("../Customizable Camera/profile" +Profile+ ".json", "RangedZoom")
-			Ignore_LeftHand = GetINTValue("../Customizable Camera/profile" +Profile+ ".json", "Ignore_LeftHand")
+	If PapyrusUtil.GetVersion() > 1
+		If Load == True
+			If JsonExists("../Customizable Camera/profile" + Profile + "")
+				IdleX = GetFloatValue("../Customizable Camera/profile" + Profile + ".json", "IdleX")
+				IdleY = GetFloatValue("../Customizable Camera/profile" + Profile + ".json", "IdleY")
+				MeleeX = GetFloatValue("../Customizable Camera/profile" + Profile + ".json", "MeleeX")
+				MeleeY = GetFloatValue("../Customizable Camera/profile" + Profile + ".json", "MeleeY")
+				MeleeZoom = GetFloatValue("../Customizable Camera/profile" + Profile + ".json", "MeleeZoom")
+				RangedX = GetFloatValue("../Customizable Camera/profile" + Profile + ".json", "RangedX")
+				RangedY = GetFloatValue("../Customizable Camera/profile" + Profile + ".json", "RangedY")
+				RangedZoom = GetFloatValue("../Customizable Camera/profile" + Profile + ".json", "RangedZoom")
+				Ignore_LeftHand = GetINTValue("../Customizable Camera/profile" + Profile + ".json", "Ignore_LeftHand")
+				FOV_Slider = GetFloatValue("../Customizable Camera/profile" + Profile + ".json", "FOV_Slider")
+				Vanity_MAX = GetFloatValue("../Customizable Camera/profile" + Profile + ".json", "Vanity_MAX")
+				Vanity_MIN = GetFloatValue("../Customizable Camera/profile" + Profile + ".json", "Vanity_MIN")
+				Zoom_Speed = GetFloatValue("../Customizable Camera/profile" + Profile + ".json", "Zoom_Speed")
+				Zoom_Increments = GetFloatValue("../Customizable Camera/profile" + Profile + ".json", "Zoom_Increments")
+				Pitch_Zoom = GetFloatValue("../Customizable Camera/profile" + Profile + ".json", "Pitch_Zoom")
+				Changestate_Speed = GetFloatValue("../Customizable Camera/profile" + Profile + ".json", "Changestate_Speed")
+				Swap_Side = GetINTValue("../Customizable Camera/profile" + Profile + ".json", "Swap_Side")
+				View_Mode_Key = GetINTValue("../Customizable Camera/profile" + Profile + ".json", "View_Mode_Key")
+				View_Mode_X = GetFloatValue("../Customizable Camera/profile" + Profile + ".json", "View_Mode_X")
+				View_Mode_Y = GetFloatValue("../Customizable Camera/profile" + Profile + ".json", "View_Mode_Y")
+				View_Mode_Zoom = GetFloatValue("../Customizable Camera/profile" + Profile + ".json", "View_Mode_Zoom")
+				TFC_Key = GetINTValue("../Customizable Camera/profile" + Profile + ".json", "TFC_Key")
+				TFC_Speed = GetFloatValue("../Customizable Camera/profile" + Profile + ".json", "TFC_Speed")
+				Sneak_Height = GetFloatValue("../Customizable Camera/profile" + Profile + ".json", "Sneak_Height")
+				Toggle_PA = GetINTValue("../Customizable Camera/profile" + Profile + ".json", "Toggle_PA")
+				Toggle_Crosshair = GetINTValue("../Customizable Camera/profile" + Profile + ".json", "Toggle_Crosshair")
+				Enabled_Sneaking = GetINTValue("../Customizable Camera/profile" + Profile + ".json", "Enabled_Sneaking")
+				Enabled_ControlTweaks = GetINTValue("../Customizable Camera/profile" + Profile + ".json", "Enabled_ControlTweaks")
 
-			FOV_Slider = GetFloatValue("../Customizable Camera/profile" +Profile+ ".json", "FOV_Slider")
-			Vanity_MAX = GetFloatValue("../Customizable Camera/profile" +Profile+ ".json", "Vanity_MAX")
-			Vanity_MIN = GetFloatValue("../Customizable Camera/profile" +Profile+ ".json", "Vanity_MIN")
-			Zoom_Speed = GetFloatValue("../Customizable Camera/profile" +Profile+ ".json", "Zoom_Speed")
-			Zoom_Increments = GetFloatValue("../Customizable Camera/profile" +Profile+ ".json", "Zoom_Increments")
-			Pitch_Zoom = GetFloatValue("../Customizable Camera/profile" +Profile+ ".json", "Pitch_Zoom")
-			Changestate_Speed = GetFloatValue("../Customizable Camera/profile" +Profile+ ".json", "Changestate_Speed")
-
-			Swap_Side = GetINTValue("../Customizable Camera/profile" +Profile+ ".json", "Swap_Side")
-			View_Mode_Key = GetINTValue("../Customizable Camera/profile" +Profile+ ".json", "View_Mode_Key")
-			View_Mode_X = GetFloatValue("../Customizable Camera/profile" +Profile+ ".json", "View_Mode_X")
-			View_Mode_Y = GetFloatValue("../Customizable Camera/profile" +Profile+ ".json", "View_Mode_Y")
-			View_Mode_Zoom = GetFloatValue("../Customizable Camera/profile" +Profile+ ".json", "View_Mode_Zoom")
-			TFC_Key = GetINTValue("../Customizable Camera/profile" +Profile+ ".json", "TFC_Key")
-			TFC_Speed = GetFloatValue("../Customizable Camera/profile" +Profile+ ".json", "TFC_Speed")
-			Sneak_Height = GetFloatValue("../Customizable Camera/profile" +Profile+ ".json", "Sneak_Height")
-
-			Toggle_PA = GetINTValue("../Customizable Camera/profile" +Profile+ ".json", "Toggle_PA")
-			Toggle_Crosshair = GetINTValue("../Customizable Camera/profile" +Profile+ ".json", "Toggle_Crosshair") ;------------------------BUGGY BEHAVIOUR?
-			Enabled_Sneaking = GetINTValue("../Customizable Camera/profile" +Profile+ ".json", "Enabled_Sneaking")
-			Enabled_ControlTweaks = GetINTValue("../Customizable Camera/profile" +Profile+ ".json", "Enabled_ControlTweaks")
-
-			If swap_side == 0
-				UnRegisterForKey(swap_side)
+				If swap_side == 0
+					UnRegisterForKey(swap_side)
+				EndIf
+				If View_Mode_Key == 0
+					UnRegisterForKey(View_Mode_Key)
+				EndIf
+				If TFC_Key == 0
+					UnRegisterForKey(TFC_Key)
+				EndIf
+				MessageBox("Profile loaded.")
+				ApplySettings()
+			Else
+				MessageBox("Profile does not exist.")
 			EndIf
-			If View_Mode_Key == 0
-				UnRegisterForKey(View_Mode_Key)
-			EndIf
-			If TFC_Key == 0
-				UnRegisterForKey(TFC_Key)
-			EndIf
-			MessageBox("Profile loaded.")
-			ApplySettings()
 		Else
-			MessageBox("Profile does not exist.")
+			SetFloatValue("../Customizable Camera/profile" + Profile + ".json", "IdleX", IdleX)
+			SetFloatValue("../Customizable Camera/profile" + Profile + ".json", "IdleY", IdleY)
+			SetFloatValue("../Customizable Camera/profile" + Profile + ".json", "MeleeX", MeleeX)
+			SetFloatValue("../Customizable Camera/profile" + Profile + ".json", "MeleeY", MeleeY)
+			SetFloatValue("../Customizable Camera/profile" + Profile + ".json", "MeleeZoom", MeleeZoom)
+			SetFloatValue("../Customizable Camera/profile" + Profile + ".json", "RangedX", RangedX)
+			SetFloatValue("../Customizable Camera/profile" + Profile + ".json", "RangedY", RangedY)
+			SetFloatValue("../Customizable Camera/profile" + Profile + ".json", "RangedZoom", RangedZoom)
+			SetINTValue("../Customizable Camera/profile" + Profile + ".json", "Ignore_LeftHand", Ignore_LeftHand as int)
+			SetFloatValue("../Customizable Camera/profile" + Profile + ".json", "FOV_Slider", FOV_Slider)
+			SetFloatValue("../Customizable Camera/profile" + Profile + ".json", "Vanity_MAX", Vanity_MAX)
+			SetFloatValue("../Customizable Camera/profile" + Profile + ".json", "Vanity_MIN", Vanity_MIN)
+			SetFloatValue("../Customizable Camera/profile" + Profile + ".json", "Zoom_Speed", Zoom_Speed)
+			SetFloatValue("../Customizable Camera/profile" + Profile + ".json", "Zoom_Increments", Zoom_Increments)
+			SetFloatValue("../Customizable Camera/profile" + Profile + ".json", "Pitch_Zoom", Pitch_Zoom)
+			SetFloatValue("../Customizable Camera/profile" + Profile + ".json", "Changestate_Speed", Changestate_Speed)
+			SetINTValue("../Customizable Camera/profile" + Profile + ".json", "Swap_Side", Swap_Side)
+			SetINTValue("../Customizable Camera/profile" + Profile + ".json", "View_Mode_Key", View_Mode_Key)
+			SetFloatValue("../Customizable Camera/profile" + Profile + ".json", "View_Mode_X", View_Mode_X)
+			SetFloatValue("../Customizable Camera/profile" + Profile + ".json", "View_Mode_Y", View_Mode_Y)
+			SetFloatValue("../Customizable Camera/profile" + Profile + ".json", "View_Mode_Zoom", View_Mode_Zoom)
+			SetINTValue("../Customizable Camera/profile" + Profile + ".json", "TFC_Key", TFC_Key)
+			SetFloatValue("../Customizable Camera/profile" + Profile + ".json", "TFC_Speed", TFC_Speed)
+			SetFloatValue("../Customizable Camera/profile" + Profile + ".json", "Sneak_Height", Sneak_Height)
+			SetINTValue("../Customizable Camera/profile" + Profile + ".json", "Toggle_PA", Toggle_PA as int)
+			SetINTValue("../Customizable Camera/profile" + Profile + ".json", "Toggle_Crosshair", Toggle_Crosshair as int)
+			SetINTValue("../Customizable Camera/profile" + Profile + ".json", "Enabled_Sneaking", Enabled_Sneaking as int)
+			SetINTValue("../Customizable Camera/profile" + Profile + ".json", "Enabled_ControlTweaks", Enabled_ControlTweaks as int)
+
+			Save("../Customizable Camera/profile" + Profile + ".json")
+			MessageBox("Profile saved.")
 		EndIf
 	Else
-		SetFloatValue("../Customizable Camera/profile" +Profile+ ".json", "IdleX", IdleX)
-		SetFloatValue("../Customizable Camera/profile" +Profile+ ".json", "IdleY", IdleY)
-		SetFloatValue("../Customizable Camera/profile" +Profile+ ".json", "MeleeX", MeleeX)
-		SetFloatValue("../Customizable Camera/profile" +Profile+ ".json", "MeleeY", MeleeY)
-		SetFloatValue("../Customizable Camera/profile" +Profile+ ".json", "MeleeZoom", MeleeZoom)
-		SetFloatValue("../Customizable Camera/profile" +Profile+ ".json", "RangedX", RangedX)
-		SetFloatValue("../Customizable Camera/profile" +Profile+ ".json", "RangedY", RangedY)
-		SetFloatValue("../Customizable Camera/profile" +Profile+ ".json", "RangedZoom", RangedZoom)
-		SetINTValue("../Customizable Camera/profile" +Profile+ ".json", "Ignore_LeftHand", Ignore_LeftHand as int)
-
-		SetFloatValue("../Customizable Camera/profile" +Profile+ ".json", "FOV_Slider", FOV_Slider)
-		SetFloatValue("../Customizable Camera/profile" +Profile+ ".json", "Vanity_MAX", Vanity_MAX)
-		SetFloatValue("../Customizable Camera/profile" +Profile+ ".json", "Vanity_MIN", Vanity_MIN)
-		SetFloatValue("../Customizable Camera/profile" +Profile+ ".json", "Zoom_Speed", Zoom_Speed)
-		SetFloatValue("../Customizable Camera/profile" +Profile+ ".json", "Zoom_Increments", Zoom_Increments)
-		SetFloatValue("../Customizable Camera/profile" +Profile+ ".json", "Pitch_Zoom", Pitch_Zoom)
-		SetFloatValue("../Customizable Camera/profile" +Profile+ ".json", "Changestate_Speed", Changestate_Speed)
-
-		SetINTValue("../Customizable Camera/profile" +Profile+ ".json", "Swap_Side", Swap_Side)
-		SetINTValue("../Customizable Camera/profile" +Profile+ ".json", "View_Mode_Key", View_Mode_Key)
-		SetFloatValue("../Customizable Camera/profile" +Profile+ ".json", "View_Mode_X", View_Mode_X)
-		SetFloatValue("../Customizable Camera/profile" +Profile+ ".json", "View_Mode_Y", View_Mode_Y)
-		SetFloatValue("../Customizable Camera/profile" +Profile+ ".json", "View_Mode_Zoom", View_Mode_Zoom)
-		SetINTValue("../Customizable Camera/profile" +Profile+ ".json", "TFC_Key", TFC_Key)
-		SetFloatValue("../Customizable Camera/profile" +Profile+ ".json", "TFC_Speed", TFC_Speed)
-		SetFloatValue("../Customizable Camera/profile" +Profile+ ".json", "Sneak_Height", Sneak_Height)
-
-		SetINTValue("../Customizable Camera/profile" +Profile+ ".json", "Toggle_PA", Toggle_PA as int)
-		SetINTValue("../Customizable Camera/profile" +Profile+ ".json", "Toggle_Crosshair", Toggle_Crosshair as int)
-		SetINTValue("../Customizable Camera/profile" +Profile+ ".json", "Enabled_Sneaking", Enabled_Sneaking as int)
-		SetINTValue("../Customizable Camera/profile" +Profile+ ".json", "Enabled_ControlTweaks", Enabled_ControlTweaks as int)
-
-		Save("../Customizable Camera/profile" +Profile+ ".json")
-		MessageBox("Profile saved.")
+		MessageBox("PapyrusUtil needs to be installed for Profiles to work properly.")
 	EndIf
-Else
-	MessageBox("PapyrusUtil needs to be installed for Profiles to work properly.")
-EndIf
 EndFunction

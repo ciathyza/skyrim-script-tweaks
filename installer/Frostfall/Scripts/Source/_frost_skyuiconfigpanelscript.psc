@@ -7,6 +7,10 @@ import CommonHelperFunctions
 
 string CONFIG_PATH = "../FrostfallData/"
 
+; -------------------------------------------------------------------------------------------------
+; Properties
+; -------------------------------------------------------------------------------------------------
+
 Actor property PlayerRef auto
 
 ; External scripts
@@ -679,7 +683,7 @@ function PageReset_Interface()
 		Interface_WeatherMessages_OID = AddToggleOption("$FrostfallInterfaceSettingWeather", false)
 	endif
 	Interface_WeathersenseDisplayMode_OID = AddMenuOption("$FrostfallInterfaceSettingWeathersenseDisplayMode", WeathersenseDisplayList[_Frost_Setting_WeathersenseDisplayMode.GetValueInt()])
-	
+
 	if _Frost_Setting_DisplayAttributesInWeathersense.GetValueInt() == 2
 		Interface_DisplayAttributesInWeathersense_OID = AddToggleOption("$FrostfallInterfaceSettingWeathersense", true)
 		if _Frost_Setting_DisplayAttributeValuesInWeathersense.GetValueInt() == 2

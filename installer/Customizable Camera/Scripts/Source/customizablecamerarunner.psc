@@ -1,7 +1,16 @@
-Scriptname CustomizableCameraRunner extends ReferenceAlias  
+Scriptname CustomizableCameraRunner extends ReferenceAlias
 
-CustomizableCamera Property CC Auto
+; -------------------------------------------------------------------------------------------------
+; Properties
+; -------------------------------------------------------------------------------------------------
+
 Actor Property PlayerRef Auto
+CustomizableCamera Property CC Auto
+
+
+; -------------------------------------------------------------------------------------------------
+; Functions
+; -------------------------------------------------------------------------------------------------
 
 Function OnObjectEquipped(Form akBaseObject, ObjectReference akReference)
 	CC.DetectRanged()
@@ -9,6 +18,8 @@ Function OnObjectEquipped(Form akBaseObject, ObjectReference akReference)
 		CC.ApplyALLCam()
 	EndIf
 EndFunction
+
+
 Function OnObjectUnEquipped(Form akBaseObject, ObjectReference akReference)
 	CC.DetectRanged()
 	If CC.View_Mode_ON == False && CC.isRanged == False
