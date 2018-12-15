@@ -242,8 +242,6 @@ String isClip
 ; -------------------------------------------------------------------------------------------------
 
 Event OnConfigInit()
-	; Execution Delay.
-	Utility.Wait(2.0)
 	setPages()
 	OnGameReload()
 	LoadPreset_New()
@@ -1432,7 +1430,7 @@ function ResetDefaults()
 	_LIH_InfoAlign.SetValueInt(50)
 	if _LIH_Default.GetValueInt() == 1 && _LIH_Reset.GetValueInt() == 1
 		_LIH_Default.SetValueInt(0)
-		debug.Notification("Uninstalling mod..")
+		debug.Notification("Uninstalling mod...")
 		_LIH_AltHealthBarVisible.SetValueInt(0)
 		_LIH_SneakCrosshairAlpha.SetValueInt(100)
 		_LIH_SneakCrosshairVisible.SetValueInt(0)
@@ -1668,7 +1666,7 @@ endFunction
 function ApplySettings()
 	if _LIH_Enabled.GetValueInt() > 0 && _LIH_Reset.GetValueInt() < 1
 		if _LIH_DebugVisible.GetValueInt() == 1
-			debug.Notification("Applying settings...")
+			debug.Notification("Applying HUD settings...")
 		endIf
 		LIH_MainInstance.reset()
 		ApplyChanges()

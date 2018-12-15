@@ -28,48 +28,61 @@ bool		_defaultSymbol1ShowSeasons			= false
 bool		_defaultSymbol2ShowMoonPhases		= false
 bool		_defaultSymbol2Shown				= false
 bool		_defaultSymbol2ShowSeasons			= false
+
 float		_defaultIGClockDisplayTime			= 1.0
-float		_defaultIGClockXOffset				= 10.0
-float		_defaultIGClockYOffset				= 80.0
+float		_defaultIGClockXOffset				= 110.0
+float		_defaultIGClockYOffset				= 19.0
+
 float		_defaultIGDateDisplayTime			= 1.0
-float		_defaultIGDateXOffset				= 150.0
-float		_defaultIGDateYOffset				= 80.0
+float		_defaultIGDateXOffset				= 74.0
+float		_defaultIGDateYOffset				= 20.0
+
 float		_defaultRLClockDisplayTime			= 1.0
 float		_defaultRLClockXOffset				= 10.0
 float		_defaultRLClockYOffset				= 120.0
+
 float		_defaultRLDateDisplayTime			= 1.0
 float		_defaultRLDateXOffset				= 150.0
 float		_defaultRLDateYOffset				= 120.0
+
 float		_defaultSymbol1DisplayTime			= 1.0
-float		_defaultSymbol1XOffset				= 10.0
+float		_defaultSymbol1XOffset				= -50.0
 float		_defaultSymbol1YOffset				= 10.0
+
 float		_defaultSymbol2DisplayTime			= 1.0
 float		_defaultSymbol2XOffset				= 0.0
 float		_defaultSymbol2YOffset				= 0.0
+
 int			_defaultIGClockAlpha				= 100
-int			_defaultIGClockHotkey				= 87
-int			_defaultIGClockScale				= 100
-int			_defaultIGClockTypeIndex			= 0
+int			_defaultIGClockHotkey				= 0
+int			_defaultIGClockScale				= 70
+int			_defaultIGClockTypeIndex			= 3
+
 int			_defaultIGDateAlpha					= 100
-int			_defaultIGDateFormatIndex			= 0
-int			_defaultIGDateHotkey				= 87
-int			_defaultIGDateScale					= 100
+int			_defaultIGDateFormatIndex			= 5
+int			_defaultIGDateHotkey				= 0
+int			_defaultIGDateScale					= 70
+
 int			_defaultRLClockAlpha				= 100
 int			_defaultRLClockHotkey				= 87
 int			_defaultRLClockScale				= 100
 int			_defaultRLClockTypeIndex			= 0
+
 int			_defaultRLDateAlpha					= 100
 int			_defaultRLDateFormatIndex			= 3
-int			_defaultRLDateHotkey				= 87
+int			_defaultRLDateHotkey				= 0
 int			_defaultRLDateScale					= 100
+
 int			_defaultSymbol1Alpha				= 100
-int			_defaultSymbol1Hotkey				= 87
-int			_defaultSymbol1Scale				= 100
-int			_defaultSymbol1ThemeIndex			= 1
+int			_defaultSymbol1Hotkey				= 0
+int			_defaultSymbol1Scale				= 20
+int			_defaultSymbol1ThemeIndex			= 7
+
 int			_defaultSymbol2Alpha				= 100
-int			_defaultSymbol2Hotkey				= 87
+int			_defaultSymbol2Hotkey				= 0
 int			_defaultSymbol2Scale				= 100
 int			_defaultSymbol2ThemeIndex			= 0
+
 int 		_defaultIGClockAlignmentIndex		= 0
 int 		_defaultIGClockControlModeIndex		= 0
 int 		_defaultIGClockPeriodIndex			= 2
@@ -172,7 +185,7 @@ int 		_symbol2VertAlignmentIndex
 
 event OnConfigInit()
 	; Execution Delay.
-	Utility.Wait(8.0)
+	Utility.Wait(6.0)
 
 	InitializeArrays()
 	LoadDefaultsGeneral()
@@ -183,7 +196,6 @@ endEvent
 
 
 event OnPageReset(String page)
-	; Load custom .swf for animated logo
 	if (page == "")
 		LoadCustomContent("AMOTSplash.swf")
 		return

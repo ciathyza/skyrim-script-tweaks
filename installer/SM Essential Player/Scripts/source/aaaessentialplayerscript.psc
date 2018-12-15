@@ -74,10 +74,7 @@ EndEvent
 
 
 Event OnHit(ObjectReference akAggressor, Form akSource, Projectile akProjectile, bool abPowerAttack, bool abSneakAttack, bool abBashAttack, bool abHitBlocked)
-	if (getActorReference().isGhost())
-		return
-	endif
-	if (getActorReference().isInKillMove())
+	if (!essentialQuest.isEnabled || getActorReference().isGhost() || getActorReference().isInKillMove())
 		return
 	endif
 	if (GetActorReference().getActorValue("Health") <= 0)
@@ -104,6 +101,7 @@ Function applyDyingLogic()
 	injuries = injuries + 1
 	injuryrecovertime = Utility.getCurrentRealTime()
 	GetActorReference().StopCombatAlarm()
+
 	If (isGhostMode())
 		setHealthAfterBleedOut(true)
 		makeGhost()

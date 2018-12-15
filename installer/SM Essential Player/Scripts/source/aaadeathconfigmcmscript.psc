@@ -44,6 +44,7 @@ event OnPageReset(string page)
 	endif
 	SetCursorFillMode(TOP_TO_BOTTOM)
 
+	AddHeaderOption("State")
 	isEnabled = AddToggleOption("Enabled ", false)
 
 	AddHeaderOption("Death Style")
@@ -74,6 +75,7 @@ event OnPageReset(string page)
 	if (essentialQuest.mode == essentialQuest.GHOSTMODE)
 		flag = OPTION_FLAG_DISABLED
 	endif
+
 	injuries = AddToggleOption("Enable Injuries", essentialQuest.disableinjuries == 0, flag)
 	coinLoss = AddSliderOption("Coin Loss", essentialQuest.losemoney, "{0}%")
 	flag = OPTION_FLAG_NONE
@@ -233,7 +235,15 @@ endEvent
 ; -------------------------------------------------------------------------------------------------
 
 function setEnabledState()
-	essentialQuest.isEnabled = isEnabled
+	if (isEnabled == 0)
+		setToggleOptionValue(isEnabled, false)
+		essentialQuest.isEnabled = false
+		Debug.Notification("Essential Death disabled.")
+	else
+		setToggleOptionValue(isEnabled, true)
+		essentialQuest.isEnabled = true
+		Debug.Notification("Essential Death enabled.")
+	endIf
 endFunction
 
 

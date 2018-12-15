@@ -41,8 +41,6 @@ Bool active
 ; -------------------------------------------------------------------------------------------------
 
 function OnInit()
-	; Execution Delay.
-	Utility.Wait(1.0)
 	self.OnGameReload()
 endFunction
 

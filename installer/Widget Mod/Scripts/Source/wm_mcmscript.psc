@@ -156,9 +156,6 @@ String[] VAnchorWeightString
 ; -------------------------------------------------------------------------------------------------
 
 Event OnConfigInit()
-	; Execution Delay.
-	Utility.Wait(7.0)
-
 	InitArrays()
 	LoadUserPreset()
 EndEvent

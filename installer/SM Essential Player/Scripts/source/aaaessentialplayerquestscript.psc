@@ -4,7 +4,7 @@ Scriptname aaaEssentialPlayerQuestScript extends Quest Conditional
 ; Properties
 ; -------------------------------------------------------------------------------------------------
 
-int property isEnabled = 0 auto conditional
+bool property isEnabled = false auto conditional
 
 ; Modes
 ; 0 essential only

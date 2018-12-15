@@ -1,0 +1,23 @@
+Scriptname SBA_CoverTopAndBottomEffectScript extends ActiveMagicEffect  
+
+SBA_CoverSelfScript Property myMod auto
+Spell Property SBA_CoverTopAbility auto
+GlobalVariable Property SBA_FacialExpressionEnabled auto
+
+Event OnEffectStart(Actor akTarget, Actor akCaster)
+
+	akTarget.RemoveSpell(SBA_CoverTopAbility)
+
+	bool bOk = true
+	bOk = FNIS_aa.SetAnimGroup(akTarget, "_mtidle", myMod.my_mtidle_base, 0, "CoverSelf", true)
+	bOk = FNIS_aa.SetAnimGroup(akTarget, "_mt", myMod.my_mt_base, 0, "CoverSelf", true)
+	bOk = FNIS_aa.SetAnimGroup(akTarget, "_mtx", myMod.my_mtx_base, 0, "CoverSelf", true)
+	bOk = FNIS_aa.SetAnimGroup(akTarget, "_mtturn", myMod.my_mtturn_base, 0, "CoverSelf", true)
+	bOk = FNIS_aa.SetAnimGroup(akTarget, "_sneakidle", myMod.my_sneakidle_base, 0, "CoverSelf", true)
+	if SBA_FacialExpressionEnabled.GetValue() as bool
+		akTarget.SetExpressionOverride(11, 100)
+	endif
+	;Debug.Notification(bOk)
+
+endEvent
+

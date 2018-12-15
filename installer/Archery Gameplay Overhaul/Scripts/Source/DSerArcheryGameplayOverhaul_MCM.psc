@@ -64,7 +64,7 @@ Float valueS_1
 Float valueS_2
 Float valueS_3
 Float valueS_4
-Int keyK_1
+Int keyK_1 = 19
 Int optionA
 Int optionB_SX
 Int optionB_SY
