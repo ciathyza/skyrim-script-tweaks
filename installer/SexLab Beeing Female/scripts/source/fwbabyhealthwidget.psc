@@ -1,69 +1,51 @@
-;/ Decompiled by Champollion V1.0.1
-Source   : FWBabyHealthWidget.psc
-Modified : 2016-12-06 03:53:06
-Compiled : 2017-01-18 08:35:47
-User     : admin
-Computer : PATRICK
-/;
-scriptName FWBabyHealthWidget extends FWWidgetBase
+﻿Scriptname FWBabyHealthWidget extends FWWidgetBase  
 
-;-- Properties --------------------------------------
 
-;-- Variables ---------------------------------------
-
-;-- Functions ---------------------------------------
-
-Bool function AllowWidgetFor(actor a)
-
-	if CFG_Enabled as Bool && System.IsValidateFemaleActor(a, false) > 0
-		if System.Controller.GetFemaleState(Target) < 4 && System.cfg.Messages >= System.MSG_Immersive
-			return false
-		endIf
+bool function AllowToHide()
+	if System.Controller.GetFemaleState(Target)<4
 		return true
-	endIf
-	return false
+	endif
+	return Target!=Game.GetPlayer() || StorageUtil.GetFloatValue(Target, "FW.UnbornHealth",100.0)>8
 endFunction
 
-; Skipped compiler generated GetState
+bool function AllowWidgetFor(actor a)
+	if CFG_Enabled && System.IsValidateFemaleActor(a)>0
+		if System.Controller.GetFemaleState(Target)<4 && System.cfg.Messages>=System.MSG_Immersive
+			return false
+		endif
+		return true
+	endif
+	return false
+endfunction
+
+event OnWidgetReset()
+	parent.OnWidgetReset()
+	X = CFG_PosX
+	Y = CFG_PosY
+	HAnchor = CFG_HAnchor
+	VAnchor = CFG_VAnchor
+endEvent
 
 function UpdateContent()
-
-	self.X = CFG_PosX as Float
-	self.Y = CFG_PosY as Float
-	self.HAnchor = self.CFG_HAnchor
-	self.VAnchor = self.CFG_VAnchor
-	if self.Ready
-		Int stateID = System.Controller.GetFemaleState(Target)
-		if stateID < 4
-			ui.InvokeInt(self.HUD_MENU, self.WidgetRoot + ".setState", 1)
-			ui.InvokeInt(self.HUD_MENU, self.WidgetRoot + ".setValue", math.Floor(System.Controller.getRelativePregnancyChance(Target, none)))
+	X = CFG_PosX
+	Y = CFG_PosY
+	HAnchor = CFG_HAnchor
+	VAnchor = CFG_VAnchor
+	if (Ready)
+		int stateID=System.Controller.GetFemaleState(Target)
+		if stateID<4
+			UI.InvokeInt(HUD_MENU, WidgetRoot + ".setState",1) ; Set Cycle state
+			UI.InvokeInt(HUD_MENU, WidgetRoot + ".setValue", Math.Floor(System.Controller.getRelativePregnancyChance(Target)))
 		else
-			ui.InvokeInt(self.HUD_MENU, self.WidgetRoot + ".setState", 2)
-			if storageutil.GetIntValue(Target as form, "FW.Abortus", 0) > 1
-				ui.InvokeInt(self.HUD_MENU, self.WidgetRoot + ".setValue", 0)
-				return 
-			endIf
-			Float hp = storageutil.GetFloatValue(Target as form, "FW.UnbornHealth", 100.000)
-			ui.InvokeFloat(self.HUD_MENU, self.WidgetRoot + ".setValue", hp)
-		endIf
-	endIf
-endFunction
-
-function OnWidgetReset()
-
-	parent.OnWidgetReset()
-	self.X = CFG_PosX as Float
-	self.Y = CFG_PosY as Float
-	self.HAnchor = self.CFG_HAnchor
-	self.VAnchor = self.CFG_VAnchor
-endFunction
-
-; Skipped compiler generated GotoState
-
-Bool function AllowToHide()
-
-	if System.Controller.GetFemaleState(Target) < 4
-		return true
-	endIf
-	return Target != game.GetPlayer() || storageutil.GetFloatValue(Target as form, "FW.UnbornHealth", 100.000) > 8.00000
+			UI.InvokeInt(HUD_MENU, WidgetRoot + ".setState",2) ; Set Pregnancy state
+			
+			if StorageUtil.GetIntValue(Target, "FW.Abortus",0)>1
+				; Abortus has already been started
+				UI.InvokeInt(HUD_MENU, WidgetRoot + ".setValue",0)
+				return
+			endif
+			float hp = StorageUtil.GetFloatValue(Target, "FW.UnbornHealth",100.0)
+			UI.InvokeFloat(HUD_MENU, WidgetRoot + ".setValue",hp)
+		endif
+	endif
 endFunction

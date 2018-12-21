@@ -1,40 +1,21 @@
-;/ Decompiled by Champollion V1.0.1
-Source   : BFA_AbilityEffectMenstruationHeadage.psc
-Modified : 2016-12-06 03:52:27
-Compiled : 2017-01-15 06:28:46
-User     : admin
-Computer : PATRICK
-/;
-scriptName BFA_AbilityEffectMenstruationHeadage extends activemagiceffect
+﻿Scriptname BFA_AbilityEffectMenstruationHeadage extends activemagiceffect  
 
-;-- Properties --------------------------------------
-
-;-- Variables ---------------------------------------
 actor PlayerRef
 
-;-- Functions ---------------------------------------
-
-function OnEffectStart(actor target, actor caster)
-
+Event OnEffectStart(Actor target, Actor caster)
 	PlayerRef = target
-	self.RegisterForSingleUpdateGameTime(1.40000)
-endFunction
+	RegisterForSingleUpdateGameTime(1.4)
+endEvent
 
-; Skipped compiler generated GetState
+Event  OnUpdateGameTime()
+	If PlayerRef
+		PlayerRef.DamageActorValue("magicka", (PlayerRef.GetBaseActorValue("magicka") / 100) * 20);
+		RegisterForSingleUpdateGameTime(1.4)
+	Else
+		Dispel()
+	EndIf
+endEvent
 
-function OnEffectFinish(actor target, actor caster)
-
-	self.UnregisterForUpdateGameTime()
-endFunction
-
-; Skipped compiler generated GotoState
-
-function OnUpdateGameTime()
-
-	if PlayerRef
-		PlayerRef.DamageActorValue("magicka", PlayerRef.GetBaseActorValue("magicka") / 100.000 * 20.0000)
-		self.RegisterForSingleUpdateGameTime(1.40000)
-	else
-		self.Dispel()
-	endIf
-endFunction
+Event OnEffectFinish(Actor target, Actor caster)
+	UnregisterForUpdateGameTime()
+endEvent

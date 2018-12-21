@@ -1,117 +1,82 @@
-;/ Decompiled by Champollion V1.0.1
-Source   : FWChildEnchant.psc
-Modified : 2016-12-06 03:52:57
-Compiled : 2017-01-18 08:35:36
-User     : admin
-Computer : PATRICK
-/;
-scriptName FWChildEnchant
+﻿Scriptname FWChildEnchant
 
-;-- Properties --------------------------------------
-magiceffect property Effect
-	magiceffect function get()
+string Ench
+string s_file=""
+int i_formID=0
+magiceffect obj = none
+int i_min = 0
+int i_max = 0
+bool bSuccess = false;
 
-		return obj
+int property min
+	int function get()
+		return min
 	endFunction
-endproperty
-String property EnchantmentName
-	String function get()
+	function set(int value)
+		min = value
+	endfunction
+endProperty
 
-		return Ench
-	endFunction
-endproperty
-Int property min
-	Int function get()
-
-		return self.min
-	endFunction
-	function set(Int value)
-
-		self.min = value
-	endFunction
-endproperty
-Bool property Loaded
-	Bool function get()
-
-		return bSuccess
-	endFunction
-endproperty
-Int property max
-	Int function get()
-
+int property max
+	int function get()
 		return i_max
 	endFunction
-	function set(Int value)
-
+	function set(int value)
 		i_max = value
-	endFunction
-endproperty
-String property ModFile
-	String function get()
+	endfunction
+endProperty
 
-		return s_file
-	endFunction
-endproperty
-Int property FormID
-	Int function get()
-
+int property FormID
+	int function get()
 		return i_formID
 	endFunction
-endproperty
+endProperty
 
-;-- Variables ---------------------------------------
-Int i_max = 0
-String Ench
-Bool bSuccess = false
-magiceffect obj
-Int i_formID = 0
-Int i_min = 0
-String s_file = ""
+string property EnchantmentName
+	string function get()
+		return Ench
+	endFunction
+endProperty
 
-;-- Functions ---------------------------------------
+string property ModFile
+	string function get()
+		return s_file
+	endFunction
+endProperty
 
-Int function GetPowerMin(String sModFile) global native
+bool property Loaded
+	bool function get()
+		return bSuccess
+	endFunction
+endProperty
 
-Int function GetFormID(String sModFile) global native
+magiceffect property Effect
+	magiceffect function get()
+		return obj
+	endFunction
+endProperty
 
-Int function GetPowerMax(String sModFile) global native
+string function GetModFile(string sModFile) global native
+int function GetFormID(string sModFile) global native
+int function GetPowerMin(string sModFile) global native
+int function GetPowerMax(string sModFile) global native
 
-String function GetModFile(String sModFile) global native
-
-; Skipped compiler generated GetState
-
-; Skipped compiler generated GotoState
-
-Bool function Load(String EnchantmentName)
-
-	Ench = self.EnchantmentName
-	s_file = FWChildEnchant.GetModFile(Ench)
-	i_formID = FWChildEnchant.GetFormID(Ench)
-	i_min = FWChildEnchant.GetPowerMin(Ench)
-	i_max = FWChildEnchant.GetPowerMax(Ench)
-	obj = game.GetFormFromFile(self.FormID, s_file) as magiceffect
-	bSuccess = obj != none
+bool function Load(string EnchantmentName)
+	Ench=EnchantmentName
+	s_file = GetModFile(Ench)
+	i_formID = GetFormID(Ench)
+	i_min = GetPowerMin(Ench)
+	i_max = GetPowerMax(Ench)
+	obj = Game.GetFormFromFile(formID, s_file) as magiceffect
+	bSuccess = obj!=none
 	return bSuccess
 endFunction
 
-function onEndState()
-{Event received when this state is switched away from}
-
-	; Empty function
-endFunction
-
-function onBeginState()
-{Event received when this state is switched to}
-
-	; Empty function
-endFunction
-
-String function Test()
-
-	String tmp = ""
+string function Test()
+	string tmp=""
 	tmp += "Enchantment File: " + Ench + "\n"
 	tmp += "Mod File: " + s_file + "\n"
-	tmp += "FormID: " + i_formID as String + "\n"
-	tmp += "Power Min: " + i_min as String + "\n"
-	tmp += "Power Max: " + i_max as String + "\n"
+	tmp += "FormID: " + i_formID + "\n"
+	tmp += "Power Min: " + i_min + "\n"
+	tmp += "Power Max: " + i_max + "\n"
 endFunction

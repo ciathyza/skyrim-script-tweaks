@@ -1,24 +1,14 @@
-;/ Decompiled by Champollion V1.0.1
-Source   : FW_DialOpenInventory.psc
-Modified : 2015-04-27 08:52:02
-Compiled : 2017-01-15 06:25:44
-User     : admin
-Computer : PATRICK
-/;
-scriptName FW_DialOpenInventory extends TopicInfo hidden
+;BEGIN FRAGMENT CODE - Do not edit anything between this and the end comment
+;NEXT FRAGMENT INDEX 2
+Scriptname FW_DialOpenInventory Extends TopicInfo Hidden
 
-;-- Properties --------------------------------------
+;BEGIN FRAGMENT Fragment_1
+Function Fragment_1(ObjectReference akSpeakerRef)
+Actor akSpeaker = akSpeakerRef as Actor
+;BEGIN CODE
+akspeaker.OpenInventory()
+;END CODE
+EndFunction
+;END FRAGMENT
 
-;-- Variables ---------------------------------------
-
-;-- Functions ---------------------------------------
-
-; Skipped compiler generated GetState
-
-; Skipped compiler generated GotoState
-
-function Fragment_1(ObjectReference akSpeakerRef)
-
-	actor akSpeaker = akSpeakerRef as actor
-	akSpeaker.OpenInventory(false)
-endFunction
+;END FRAGMENT CODE - Do not edit anything between this and the begin comment

@@ -1,118 +1,101 @@
-;/ Decompiled by Champollion V1.0.1
-Source   : BFA_Reminder.psc
-Modified : 2016-12-06 03:52:10
-Compiled : 2017-01-15 06:28:36
-User     : admin
-Computer : PATRICK
-/;
-scriptName BFA_Reminder extends FWAddOn_Misc
+﻿Scriptname BFA_Reminder extends FWAddOn_Misc  
 
-;-- Properties --------------------------------------
-fwsystem property System auto
+FWSystem property System auto
+bool bActive=false
 
-;-- Variables ---------------------------------------
-Bool bActive = false
-
-;-- Functions ---------------------------------------
-
-; Skipped compiler generated GotoState
 
 function OnGameLoad()
-
-	if System == none
-		System = game.GetFormFromFile(3426, "BeeingFemale.esm") as fwsystem
-	endIf
-	if bActive == true
-		self.RegisterForSingleUpdateGameTime(2.00000)
-		self.execute()
+	if System==none
+		System = Game.GetFormFromFile(0xD62, "BeeingFemale.esm") as FWSystem
+	endif
+	if bActive==true
+		RegisterForSingleUpdateGameTime(2)
+		execute()
 	else
-		self.SetStage(0)
-		self.SetObjectiveDisplayed(0, false, false)
-		self.SetObjectiveDisplayed(1, false, false)
-		self.SetObjectiveDisplayed(2, false, false)
-	endIf
+		SetStage(0)
+		SetObjectiveDisplayed(0, false)
+		SetObjectiveDisplayed(1, false)
+		SetObjectiveDisplayed(2, false)
+	endif
 endFunction
 
 function OnAddOnActivate()
-
-	if bActive == false
-		debug.Trace("Reminder activated", 0)
-		bActive = true
-		self.RegisterForUpdateGameTime(2.00000)
-		self.execute()
-	endIf
-endFunction
-
-function execute()
-
-	actor PlayerRef = game.GetPlayer()
-	if PlayerRef.GetLeveledActorBase().GetSex() == 0 || storageutil.FormListFind(none, "FW.SavedNPCs", PlayerRef as form) < 0
-		self.SetStage(0)
-		self.SetObjectiveDisplayed(0, false, false)
-		self.SetObjectiveDisplayed(1, false, false)
-		self.SetObjectiveDisplayed(2, false, false)
-		return 
-	endIf
-	Float Time = utility.GetCurrentGameTime()
-	Float cDur = System.GetPillDuration(PlayerRef)
-	Float cTime = storageutil.GetFloatValue(PlayerRef as form, "FW.ContraceptionTime", 0.000000)
-	Float contraception = System.Controller.getContraceptionTimed(PlayerRef, Time)
-	if contraception < 5.00000
-		if self.GetStage() != 0
-			self.SetStage(0)
-			self.SetObjectiveDisplayed(0, false, false)
-			self.SetObjectiveDisplayed(1, false, false)
-			self.SetObjectiveDisplayed(2, false, false)
-		endIf
-	elseIf cTime + cDur + 0.200000 < Time
-		if self.GetStage() != 2
-			self.SetStage(2)
-			self.SetObjectiveDisplayed(0, false, false)
-			self.SetObjectiveDisplayed(1, false, false)
-			self.SetObjectiveDisplayed(2, true, false)
-		endIf
-	elseIf cTime + cDur * 0.730000 > Time
-		if self.GetStage() != 0
-			self.SetStage(0)
-			self.SetObjectiveDisplayed(0, false, false)
-			self.SetObjectiveDisplayed(1, false, false)
-			self.SetObjectiveDisplayed(2, false, false)
-		endIf
-	elseIf self.GetStage() != 1
-		self.SetStage(1)
-		self.SetObjectiveDisplayed(0, false, false)
-		self.SetObjectiveDisplayed(1, true, false)
-		self.SetObjectiveDisplayed(2, false, false)
-	endIf
+	if bActive==false
+		Debug.Trace("Reminder activated")
+		bActive=true
+		RegisterForUpdateGameTime(2)
+		execute()
+	endif
 endFunction
 
 function OnAddOnDeactivate()
-
-	if bActive == true
-		debug.Trace("Reminder deactivated", 0)
-		bActive = false
-		self.UnregisterForUpdateGameTime()
-		self.SetStage(0)
-		self.SetObjectiveDisplayed(0, false, false)
-		self.SetObjectiveDisplayed(1, false, false)
-		self.SetObjectiveDisplayed(2, false, false)
-	endIf
+	if bActive==true
+		Debug.Trace("Reminder deactivated")
+		bActive=false
+		UnregisterForUpdateGameTime()
+		SetStage(0)
+		SetObjectiveDisplayed(0, false)
+		SetObjectiveDisplayed(1, false)
+		SetObjectiveDisplayed(2, false)
+	endif
 endFunction
 
-function OnContraception(actor Woman, Float Amount, Float ValueBefore, Float ValueAfter, Float TimeAgo)
+event OnUpdateGameTime()
+	if self==none
+		return
+	endif
+	execute()
+	if bActive==true
+		RegisterForSingleUpdateGameTime(2)
+	endif
+endEvent
 
-	self.execute()
+function execute()
+	actor PlayerRef = Game.GetPlayer()
+	If PlayerRef.GetLeveledActorBase().GetSex()==0 || (StorageUtil.FormListFind(none,"FW.SavedNPCs",PlayerRef)<0)
+		; Woman not stored
+		SetStage(0)
+		SetObjectiveDisplayed(0, false)
+		SetObjectiveDisplayed(1, false)
+		SetObjectiveDisplayed(2, false)
+		return
+	EndIf
+	float Time = Utility.GetCurrentGameTime()
+	float cDur = System.GetPillDuration(PlayerRef)
+	float cTime = StorageUtil.GetFloatValue(PlayerRef,"FW.ContraceptionTime",0)
+	float contraception = System.Controller.getContraceptionTimed(PlayerRef, Time)
+	
+	if contraception<5
+		if GetStage()!=0
+		SetStage(0)
+		SetObjectiveDisplayed(0, false)
+		SetObjectiveDisplayed(1, false)
+		SetObjectiveDisplayed(2, false)
+		endif
+	elseif cTime + cDur + 0.2 < Time
+		if GetStage()!=2
+		SetStage(2)
+		SetObjectiveDisplayed(0, false)
+		SetObjectiveDisplayed(1, false)
+		SetObjectiveDisplayed(2, true)
+		endif
+	elseif cTime + (cDur * 0.73) > Time
+		if GetStage()!=0
+		SetStage(0)
+		SetObjectiveDisplayed(0, false)
+		SetObjectiveDisplayed(1, false)
+		SetObjectiveDisplayed(2, false)
+		endif
+	else
+		if GetStage()!=1
+		SetStage(1)
+		SetObjectiveDisplayed(0, false)
+		SetObjectiveDisplayed(1, true)
+		SetObjectiveDisplayed(2, false)
+		endif
+	endif
 endFunction
 
-; Skipped compiler generated GetState
-
-function OnUpdateGameTime()
-
-	if self == none
-		return 
-	endIf
-	self.execute()
-	if bActive == true
-		self.RegisterForSingleUpdateGameTime(2.00000)
-	endIf
+function OnContraception(Actor Woman, float Amount, float ValueBefore, float ValueAfter, float TimeAgo)
+	execute()
 endFunction

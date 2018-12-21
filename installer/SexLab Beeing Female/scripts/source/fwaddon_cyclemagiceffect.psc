@@ -1,38 +1,36 @@
-;/ Decompiled by Champollion V1.0.1
-Source   : FWAddOn_CycleMagicEffect.psc
-Modified : 2017-01-12 13:18:38
-Compiled : 2017-01-18 08:36:35
-User     : admin
-Computer : PATRICK
-/;
-scriptName FWAddOn_CycleMagicEffect extends FWAddOnBase
+﻿Scriptname FWAddOn_CycleMagicEffect extends FWAddOnBase
 
-;-- Properties --------------------------------------
-spell[] property Always_Trimester2 auto
-spell[] property Always_LuthealPhase auto
-spell[] property Always_Menstruation auto
-spell[] property Sometimes_Trimester3 auto
-spell[] property Always_Trimester1 auto
-spell[] property Sometimes_Trimester1 auto
-spell[] property Always_Trimester3 auto
-spell[] property Sometimes_LaborPains auto
-spell[] property Always_FollicularPhase auto
-spell[] property Sometimes_Menstruation auto
-spell[] property Sometimes_FollicularPhase auto
-spell[] property Sometimes_LuthealPhase auto
-spell[] property Sometimes_Recovery auto
-spell[] property Always_Ovulation auto
-spell[] property Always_PMS auto
-spell[] property Sometimes_PMS auto
-spell[] property Sometimes_Ovulation auto
-spell[] property Always_Recovery auto
-spell[] property Always_LaborPains auto
-spell[] property Sometimes_Trimester2 auto
+spell[] property Always_FollicularPhase Auto
+spell[] property Always_Ovulation Auto
+spell[] property Always_LuthealPhase Auto
+spell[] property Always_PMS Auto
+spell[] property Always_Menstruation Auto
+spell[] property Always_Trimester1 Auto
+spell[] property Always_Trimester2 Auto
+spell[] property Always_Trimester3 Auto
+spell[] property Always_LaborPains Auto
+spell[] property Always_Recovery Auto
 
-;-- Variables ---------------------------------------
+spell[] property Sometimes_FollicularPhase Auto
+spell[] property Sometimes_Ovulation Auto
+spell[] property Sometimes_LuthealPhase Auto
+spell[] property Sometimes_PMS Auto
+spell[] property Sometimes_Menstruation Auto
+spell[] property Sometimes_Trimester1 Auto
+spell[] property Sometimes_Trimester2 Auto
+spell[] property Sometimes_Trimester3 Auto
+spell[] property Sometimes_LaborPains Auto
+spell[] property Sometimes_Recovery Auto
 
-;-- Functions ---------------------------------------
 
-; Skipped compiler generated GotoState
-
-; Skipped compiler generated GetState
+;function Refresh(string strArg, FWAddOnManager sender)
+;	if (strArg == "") || (strArg == "CME")
+;		if sender != none
+;			sender.RegisterCMEAddOn(self)
+;		elseif AddOnManager != none
+;			AddOnManager.RegisterCMEAddOn(self)
+;		else
+;			Debug.Trace("Beeing Female Mod Manager - RefreshAddOns CME " + GetName() + " failed - Manager is none")
+;		endif
+;	endIf
+;endFunction

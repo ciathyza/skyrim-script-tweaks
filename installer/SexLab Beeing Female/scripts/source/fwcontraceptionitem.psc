@@ -1,80 +1,65 @@
-;/ Decompiled by Champollion V1.0.1
-Source   : FWContraceptionItem.psc
-Modified : 2017-01-13 16:21:15
-Compiled : 2017-01-18 08:35:33
-User     : admin
-Computer : PATRICK
-/;
-scriptName FWContraceptionItem extends FWSpell
+﻿Scriptname FWContraceptionItem extends FWSpell 
 
-;-- Properties --------------------------------------
-imagespacemodifier property iModContraception6 auto
-imagespacemodifier property iModContraception8 auto
-imagespacemodifier property iModContraception4 auto
-imagespacemodifier property iModContraception2 auto
-imagespacemodifier property iModContraception9 auto
-imagespacemodifier property iModContraception5 auto
-imagespacemodifier property iModContraception7 auto
-imagespacemodifier property iModContraception0 auto
-imagespacemodifier property iModContraception1 auto
-imagespacemodifier property iModContraception3 auto
+;FWSystem property System auto
 
-;-- Variables ---------------------------------------
+Imagespacemodifier property iModContraception0 auto
+Imagespacemodifier property iModContraception1 auto
+Imagespacemodifier property iModContraception2 auto
+Imagespacemodifier property iModContraception3 auto
+Imagespacemodifier property iModContraception4 auto
+Imagespacemodifier property iModContraception5 auto
+Imagespacemodifier property iModContraception6 auto
+Imagespacemodifier property iModContraception7 auto
+Imagespacemodifier property iModContraception8 auto
+Imagespacemodifier property iModContraception9 auto
+
 actor ActorRef
-Bool bInit = false
-
-;-- Functions ---------------------------------------
-
-function OnInit()
-
-	bInit = true
-	parent.OnInit()
-	self.execute()
-endFunction
-
-; Skipped compiler generated GetState
-
-function OnWoman(actor akTarget, actor akCaster)
-
-	ActorRef = akCaster
-	self.execute()
-endFunction
+bool bInit=false
 
 function execute()
 
-	if bInit == false || ActorRef == none
-		return 
-	endIf
-	Float mag = self.GetMagnitude()
-	if mag < 2.00000
-		mag = 2.00000
-	endIf
-	if ActorRef == game.GetPlayer() && mag > 2.00000
-		Float f = 1.00000 - fwutility.floatModulo(mag, 10.0000) / 30.0000
-		if mag < 10.0000
+	if bInit==false || ActorRef==none
+		return
+	endif
+	float mag = GetMagnitude()
+	if mag <2
+		mag=2
+	endif
+	if ActorRef==Game.GetPlayer() && mag >2
+		float f=1.0 - (FWUtility.floatModulo(mag,10.0)/30)
+		if mag<10
 			iModContraception0.apply(f)
-		elseIf mag < 20.0000
+		elseif mag<20
 			iModContraception1.apply(f)
-		elseIf mag < 30.0000
+		elseif mag<30
 			iModContraception2.apply(f)
-		elseIf mag < 40.0000
+		elseif mag<40
 			iModContraception3.apply(f)
-		elseIf mag < 50.0000
+		elseif mag<50
 			iModContraception4.apply(f)
-		elseIf mag < 60.0000
+		elseif mag<60
 			iModContraception5.apply(f)
-		elseIf mag < 70.0000
+		elseif mag<70
 			iModContraception6.apply(f)
-		elseIf mag < 80.0000
+		elseif mag<80
 			iModContraception7.apply(f)
-		elseIf mag < 90.0000
+		elseif mag<90
 			iModContraception8.apply(f)
 		else
 			iModContraception9.apply(f)
-		endIf
-	endIf
+		endif
+	endif
 	System.Controller.AddContraception(ActorRef, mag)
 	System.Controller.DamageBaby(ActorRef, mag)
-endFunction
+endfunction
 
-; Skipped compiler generated GotoState
+Event OnWoman(Actor akTarget, Actor akCaster)
+	ActorRef = akCaster
+	execute()
+endEvent
+
+Event OnInit()
+	bInit=true
+	parent.OnInit()
+	execute()
+endEvent

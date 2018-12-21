@@ -1,129 +1,119 @@
-;/ Decompiled by Champollion V1.0.1
-Source   : FWAbilityBeeingMale.psc
-Modified : 2016-12-06 03:53:19
-Compiled : 2017-01-18 08:36:44
-User     : admin
-Computer : PATRICK
-/;
-scriptName FWAbilityBeeingMale extends FWAbilityBeeingBase
+﻿Scriptname FWAbilityBeeingMale extends FWAbilityBeeingBase
 
-;-- Properties --------------------------------------
+Event OnEffectStart(Actor akTarget, Actor akCaster)
+	if  System.ModEnabled.GetValueInt()!=1
+		akTarget.RemoveSpell(System.BeeingMaleSpell)
+		akTarget.DispelSpell(System.BeeingMaleSpell)
+		return;
+	endif
 
-;-- Variables ---------------------------------------
+	if (akTarget as form) == none
+		Debug.Trace("BeeingMale: OnEffectStart Actor's Form = none : Dispel")
+		Self.Dispel()
+		return
+	endif
 
-;-- Functions ---------------------------------------
-
-function OnUpdate()
-
-	if !self.isFormValid()
-		return 
-	endIf
-	parent.OnUpdate()
-endFunction
-
-; Skipped compiler generated GotoState
-
-function OnUpdateGameTime()
-
-	if !self.isFormValid()
-		return 
-	endIf
-	if ActorRef == none
-		self.Dispel()
-		return 
-	endIf
-	if System == none
-		return 
-	endIf
-	if System.Controller == none
-		return 
-	endIf
-	System.Controller.UpdateParentFaction(ActorRef)
-	if ActorRef.GetLeveledActorBase().GetSex() != 0
-		if ActorRef.HasSpell(System.BeeingFemaleSpell as form) == false
-			if System.IsValidateActor(ActorRef, false) > 0
-				ActorRef.AddSpell(System.BeeingFemaleSpell, true)
-			endIf
-		endIf
+	IsPlayer = (akTarget == Game.GetPlayer())
+	
+	ActorRef = akTarget
+	ActorRefBase = akTarget.GetLeveledActorBase()
+	
+	If System.IsValidateMaleActor(akTarget)<0
+		;System.Message("BeeingMale on " + ActorBaseRef.GetName() + " dispelled (#1)", System.MSG_Debug)
 		ActorRef.RemoveSpell(System.BeeingMaleSpell)
 		ActorRef.DispelSpell(System.BeeingMaleSpell)
-	endIf
-	if IsPlayer
-		if System.PlayerMale == none
-			System.PlayerMale = self
-			System.Player = none
-		endIf
-	endIf
-endFunction
+		;Dispel()
+		Return
+	EndIf
 
-Bool function isFormValid()
+	If IsPlayer
+		System.PlayerMale = Self
+		System.Player = none
+	EndIf
 
-	return ActorRef as form != none && ActorRefBase as actorbase != none
-endFunction
+	equipChild()
+	
+	bInitSpell=true
+	OnPlayerLoadGame()
+EndEvent
 
 function OnPlayerLoadGame()
-
-	if bInit == true && bInitSpell == true && self as activemagiceffect != none
-		utility.WaitMenuMode(1.00000)
+	if bInit==true && bInitSpell==true && self as ActiveMagicEffect != none
+		Utility.WaitMenuMode(1)
 		IsFollower = ActorRef.IsInFaction(System.FollowerFaction) && IsPlayer == false
 		System.Controller.UpdateParentFaction(ActorRef)
-		if !self.isFormValid()
-			self.Dispel()
-			debug.Trace("BeeingMale: OnPlayerloadgame on None Actor - Dispel", 0)
-			return 
-		elseIf self as FWAbilityBeeingMale != none
-			(self as activemagiceffect).UnregisterForUpdateGameTime()
-			(self as activemagiceffect).RegisterForupdateGameTime(2.00000)
-			(self as activemagiceffect).UnregisterForUpdate()
-			(self as activemagiceffect).RegisterForUpdate(5.00000)
-		endIf
-	endIf
-endFunction
+		if !isFormValid() ; ActorRef == None
+			Self.Dispel()
+			Debug.Trace("BeeingMale: OnPlayerloadgame on None Actor - Dispel")
+			return
+		else
+			if self as FWAbilityBeeingMale != none 
+				(self as ActiveMagicEffect).UnregisterForUpdateGameTime() ;***Edit by Bane
+				(self as ActiveMagicEffect).RegisterForupdateGameTime(2) ;***Edit by Bane
+				(self as ActiveMagicEffect).UnregisterForUpdate() ;***Edit by Bane
+				(self as ActiveMagicEffect).RegisterForUpdate(5) ;***Edit by Bane
+			endif
+		endif
+		;parent.OnPlayerLoadGame()
+	endif
+endfunction
 
-; Skipped compiler generated GetState
-
-function OnEffectFinish(Actor akTarget, Actor akCaster)
-
-	if self as activemagiceffect != none && self.isFormValid()
-		if System
-			if System.PlayerMale == self
-				System.PlayerMale = none
-			endIf
+Event OnEffectFinish(Actor akTarget, Actor akCaster)
+	If Self as ActiveMagicEffect != none && isFormValid()
+		If System
+			If (System.PlayerMale == Self)
+				System.PlayerMale = None
+			EndIf
 			if ActorRef
 				ActorRef.RemoveSpell(System.BeeingMaleSpell)
 				ActorRef.DispelSpell(System.BeeingMaleSpell)
-			endIf
-		endIf
-	else
-		debug.Trace("BeeingFemale: Orphaned BeeingMale OnEffectFinish", 0)
-	endIf
-endFunction
+			endif
+		EndIf
+	Else
+		Debug.Trace("BeeingFemale: Orphaned BeeingMale OnEffectFinish")
+	EndIf
+EndEvent
 
-function OnEffectStart(Actor akTarget, Actor akCaster)
+Event OnUpdate()
+	if !isFormValid()
+		return
+	endif
+	parent.OnUpdate()
+endEvent
 
-	if System.ModEnabled.GetValueInt() != 1
-		akTarget.RemoveSpell(System.BeeingMaleSpell)
-		akTarget.DispelSpell(System.BeeingMaleSpell)
-		return 
-	endIf
-	if akTarget as form == none
-		debug.Trace("BeeingMale: OnEffectStart Actor's Form = none : Dispel", 0)
-		self.Dispel()
-		return 
-	endIf
-	IsPlayer = akTarget == game.GetPlayer()
-	ActorRef = akTarget
-	ActorRefBase = akTarget.GetLeveledActorBase()
-	if System.IsValidateMaleActor(akTarget, false) < 0
+Event OnUpdateGameTime()
+	if !isFormValid()
+		return
+	endif
+	if ActorRef==none
+		Self.Dispel()
+		return
+	endif
+	if System==none
+		return
+	endif
+	if System.Controller == none
+		return
+	endif
+	System.Controller.UpdateParentFaction(ActorRef)
+	if ActorRef.GetLeveledActorBase().GetSex()!=0
+		if ActorRef.HasSpell(System.BeeingFemaleSpell)==false
+			if System.IsValidateActor(ActorRef)>0
+				ActorRef.AddSpell(System.BeeingFemaleSpell)
+			endif
+		endif
 		ActorRef.RemoveSpell(System.BeeingMaleSpell)
 		ActorRef.DispelSpell(System.BeeingMaleSpell)
-		return 
-	endIf
+	endif
 	if IsPlayer
-		System.PlayerMale = self
-		System.Player = none
-	endIf
-	self.equipChild()
-	bInitSpell = true
-	self.OnPlayerLoadGame()
-endFunction
+		if System.PlayerMale==none
+			System.PlayerMale=self
+			System.Player=none
+		endif
+	endif
+endEvent
+
+bool Function isFormValid()
+	return (ActorRef as form) != none && (ActorRefBase as ActorBase) != none
+endfunction
+	

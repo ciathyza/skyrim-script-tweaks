@@ -1,304 +1,313 @@
-;/ Decompiled by Champollion V1.0.1
-Source   : FWAddOn_Misc.psc
-Modified : 2017-01-12 13:18:41
-Compiled : 2017-01-18 08:36:18
-User     : admin
-Computer : PATRICK
-/;
-scriptName FWAddOn_Misc extends FWAddOnBase hidden
+﻿Scriptname FWAddOn_Misc extends FWAddOnBase Hidden
 
-;-- Properties --------------------------------------
-String property AddOnName hidden
-	String function get()
+bool property HasCamera = false auto
 
-		if sAddOnName == ""
-			Int fID = self.GetFormID()
-			Int bID = fID % 16777216
-			Int mID = (fID - bID) / 16777216
-			String ModName = game.GetModName(mID)
-			debug.Notification(ModName + "; mID:" + mID as String + "; bID:" + bID as String)
-			Int c = fwutility.GetFileCount("AddOn", "ini")
-			while c > 0
-				c -= 1
-				String n = fwutility.GetFileName("AddOn", "ini", c)
-				if fwutility.GetIniCString("AddOn", n, "AddOn", "modFile", "") == ModName
-					if fwutility.GetIniCInt("AddOn", n, "AddOn", "form", 0) == bID
-						self.SetAddOnName(n)
-						return n
-					endIf
-				endIf
-			endWhile
-		endIf
-		return sAddOnName
-	endFunction
-endproperty
-Bool property HasCamera = false auto
 
-;-- Variables ---------------------------------------
-String sAddOnName = ""
-
-;-- Functions ---------------------------------------
-
-function OnGameLoad()
-
-	; Empty function
-endFunction
-
-function OnDoDamageEnd(actor Woman, Float amount, Int DamageType, Float OptionalArgument)
-
-	; Empty function
-endFunction
-
-function OnRegisterChildPerk(FWChildSettings childSettings)
-
-	; Empty function
-endFunction
-
-function OnEnterState(actor akFemale, Int iState)
-
-	; Empty function
-endFunction
-
-function OnImpregnate(actor Woman, Int NumChildren, Actor[] ChildFathers)
-
-	; Empty function
-endFunction
-
-String function GetString(String name, String Default)
-
-	if self.AddOnName == ""
-		return Default
-	else
-		return fwutility.GetIniCString("AddOn", sAddOnName, "Settings", name, Default)
-	endIf
-endFunction
-
-function OnExitState(actor akFemale, Int iState)
-
-	; Empty function
-endFunction
-
-function OnAddOnDeactivate()
-
-	; Empty function
-endFunction
-
-function OnPotionDrink(actor akMother, potion akPotion)
-
-	; Empty function
-endFunction
-
-function OnGiveBirthEnd(actor akMother)
-
-	; Empty function
-endFunction
-
-Bool function OnAllowFFCum(actor WomanToAdd, actor denor)
-
-	return false
-endFunction
-
-function StopCamera()
-
-	; Empty function
-endFunction
-
-function OnContraception(actor Woman, Float amount, Float ValueBefore, Float ValueAfter, Float TimeAgo)
-
-	; Empty function
-endFunction
-
-function SetFloat(String name, Float value)
-
-	if self.AddOnName != ""
-		fwutility.SetIniCFloat("AddOn", sAddOnName, "Settings", name, value)
-	endIf
-endFunction
-
-Int function GetInt(String name, Int Default)
-
-	if self.AddOnName == ""
-		return Default
-	else
-		return fwutility.GetIniCInt("AddOn", sAddOnName, "Settings", name, Default)
-	endIf
-endFunction
-
-Bool function GetBool(String name, Bool Default)
-
-	if self.AddOnName == ""
-		return Default
-	else
-		return fwutility.GetIniCBool("AddOn", sAddOnName, "Settings", name, Default)
-	endIf
-endFunction
-
-function OnLaborPain(actor akFemale)
-
-	; Empty function
-endFunction
-
-FWController function GetController()
-
-	return game.GetFormFromFile(6186, fwutility.modFile("BeeingFemale")) as FWController
-endFunction
-
-function SetString(String name, String value)
-
-	if self.AddOnName != ""
-		fwutility.SetIniCString("AddOn", sAddOnName, "Settings", name, value)
-	endIf
-endFunction
-
-FWSystemConfig function GetConfig()
-
-	return game.GetFormFromFile(6184, fwutility.modFile("BeeingFemale")) as FWSystemConfig
-endFunction
-
-Bool function CheckForCondome(actor Woman, actor Man)
-
-	return false
-endFunction
-
-FWSystem function GetSystem()
-
-	return game.GetFormFromFile(3426, fwutility.modFile("BeeingFemale")) as FWSystem
-endFunction
-
-function OnCameInside(actor akFemale, actor akMale)
-
-	; Empty function
-endFunction
-
-Float function getSpermAmount(actor akFemale, actor akMale, Float amount)
-
-	return amount
-endFunction
-
-function StartCamera()
-
-	; Empty function
-endFunction
-
-function SetInt(String name, Int value)
-
-	if self.AddOnName != ""
-		fwutility.SetIniCInt("AddOn", sAddOnName, "Settings", name, value)
-	endIf
-endFunction
-
-function SetAddOnName(String S)
-
-	sAddOnName = S
-endFunction
-
-ObjectReference function OnGetBedRef(actor ActorRef)
-
-	return none
-endFunction
-
-; Skipped compiler generated GotoState
-
-actor function OnSleepSexStart(actor p, actor aSexPartner)
-
-	return aSexPartner
-endFunction
-
-function OnMimik(actor ActorRef, String ExpressionName, Int Strength, Bool bClear)
-
-	; Empty function
-endFunction
-
-function OnAddOnActivate()
-
-	; Empty function
-endFunction
-
-Bool function OnPlayPainSound(actor ActorRef, Float Strength)
-
-	return false
-endFunction
-
-function SetBool(String name, Bool value)
-
-	if self.AddOnName != ""
-		fwutility.SetIniCBool("AddOn", sAddOnName, "Settings", name, value)
-	endIf
-endFunction
-
-function OnGiveBirth(actor akMother, Int iChildCount)
-
-	; Empty function
-endFunction
-
-Form[] function OnStripActor(actor ActorRef)
-
-	Form[] fAll
-	return fAll
-endFunction
-
-actor function OnSleepSexStop(actor p, actor aSexPartner)
-
-	return aSexPartner
-endFunction
-
-function OnMagicEffectApply(actor akWoman, ObjectReference akCaster, MagicEffect akEffect)
-
-	; Empty function
-endFunction
-
-function OnDoDamageStart(actor a, Float amount, Int DamageType, Float OptionalArgument)
-
-	; Empty function
-endFunction
-
-function OnUpdateFunction(actor akFemale, Int iState, Float StatePercentage)
-
-	; Empty function
-endFunction
-
-Float function OnDoDamage(actor Woman, Float amount, Int DamageType, Float OptionalArgument)
-
-	return amount
-endFunction
-
-Float function GetFloat(String name, Float Default)
-
-	if self.AddOnName == ""
-		return Default
-	else
-		return fwutility.GetIniCFloat("AddOn", sAddOnName, "Settings", name, Default)
-	endIf
-endFunction
-
-Bool function OnPainSound(actor akMother)
-
-	; Empty function
-endFunction
-
-function OnBabySpawn(actor akMother, actor akFather)
-
-	; Empty function
-endFunction
-
-function OnGiveBirthStart(actor akMother)
-
-	; Empty function
-endFunction
-
-function OnUninstall()
-
-	; Empty function
-endFunction
-
-; Skipped compiler generated GetState
-
-Bool function IsActive()
-
+; Check if this AddOn is active
+bool function IsActive()
 	return true
 endFunction
 
-function OnSpellCast(actor akMother, spell akSpell)
+; Raised when the player loads the game
+function OnGameLoad()
+endFunction
 
-	; Empty function
+
+; Raised when this AddOn was activated / enabled
+function OnAddOnActivate()
+endFunction
+
+; raised when this AddOn was deaktivated
+function OnAddOnDeactivate()
+endFunction
+
+
+; Starting a birth camera
+function StartCamera()
+endFunction
+
+
+; End a birth camera
+function StopCamera()
+endFunction
+
+
+; Raised when a state was enterd
+function OnEnterState(actor akFemale, int iState)
+endFunction
+
+
+; Raised when exit a state
+function OnExitState(actor akFemale, int iState)
+endFunction
+
+
+; raised every Game-hour
+function OnUpdateFunction(actor akFemale, int iState, float StatePercentage)
+endFunction
+
+
+; raised when a man cames inside a woman
+function OnCameInside(actor akFemale, actor akMale)
+endFunction
+
+
+; Returns the amount of sperm when a male cames inside a woman
+float function getSpermAmount(actor akFemale, actor akMale, float amount)
+	return amount
+endFunction
+
+; Raised when the woman had some labor pains
+function OnLaborPain(actor akFemale)
+endFunction
+
+
+; raised when the birth began
+function OnGiveBirth(actor akMother, int iChildCount)
+endFunction
+
+
+; raised when Birth animation begin
+function OnGiveBirthStart(actor akMother)
+endFunction
+
+
+; raised when the birth animation ends
+function OnGiveBirthEnd(actor akMother)
+endFunction
+
+
+; raised when the the woman has pains
+bool function OnPainSound(actor akMother)
+endFunction
+
+
+; raised when a baby was spawn
+function OnBabySpawn(actor akMother, actor akFather)
+endFunction
+
+
+; raised when a potion was drank
+function OnPotionDrink(actor akMother, potion akPotion)
+endFunction
+
+
+; raised when a spell was casted
+function OnSpellCast(actor akMother, spell akSpell)
+endFunction
+
+
+
+
+; Damage Type:								Optional Argument
+;  0	Unknown
+;  1	Mittelschmerz / Ovulation pains		strength of the pains
+;  2	PMS pains							
+;  3	Menstruation cramps					strength of the pains
+;  4	Pregnancy 1. sickness
+;  5	Pregnancy 2. sickness
+;  6	Pregnancy 3. sickness
+;  7	premonitory pains
+;  8	first stage pains
+;  9	Child-Pressing pains
+; 10	bearing-down pains
+; 11	afterpains
+; 12	baby milk drinking pains
+; 13	infection pains
+; 14	abortus pains
+;
+; The amount is a percentage value based on the players max health. 0.0 = 0 Damage; 100.0 = instant death
+; Raised when the mod based menstrual/pragnancy damage was called
+float function OnDoDamage(actor Woman, float Amount, int DamageType, float OptionalArgument)
+	return Amount
+endfunction
+
+
+; Raised when the stack of pains begin
+function OnDoDamageStart(actor a, float Amount, int DamageType, float OptionalArgument)
+endFunction
+
+
+; Raised when the stack of pains end
+function OnDoDamageEnd(actor Woman, float Amount, int DamageType, float OptionalArgument)
+endFunction
+
+
+; Raised when the women uses a contraception fluid
+function OnContraception(Actor Woman, float Amount, float ValueBefore, float ValueAfter, float TimeAgo)
+endFunction
+
+
+; Raised when the women become pregnant
+function OnImpregnate(actor Woman, int NumChildren, Actor[] ChildFathers)
+endfunction
+
+
+; Raised when a magic effect was applied
+function OnMagicEffectApply(Actor akWoman, ObjectReference akCaster, MagicEffect akEffect)
+endFunction
+
+
+; Check for a condome. When this function returns true, there won't be any sperm added
+bool function CheckForCondome(actor Woman, actor Man)
+	return false
+endfunction
+
+
+; Raised when this AddOn was unsinstalled
+function OnUninstall()
+endfunction
+
+
+; not used anymore
+function OnRegisterChildPerk(FWChildSettings childSettings)
+endFunction
+
+
+; Raised when the women undress
+Form[] function OnStripActor(Actor ActorRef)
+	Form[] fAll
+	return fAll
+endfunction
+
+
+; Raised when the women mimik changes
+function OnMimik(actor ActorRef, string ExpressionName = "", int Strength = 50, bool bClear = true)
+endfunction
+
+
+; Raised when searching a bed
+ObjectReference function OnGetBedRef(Actor ActorRef)
+	return none
+endfunction
+
+
+; Raised when a pain sound should appear. Return false when this AddOn don't handle the pain sound
+bool function OnPlayPainSound(actor ActorRef, float Strength)
+	return false
+endfunction
+
+
+; Raised when check for Female/Female cum
+bool function OnAllowFFCum(Actor WomanToAdd, Actor denor)
+	return false
+endfunction
+
+
+; Raised when the player beginn sleeping, overwriting the sex partner that is used
+actor function OnSleepSexStart(actor p, actor aSexPartner)
+	return aSexPartner
+endFunction
+
+
+; Raised when the player stop sleeping, overwriting the sex partner that is used
+actor function OnSleepSexStop(actor p, actor aSexPartner)
+	return aSexPartner
+endFunction
+
+
+
+
+
+
+
+
+
+;-----------------------------
+;   Static Functions
+;-----------------------------
+string sAddOnName=""
+string property AddOnName hidden
+	string function Get()
+		if sAddOnName==""
+			int fID=GetFormID() ; FormID
+			int bID=fID % 0x1000000 ; Form Base ID
+			int mID=(fID-bID)/0x1000000 ; Mod ID
+			string ModName=Game.GetModName(mID)
+			Debug.Notification(ModName+"; mID:"+mID+"; bID:"+bID)
+			int c=FWUtility.GetFileCount("AddOn","ini")
+			while c>0
+				c-=1
+				string n=FWUtility.GetFileName("AddOn","ini",c)
+				if FWUtility.GetIniCString("AddOn",n,"AddOn","modFile")==ModName
+					if FWUtility.GetIniCInt("AddOn",n,"AddOn","form")==bID
+						SetAddOnName(n)
+						return n
+					endif
+				endif
+			endWhile
+		endif
+		return sAddOnName
+	endFunction
+endProperty
+function SetAddOnName(string s)
+	sAddOnName = s
+endFunction
+
+;---------------------------------
+;  Read / Write Mod Settings
+;---------------------------------
+
+string function GetString(string name, string Default="")
+	if AddOnName==""
+		return Default
+	else
+		return FWUtility.GetIniCString("AddOn",sAddOnName,"Settings",name,Default)
+	endif
+endFunction
+function SetString(string name, string value)
+	if AddOnName!=""
+		FWUtility.SetIniCString("AddOn",sAddOnName,"Settings",name,value)
+	endif
+endFunction
+
+bool function GetBool(string name, bool Default=false)
+	if AddOnName==""
+		return Default
+	else
+		return FWUtility.GetIniCBool("AddOn",sAddOnName,"Settings",name,Default)
+	endif
+endFunction
+function SetBool(string name, bool value)
+	if AddOnName!=""
+		FWUtility.SetIniCBool("AddOn",sAddOnName,"Settings",name,value)
+	endif
+endFunction
+
+int function GetInt(string name, int Default=0)
+	if AddOnName==""
+		return Default
+	else
+		return FWUtility.GetIniCInt("AddOn",sAddOnName,"Settings",name,Default)
+	endif
+endFunction
+function SetInt(string name, int value)
+	if AddOnName!=""
+		FWUtility.SetIniCInt("AddOn",sAddOnName,"Settings",name,value)
+	endif
+endFunction
+
+float function GetFloat(string name, float Default=0.0)
+	if AddOnName==""
+		return Default
+	else
+		return FWUtility.GetIniCFloat("AddOn",sAddOnName,"Settings",name,Default)
+	endif
+endFunction
+function SetFloat(string name, float value)
+	if AddOnName!=""
+		FWUtility.SetIniCFloat("AddOn",sAddOnName,"Settings",name,value)
+	endif
+endFunction
+
+FWSystem function GetSystem()
+	return Game.GetFormFromFile(0xD62,FWUtility.ModFile("BeeingFemale")) as FWSystem
+endFunction
+
+FWSystemConfig function GetConfig()
+	return Game.GetFormFromFile(0x1828,FWUtility.ModFile("BeeingFemale")) as FWSystemConfig
+endFunction
+
+FWController function GetController()
+	return Game.GetFormFromFile(0x182a,FWUtility.ModFile("BeeingFemale")) as FWController
 endFunction

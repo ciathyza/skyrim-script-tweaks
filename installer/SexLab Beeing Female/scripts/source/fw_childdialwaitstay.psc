@@ -1,24 +1,14 @@
-;/ Decompiled by Champollion V1.0.1
-Source   : FW_ChildDialWaitStay.psc
-Modified : 2015-04-27 08:52:02
-Compiled : 2017-01-15 06:25:48
-User     : admin
-Computer : PATRICK
-/;
-scriptName FW_ChildDialWaitStay extends TopicInfo hidden
+;BEGIN FRAGMENT CODE - Do not edit anything between this and the end comment
+;NEXT FRAGMENT INDEX 1
+Scriptname FW_ChildDialWaitStay Extends TopicInfo Hidden
 
-;-- Properties --------------------------------------
+;BEGIN FRAGMENT Fragment_0
+Function Fragment_0(ObjectReference akSpeakerRef)
+Actor akSpeaker = akSpeakerRef as Actor
+;BEGIN CODE
+(akspeaker as FWChildActor).Order_Wait()
+;END CODE
+EndFunction
+;END FRAGMENT
 
-;-- Variables ---------------------------------------
-
-;-- Functions ---------------------------------------
-
-; Skipped compiler generated GetState
-
-function Fragment_0(ObjectReference akSpeakerRef)
-
-	actor akSpeaker = akSpeakerRef as actor
-	(akSpeaker as fwchildactor).Order_Wait()
-endFunction
-
-; Skipped compiler generated GotoState
+;END FRAGMENT CODE - Do not edit anything between this and the begin comment

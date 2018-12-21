@@ -1,42 +1,25 @@
-;/ Decompiled by Champollion V1.0.1
-Source   : BFA_AbilityEffectPMSPowerless.psc
-Modified : 2016-12-06 03:52:14
-Compiled : 2017-01-15 06:28:41
-User     : admin
-Computer : PATRICK
-/;
-scriptName BFA_AbilityEffectPMSPowerless extends activemagiceffect
+﻿Scriptname BFA_AbilityEffectPMSPowerless extends activemagiceffect  
 
-;-- Properties --------------------------------------
-
-;-- Variables ---------------------------------------
 actor PlayerRef
 
-;-- Functions ---------------------------------------
-
-; Skipped compiler generated GotoState
-
-function OnEffectStart(actor target, actor caster)
-
+Event OnEffectStart(Actor target, Actor caster)
 	PlayerRef = target
-	if PlayerRef
-		PlayerRef.ModActorValue("Carryweight", -50.0000)
-		PlayerRef.ModActorValue("DestructionMod", -0.100000)
-		PlayerRef.ModActorValue("OneHandedMod", -0.300000)
-		PlayerRef.ModActorValue("TwoHandedMod", -0.300000)
-	else
-		self.Dispel()
-	endIf
-endFunction
+	
+	If PlayerRef
+		PlayerRef.ModActorValue("Carryweight", -50)
+		PlayerRef.ModActorValue("DestructionMod", -0.1)
+		PlayerRef.ModActorValue("OneHandedMod", -0.3)
+		PlayerRef.ModActorValue("TwoHandedMod", -0.3)
+	Else
+		Dispel()
+	EndIf
+EndEvent
 
-; Skipped compiler generated GetState
-
-function OnEffectFinish(actor target, actor caster)
-
-	if PlayerRef
-		PlayerRef.ModActorValue("Carryweight", 50.0000)
-		PlayerRef.ModActorValue("DestructionMod", 0.100000)
-		PlayerRef.ModActorValue("OneHandedMod", 0.300000)
-		PlayerRef.ModActorValue("TwoHandedMod", 0.300000)
-	endIf
-endFunction
+Event OnEffectFinish(Actor target, Actor caster)
+	If PlayerRef
+		PlayerRef.ModActorValue("Carryweight", 50)
+		PlayerRef.ModActorValue("DestructionMod", 0.1)
+		PlayerRef.ModActorValue("OneHandedMod", 0.3)
+		PlayerRef.ModActorValue("TwoHandedMod", 0.3)
+	EndIf
+EndEvent

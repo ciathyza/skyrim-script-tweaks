@@ -1,56 +1,39 @@
-;/ Decompiled by Champollion V1.0.1
-Source   : FWSpellExtraLife.psc
-Modified : 2017-01-13 11:43:00
-Compiled : 2017-01-18 08:35:12
-User     : admin
-Computer : PATRICK
-/;
-scriptName FWSpellExtraLife extends ActiveMagicEffect
+﻿Scriptname FWSpellExtraLife extends ActiveMagicEffect
 
-;-- Properties --------------------------------------
-Float property CoolDown auto
-Float property HealPercent auto
-Float property MagickaPercent auto
-
-;-- Variables ---------------------------------------
+float property HealPercent auto
+float property MagickaPercent auto
+float property CoolDown auto
+bool bCanHeal = true
 actor me
-Bool bCanHeal = true
 
-;-- Functions ---------------------------------------
+
+; Event received when this object is hit by a source (weapon, spell, explosion) or projectile attack
+Event OnHit(ObjectReference akAggressor, Form akSource, Projectile akProjectile, bool abPowerAttack, bool abSneakAttack, bool abBashAttack, bool abHitBlocked)
+	CheckHealing()
+endEvent
 
 function OnUpdate()
-
-	bCanHeal = true
+	bCanHeal=true
 endFunction
-
-function OnHit(ObjectReference akAggressor, Form akSource, Projectile akProjectile, Bool abPowerAttack, Bool abSneakAttack, Bool abBashAttack, Bool abHitBlocked)
-
-	self.CheckHealing()
-endFunction
-
-; Skipped compiler generated GetState
 
 function CheckHealing()
-
-	Float h = me.GetActorValuePercentage("Health")
-	if bCanHeal == true && h < 0.0800000
-		Float baseHealing = 0.000000
-		if h < 0.000000
-			baseHealing = h * -1.00000 * me.GetBaseActorValue("Health")
-		endIf
-		me.RestoreActorValue("Health", HealPercent / 100.000 * me.GetBaseActorValue("Health") + baseHealing)
-		me.RestoreActorValue("Magicka", MagickaPercent / 100.000 * me.GetBaseActorValue("Magicka"))
-		bCanHeal = false
-		self.RegisterForSingleUpdate(CoolDown)
-	endIf
+	float h = me.GetActorValuePercentage("Health")
+	if bCanHeal == true && h<0.08
+		float baseHealing=0
+		if h<0
+			baseHealing = (h * -1) * me.GetBaseActorValue("Health")
+		endif
+		me.RestoreActorValue("Health", (HealPercent / 100 * me.GetBaseActorValue("Health"))+baseHealing)
+		me.RestoreActorValue("Magicka", MagickaPercent / 100 * me.GetBaseActorValue("Magicka"))
+		bCanHeal=false
+		RegisterForSingleUpdate(CoolDown)
+	endif
 endFunction
 
-function OnEffectStart(actor akTarget, actor akCaster)
-
-	if HealPercent <= 0.000000
-		HealPercent = self.GetMagnitude()
-	endIf
-	me = akTarget
-endFunction
-
-; Skipped compiler generated GotoState
+; Event received when this effect is first started (OnInit may not have been run yet!)
+Event OnEffectStart(Actor akTarget, Actor akCaster)
+	if HealPercent<=0
+		HealPercent=GetMagnitude()
+	endif
+	me=akTarget
+endEvent

@@ -1,60 +1,42 @@
-;/ Decompiled by Champollion V1.0.1
-Source   : FWInfectionSpell.psc
-Modified : 2017-01-13 12:05:26
-Compiled : 2017-01-18 08:35:26
-User     : admin
-Computer : PATRICK
-/;
-scriptName FWInfectionSpell extends FWSpell
+﻿Scriptname FWInfectionSpell extends FWSpell  
 
-;-- Properties --------------------------------------
-potion[] property HealDrink auto
-
-;-- Variables ---------------------------------------
+;FWSystem property System auto
+Potion[] property HealDrink auto
+float CurDamage = 1.0
 actor ActorRef
-Float CurDamage = 1.00000
 
-;-- Functions ---------------------------------------
+Event OnWoman(Actor akTarget, Actor akCaster)
+	ActorRef=akTarget
+	RegisterForSingleUpdateGameTime(1)
+endEvent
 
-function OnMan(actor akTarget, actor akCaster)
+Event OnMan(Actor akTarget, Actor akCaster)
+	Dispel()
+endEvent
 
-	self.Dispel()
-endFunction
-
-function OnWoman(actor akTarget, actor akCaster)
-
-	ActorRef = akTarget
-	self.RegisterForSingleUpdateGameTime(1.00000)
-endFunction
-
-function OnSpellCast(Form akSpell)
-
-	Int i = HealDrink.length
-	while i > 0
-		i -= 1
-		if akSpell == HealDrink[i] as Form
-			self.Dispel()
-		endIf
-	endWhile
-endFunction
-
-function OnUpdateGameTime()
-
-	System.doDamage(ActorRef, CurDamage * System.getDamageScale(5, ActorRef), 13, 0.000000)
-	if CurDamage < 15.0000
-		CurDamage += 1.00000
-	elseIf CurDamage >= 15.0000 && CurDamage < 35.0000
-		CurDamage += 1.20000
-	elseIf CurDamage >= 35.0000 && CurDamage < 50.0000
-		CurDamage += 1.80000
-	elseIf CurDamage >= 50.0000
-		CurDamage += 2.50000
+Event OnUpdateGameTime()
+	;doDamage(actor A, float Percentage, bool Silent = false, bool DoBleedOut = true, ImageSpaceModifier Effect = none)
+	System.doDamage(ActorRef, CurDamage * System.getDamageScale(5,ActorRef), 13)
+	if CurDamage < 15
+		CurDamage+=1.0
+	elseif CurDamage>=15 && CurDamage < 35
+		CurDamage+=1.2
+	elseif CurDamage>=35 && CurDamage < 50
+		CurDamage+=1.8
+	elseif CurDamage>=50
+		CurDamage+=2.5
 	else
-		CurDamage += 1.00000
-	endIf
-	self.RegisterForSingleUpdateGameTime(1.00000)
-endFunction
+		CurDamage+=1.0
+	endif
+	RegisterForSingleUpdateGameTime(1)
+endEvent
 
-; Skipped compiler generated GetState
-
-; Skipped compiler generated GotoState
+Event OnSpellCast(Form akSpell)
+	int i=HealDrink.length
+	while i>0
+		i-=1
+		if akSpell==HealDrink[i]
+			Dispel()
+		endif
+	endWhile
+endEvent

@@ -1,74 +1,54 @@
-;/ Decompiled by Champollion V1.0.1
-Source   : BFA_AbilityEffectPMSHeadageHurts.psc
-Modified : 2016-12-06 03:52:19
-Compiled : 2017-01-15 06:28:43
-User     : admin
-Computer : PATRICK
-/;
-scriptName BFA_AbilityEffectPMSHeadageHurts extends activemagiceffect
+﻿Scriptname BFA_AbilityEffectPMSHeadageHurts extends activemagiceffect  
 
-;-- Properties --------------------------------------
-Int property MaxCount = 4 auto
-fwaddonmanager property Manager auto
+FWAddOnManager property Manager auto
 
-;-- Variables ---------------------------------------
+int count
+int property MaxCount = 4 Auto
 actor PlayerRef
-Int count
 
-;-- Functions ---------------------------------------
-
-Bool function isFormValid()
-
-	return PlayerRef as form != none && PlayerRef.GetLeveledActorBase() != none
-endFunction
-
-function OnEffectStart(actor target, actor caster)
-
+Event OnEffectStart(Actor target, Actor caster)
 	PlayerRef = target
-	if PlayerRef
-		self.RegisterForSingleUpdateGameTime(1.00000)
-	else
-		self.Dispel()
-	endIf
-endFunction
+	If PlayerRef
+		RegisterForSingleUpdateGameTime(1)
+	Else
+		Dispel()
+	EndIf
+endEvent
 
-function OnEffectFinish(actor target, actor caster)
-
-	if self.isFormValid()
-		self.UnregisterForUpdateGameTime()
-	endIf
-endFunction
-
-function onUpdate()
-
-	if PlayerRef as Bool && self.isFormValid()
-		PlayerRef.DamageActorValue("magicka", PlayerRef.GetBaseActorValue("magicka") / 100.000 * 10.0000)
-		PlayerRef.DamageActorValue("Health", PlayerRef.GetBaseActorValue("Health") / 100.000 * 4.00000 * Manager.getActorDamageScale(2, PlayerRef))
-		count += 1
-		if count <= MaxCount
-			self.RegisterForSingleUpdate(4.00000)
-		endIf
-	else
-		self.Dispel()
-	endIf
-endFunction
-
-; Skipped compiler generated GetState
-
-function OnUpdateGameTime()
-
-	if PlayerRef as Bool && self.isFormValid()
-		Int v = utility.RandomInt(0, 5)
+Event  OnUpdateGameTime()
+	If PlayerRef && isFormValid() ;***Edit by Bane
+		int v = Utility.RandomInt(0, 5)
 		if v > 4
 			count = 0
-			self.RegisterForSingleUpdate(4.00000)
-		elseIf v > 2
-			PlayerRef.DamageActorValue("magicka", PlayerRef.GetBaseActorValue("magicka") / 100.000 * 30.0000)
+			RegisterForSingleUpdate(4)
+		elseif v > 2
+			PlayerRef.DamageActorValue("magicka", (PlayerRef.GetBaseActorValue("magicka") / 100) * 30);
 		endIf
-		self.RegisterForSingleUpdateGameTime(1.00000)
-	else
-		self.Dispel()
-	endIf
-endFunction
+		RegisterForSingleUpdateGameTime(1)
+	Else
+		Dispel()
+	EndIf
+endEvent
 
-; Skipped compiler generated GotoState
+event onUpdate()
+	If PlayerRef && isFormValid() ;***Edit by Bane
+		PlayerRef.DamageActorValue("magicka", (PlayerRef.GetBaseActorValue("magicka") / 100) * 10);
+		PlayerRef.DamageActorValue("Health", ((PlayerRef.GetBaseActorValue("Health") / 100) * 4) * Manager.getActorDamageScale(2, PlayerRef));
+		count += 1
+		if count <= MaxCount
+			RegisterForSingleUpdate(4)
+		endIf
+	Else
+		Dispel()
+	EndIf
+endEvent
+
+Event OnEffectFinish(Actor target, Actor caster)
+	if isFormValid() ;***Added by Bane
+		UnregisterForUpdateGameTime()
+	endif
+endEvent
+
+bool Function isFormValid() ;***Added by Bane
+	return (PlayerRef as form) != none && (PlayerRef.GetLeveledActorBase() as ActorBase) != none
+endfunction

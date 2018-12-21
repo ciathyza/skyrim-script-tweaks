@@ -1,44 +1,26 @@
-;/ Decompiled by Champollion V1.0.1
-Source   : FWAntiSpermEssence.psc
-Modified : 2016-12-06 03:53:07
-Compiled : 2017-01-18 08:35:50
-User     : admin
-Computer : PATRICK
-/;
-scriptName FWAntiSpermEssence extends activemagiceffect
+﻿Scriptname FWAntiSpermEssence extends activemagiceffect  
+FWSystem property System auto
 
-;-- Properties --------------------------------------
-Int property UpdateEvery = 10 auto
-fwsystem property System auto
+int property UpdateEvery = 10 auto
+actor woman = none
+float Strength = 0.0
 
-;-- Variables ---------------------------------------
-Float Strength = 0.000000
-actor woman
-
-;-- Functions ---------------------------------------
-
-; Skipped compiler generated GotoState
-
-; Skipped compiler generated GetState
-
-function OnEffectStart(actor akTarget, actor akCaster)
-
-	woman = akTarget
-	utility.Wait(0.200000)
-	Strength = self.GetMagnitude()
-	self.Execute()
-	if self.GetDuration() >= UpdateEvery as Float
-		self.RegisterForSingleUpdate(UpdateEvery as Float)
-	endIf
-endFunction
+Event OnEffectStart(Actor akTarget, Actor akCaster)
+	; Check if the user is a woman
+	woman=akTarget
+	Utility.Wait(0.2)
+	Strength = GetMagnitude()
+	Execute()
+	if GetDuration()>=UpdateEvery
+		RegisterForSingleUpdate(UpdateEvery)
+	endif
+endEvent
 
 function Execute()
-
-	System.Controller.WashOutSperm(woman, 2, Strength / 100.000)
+	System.Controller.WashOutSperm(woman, 2, Strength / 100)
 endFunction
 
 function OnUpdate()
-
-	self.Execute()
-	self.RegisterForSingleUpdate(UpdateEvery as Float)
-endFunction
+	Execute()
+	RegisterForSingleUpdate(UpdateEvery)
+endfunction

@@ -1,168 +1,173 @@
-;/ Decompiled by Champollion V1.0.1
-Source   : BFA_AbilityHungry.psc
-Modified : 2016-12-06 03:52:11
-Compiled : 2017-01-15 06:28:37
-User     : admin
-Computer : PATRICK
-/;
-scriptName BFA_AbilityHungry extends ActiveMagicEffect
+﻿Scriptname BFA_AbilityHungry extends ActiveMagicEffect
 
-;-- Properties --------------------------------------
-sound property FoodEat auto
-formlist property FoodList auto
-spell property StomachGrowl auto
+Formlist property FoodList auto
+Spell property StomachGrowl auto
+Sound property FoodEat auto
 
-;-- Variables ---------------------------------------
-Float lastEatenTime
 Actor PlayerRef
-Bool NeedToCheck = true
-faction _SNHungryFaction
-Float lastEatenGTime
-Bool bIsPlayer = false
+float lastEatenTime
+float lastEatenGTime
+bool NeedToCheck = true
+bool bIsPlayer = false
+faction _SNHungryFaction = none
 
-;-- Functions ---------------------------------------
+; Event received when this effect is first started (OnInit may not have been run yet!)
+Event OnEffectStart(Actor akTarget, Actor akCaster)
+	PlayerRef = akTarget
+	bIsPlayer = PlayerRef==Game.GetPlayer()
+	RegisterForSingleUpdate(10)
+	RegisterForModEvent("_SN_PlayerConsumes","OnPlayerEaten")
+EndEvent
 
-; Skipped compiler generated GetState
+Event OnPlayerEaten(string hookName, string argString, float argNum, form sender)
+	if PlayerRef==Game.GetPlayer()
+		lastEatenTime = Utility.GetCurrentRealTime()
+		lastEatenGTime = Utility.GetCurrentGameTime()
+	endif
+endEvent
 
-function OnEffectFinish(Actor akTarget, Actor akCaster)
+; Event received when this effect is finished (effect may already be deleted, calling
+; functions on this effect will fail)
+Event OnEffectFinish(Actor akTarget, Actor akCaster)
+	UnregisterForModEvent("_SN_PlayerConsumes")
+	UnregisterForUpdate()
+EndEvent
 
-	self.UnregisterForModEvent("_SN_PlayerConsumes")
-	self.UnregisterForUpdate()
-endFunction
+Event OnUpdate()
+	float t = Utility.GetCurrentRealTime()
+	float g = Utility.GetCurrentGameTime()
+	float w = 90
+	
+	if t >= lastEatenTime + w || g > lastEatenGTime + 2.0
+		; Actor is hungry
+		if CheckInventoryForFood()
+			RegisterForSingleUpdate(w * 0.65) ; Actor just ate something, make the wait duration a bit longer
+		else
+			RegisterForSingleUpdate(Utility.RandomFloat(w*0.5,w*1.5))
+		endif
+	else
+		RegisterForSingleUpdate(10)
+	endif
+endEvent
 
-Bool function CheckInventoryForFood()
+Event OnSpellCast(Form akSpell)
+	if (akSpell as potion) != none
+		if FoodList.Find(akSpell) || ((akSpell as potion).IsFood() && (akSpell as potion).IsPoison()==false)
+			; Actor just ate something
+			lastEatenTime = Utility.GetCurrentRealTime()
+			lastEatenGTime = Utility.GetCurrentGameTime()
+		endif
+	endif
+EndEvent
 
-	Int c = PlayerRef.GetNumItems()
-	if NeedToCheck == true
-		Bool bFound = false
-		Int HungerChance = utility.RandomInt(0, 40)
-		Int ItemsToEat = 1
-		if HungerChance > 38
-			ItemsToEat = utility.RandomInt(2, 4)
-		elseIf HungerChance > 35
-			ItemsToEat = utility.RandomInt(2, 3)
-		elseIf HungerChance > 30
-			ItemsToEat = utility.RandomInt(1, 3)
-		elseIf HungerChance > 20
-			ItemsToEat = utility.RandomInt(1, 2)
-		endIf
-		while ItemsToEat > 0
-			while c > 0
-				c -= 1
-				if self.Eat(PlayerRef.GetNthForm(c))
-					c = 0
+bool function CheckinventoryForFood()
+	int c = PlayerRef.GetNumItems()
+	
+	; If NeedToCheck is false, the actor won't have a FoodItem
+	if NeedToCheck==true
+		bool bFound=false
+		int HungerChance = Utility.RandomInt(0,40)
+		int ItemsToEat = 1
+		if HungerChance>38
+			ItemsToEat = Utility.RandomInt(2,4)
+		elseif HungerChance>35
+			ItemsToEat = Utility.RandomInt(2,3)
+		elseif HungerChance>30
+			ItemsToEat = Utility.RandomInt(1,3)
+		elseif HungerChance>20
+			ItemsToEat = Utility.RandomInt(1,2)
+		endif
+		
+		while ItemsToEat>0
+			while c>0
+				c-=1
+				if Eat(PlayerRef.GetNthForm(c))
+					c=0
 					bFound = true
-				endIf
-			endWhile
-			ItemsToEat -= 1
+				endif
+			endwhile
+			ItemsToEat-=1
 		endWhile
+		
 		if bFound
 			return true
-		endIf
-	endIf
+		endif
+	endif
+	
+	; Set need to check to false, until an Item was added to the actors inventory.
 	NeedToCheck = false
-	if StomachGrowl != none && bIsPlayer as Bool
-		StomachGrowl.Cast(PlayerRef as objectreference, none)
-		PlayerRef.CreateDetectionEvent(PlayerRef, utility.RandomInt(20, 100))
+	if(StomachGrowl!=none && bIsPlayer)
+		; No food found, check for playing sound
+		StomachGrowl.Cast(PlayerRef)
+		PlayerRef.CreateDetectionEvent(PlayerRef, Utility.RandomInt(20,100))
 		return false
-	endIf
+	endif
 endFunction
 
-function OnEffectStart(Actor akTarget, Actor akCaster)
-
-	PlayerRef = akTarget
-	bIsPlayer = PlayerRef == game.GetPlayer()
-	self.RegisterForSingleUpdate(10.0000)
-	self.RegisterForModEvent("_SN_PlayerConsumes", "OnPlayerEaten")
-endFunction
-
-function OnPlayerEaten(String hookName, String argString, Float argNum, form sender)
-
-	if PlayerRef == game.GetPlayer()
-		lastEatenTime = utility.GetCurrentRealTime()
-		lastEatenGTime = utility.GetCurrentGameTime()
-	endIf
-endFunction
-
-; Skipped compiler generated GotoState
-
-Bool function Eat(form itm)
-
-	if itm as potion != none
+bool function Eat(Form itm)
+	;Debug.Trace("Hungry Check Eat: " + itm.GetName())
+	if (itm as potion) != none
 		potion p = itm as potion
 		if p.IsFood() == true
 			if p.IsHostile() == false
-				if FoodList.Find(p as form) >= 0
-					if PlayerRef.GetItemCount(p as form) > 0
-						lastEatenTime = utility.GetCurrentRealTime()
-						lastEatenGTime = utility.GetCurrentGameTime()
-						self.CastEffects(p)
-						PlayerRef.OnSpellCast(p as form)
-						PlayerRef.RemoveItem(p as form, 1, true, none)
-						FoodEat.Play(PlayerRef as objectreference)
-						if _SNHungryFaction != none
+				if FoodList.Find(p)>=0
+					if PlayerRef.GetItemCount(p)>0
+						lastEatenTime = Utility.GetCurrentRealTime()
+						lastEatenGTime = Utility.GetCurrentGameTime()
+						
+						CastEffects(p)
+						
+						PlayerRef.OnSpellCast(p)
+						PlayerRef.RemoveItem(p,1,true)
+						FoodEat.Play(PlayerRef)
+						
+						if _SNHungryFaction!=none
 							PlayerRef.RemoveFromFaction(_SNHungryFaction)
-						endIf
+						endif
 						return true
-					endIf
-				endIf
-			endIf
-		endIf
-	endIf
+					endif
+				endif
+			endif
+		endif
+	endif
 	return false
 endFunction
 
-function OnSpellCast(form akSpell)
+Event OnItemAdded(Form akBaseItem, int aiItemCount, ObjectReference akItemReference, ObjectReference akSourceContainer)
+	if FoodList.Find(akBaseItem)>=0
+		NeedToCheck=true
+	endif
+EndEvent
 
-	if akSpell as potion != none
-		if FoodList.Find(akSpell) as Bool || (akSpell as potion).IsFood() && (akSpell as potion).IsPoison() == false
-			lastEatenTime = utility.GetCurrentRealTime()
-			lastEatenGTime = utility.GetCurrentGameTime()
-		endIf
-	endIf
-endFunction
-
-function OnItemAdded(form akBaseItem, Int aiItemCount, objectreference akItemReference, objectreference akSourceContainer)
-
-	if FoodList.Find(akBaseItem) >= 0
-		NeedToCheck = true
-	endIf
-endFunction
-
-function CastEffects(potion itm)
-
-	Int c = itm.GetNumEffects()
-	while c > 0
-		c -= 1
-		magiceffect mfx = itm.GetNthEffectMagicEffect(c)
-		Float mag = itm.GetNthEffectMagnitude(c)
-		Int mid = mfx.GetFormID()
-		if mid == 996299
+Function CastEffects(potion itm)
+	int c = itm.GetNumEffects()
+	while c>0
+		c-=1
+		MagicEffect mfx = itm.GetNthEffectMagicEffect(c)
+		float mag = itm.GetNthEffectMagnitude(c)
+		int mid = mfx.GetFormID()
+		
+		if mid==0xf33cb ; Food Restore health
 			PlayerRef.RestoreActorValue("Health", mag)
-		elseIf mid == 1071266
+		elseif mid==0x1058A2 ; Food Restore health Duration
 			PlayerRef.RestoreActorValue("Health", mag)
-		elseIf mid == 1071271
+		elseif mid==0x1058A7 ; Food restore magicka duration
 			PlayerRef.RestoreActorValue("Magicka", mag)
-		elseIf mid == 996300
+		elseif mid==0xF33CC ; Food restore stamina
 			PlayerRef.RestoreActorValue("Stamina", mag)
-		elseIf mid == 1071267
+		elseif mid==0x1058A3 ; Food restore stamina duration
 			PlayerRef.RestoreActorValue("Stamina", mag)
-		endIf
+		endif
 	endWhile
 endFunction
 
-function OnUpdate()
+;Event On
 
-	Float t = utility.GetCurrentRealTime()
-	Float g = utility.GetCurrentGameTime()
-	Float w = 90.0000
-	if t >= lastEatenTime + w || g > lastEatenGTime + 2.00000
-		if self.CheckInventoryForFood()
-			self.RegisterForSingleUpdate(w * 0.650000)
-		else
-			self.RegisterForSingleUpdate(utility.RandomFloat(w * 0.500000, w * 1.50000))
-		endIf
-	else
-		self.RegisterForSingleUpdate(10.0000)
-	endIf
-endFunction
+
+;int Function GetNumItems() native
+;Form Function GetNthForm(int index) native
+;float Function GetTotalItemWeight() native
+;float Function GetTotalArmorWeight() native
+
+;int Function GetItemCount(Form akItem) native
+;Function RemoveItem(Form akItemToRemove, int aiCount = 1, bool abSilent = false, ObjectReference akOtherContainer = None) native

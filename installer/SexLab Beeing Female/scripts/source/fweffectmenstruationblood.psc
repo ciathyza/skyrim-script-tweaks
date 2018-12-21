@@ -1,33 +1,15 @@
-;/ Decompiled by Champollion V1.0.1
-Source   : FWEffectMenstruationBlood.psc
-Modified : 2017-01-13 12:05:27
-Compiled : 2017-01-18 08:35:26
-User     : admin
-Computer : PATRICK
-/;
-scriptName FWEffectMenstruationBlood extends ActiveMagicEffect
+﻿Scriptname FWEffectMenstruationBlood Extends ActiveMagicEffect  
 
-;-- Properties --------------------------------------
-
-;-- Variables ---------------------------------------
 Actor a
 
-;-- Functions ---------------------------------------
-
-function OnUpdate()
-
-	if !a || a.IsSwimming()
-		self.Dispel()
-	endIf
-	self.RegisterForSingleUpdate(2.00000)
-endFunction
-
-function OnEffectStart(Actor target, Actor caster)
-
+Event OnEffectStart(Actor target, Actor caster)
 	a = target
-	self.RegisterForSingleUpdate(2.00000)
-endFunction
+	RegisterForSingleUpdate(2.0)
+EndEvent
 
-; Skipped compiler generated GetState
-
-; Skipped compiler generated GotoState
+Event OnUpdate()
+	If ! a || a.IsSwimming()
+		Dispel()
+	EndIf
+	RegisterForSingleUpdate(2.0)
+EndEvent

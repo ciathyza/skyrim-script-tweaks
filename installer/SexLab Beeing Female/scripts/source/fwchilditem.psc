@@ -1,163 +1,145 @@
-;/ Decompiled by Champollion V1.0.1
-Source   : FWChildItem.psc
-Modified : 2017-01-14 16:10:10
-Compiled : 2017-01-18 08:35:36
-User     : admin
-Computer : PATRICK
-/;
-scriptName FWChildItem extends MiscObject
+﻿Scriptname FWChildItem extends MiscObject  
 
-;-- Properties --------------------------------------
-Float property DayOfBirth
-	Float function get()
-
-		return dob
-	endFunction
-endproperty
-Float property Age
-	Float function get()
-
-		return utility.GetCurrentGameTime() - dob
-	endFunction
-endproperty
-Float property SizeDuration = 30.0000 auto
-Float property SmallSizeScale = 0.600000 auto
-actor property Father
-	actor function get()
-
-		return _Father
-	endFunction
-endproperty
 actor property Mother
 	actor function get()
-
 		return _Mother
 	endFunction
-endproperty
+endProperty
 
-;-- Variables ---------------------------------------
-Float dob = 0.000000
-String Name = ""
+actor property Father
+	actor function get()
+		return _Father
+	endFunction
+endProperty
+
+float property Age
+	float function get()
+		return Utility.GetCurrentGameTime() - dob
+	endFunction
+endProperty
+
+float property DayOfBirth
+	float function get()
+		return dob
+	endFunction
+endProperty
+
+
 actor _Mother
 actor _Father
-Bool bIsVampire = false
-Int iSex
+string Name = ""
 ColorForm HairColor
+bool bIsVampire = false
+int iSex
+float dob = 0.0 ; Day of birth
 
-;-- Functions ---------------------------------------
+float property SmallSizeScale = 0.6 auto
+float property SizeDuration = 30.0 auto
 
-function OnDeath(actor akKiller)
+; Flags
+;  1 IsVampire
+;  2 Hair from Mother
+;  4 IsFemale
+;  8 Eyes from Mother
+; 16 Nose from Mother
 
-	storageutil.SetFloatValue(self as form, "FW.Child.LastUpdate", utility.GetCurrentGameTime())
-endFunction
-
-Bool function IsVampire()
-
+Bool Function IsVampire()
 	return bIsVampire
+EndFunction
+
+Function SetVampire(bool bVamp)
+	int xflag = StorageUtil.GetIntValue(self, "FW.Child.Flag", 0)
+	if (Math.LogicalAnd(xflag,1) == 1) && bVamp==false
+		StorageUtil.SetIntValue(self, "FW.Child.Flag", Math.LogicalXor(xflag,1) )
+	elseif (Math.LogicalAnd(xflag,1) == 0) && bVamp==true
+		StorageUtil.SetIntValue(self, "FW.Child.Flag", Math.LogicalOr(xflag,1) )
+	endif
+	bIsVampire = bVamp
+EndFunction
+
+int function GetSex()
+	return iSex
 endFunction
 
-function SetSex(Int Sex)
-
-	Int xflag = storageutil.GetIntValue(self as form, "FW.Child.Flag", 0)
-	if math.LogicalAnd(xflag, 4) == 4 && Sex == 0
-		storageutil.SetIntValue(self as form, "FW.Child.Flag", math.LogicalXor(xflag, 4))
-	elseIf math.LogicalAnd(xflag, 4) == 0 && Sex == 1
-		storageutil.SetIntValue(self as form, "FW.Child.Flag", math.LogicalOr(xflag, 4))
-	endIf
-	if Sex == 1
-		iSex = 1
+function SetSex(int Sex)
+	int xflag = StorageUtil.GetIntValue(self, "FW.Child.Flag", 0)
+	if (Math.LogicalAnd(xflag,4) == 4) && Sex==0
+		StorageUtil.SetIntValue(self, "FW.Child.Flag", Math.LogicalXor(xflag,4) )
+	elseif (Math.LogicalAnd(xflag,4) == 0) && Sex==1
+		StorageUtil.SetIntValue(self, "FW.Child.Flag", Math.LogicalOr(xflag,4) )
+	endif
+	if Sex==1
+		iSex=1
 	else
-		iSex = 0
-	endIf
-endFunction
+		iSex=0
+	endif
+endfunction
 
-function UpdateSize()
+ColorForm Function GetHairColor()
+	return HairColor
+EndFunction
 
-	if self.Age >= SizeDuration
-		
-	elseIf self.Age < 0.000000
-		
-	endIf
-endFunction
-
-function SetParent(actor Mother, actor Father)
-
-	storageutil.SetFormValue(self as form, "FW.Child.Father", self.Father as form)
-	storageutil.SetFormValue(self as form, "FW.Child.Mother", self.Mother as form)
-	storageutil.SetFloatValue(self as form, "FW.Child.LastUpdate", utility.GetCurrentGameTime())
-	_Father = self.Father
-	_Mother = self.Mother
-endFunction
-
-String function GetName()
-
+String Function GetName()
 	return Name
-endFunction
+EndFunction
 
-function Delete()
+Function SetName(string newName)
+	Name = newName
+	StorageUtil.SetStringValue(self,"FW.Child.Name",newName)
+EndFunction
 
-	storageutil.UnsetFloatValue(self as form, "FW.Child.LastUpdate")
-	storageutil.UnsetFormValue(self as form, "FW.Child.Father")
-	storageutil.UnsetFormValue(self as form, "FW.Child.Mother")
-	storageutil.UnsetStringValue(self as form, "FW.Child.Name")
-	storageutil.UnsetIntValue(self as form, "FW.Child.Flag")
-endFunction
-
-function OnUpdateGameTime()
-
-	storageutil.SetFloatValue(self as form, "FW.Child.LastUpdate", utility.GetCurrentGameTime())
-	self.UpdateSize()
-	self.RegisterForSingleUpdateGameTime(5.00000)
-endFunction
-
-function OnLoad()
-
-	Int flag = storageutil.GetIntValue(self as form, "FW.Child.Flag", 0)
-	bIsVampire = math.LogicalAnd(flag, 1) == 1
-	if math.LogicalAnd(flag, 4) == 4
-		iSex = 1
+Event OnLoad()
+	int flag = StorageUtil.GetIntValue(self, "FW.Child.Flag", 0)
+	bIsVampire = Math.LogicalAnd(flag,1) == 1
+	if Math.LogicalAnd(flag,4) == 4
+		iSex=1
 	else
-		iSex = 0
-	endIf
-	Name = storageutil.GetStringValue(self as form, "FW.Child.Name", "")
-	if math.LogicalAnd(flag, 2) == 2
+		iSex=0
+	endif
+	name = StorageUtil.GetStringValue(self,"FW.Child.Name","")
+	if Math.LogicalAnd(flag,2)==2
 		HairColor = _Father.GetLeveledActorBase().GetHairColor()
 	else
 		HairColor = _Mother.GetLeveledActorBase().GetHairColor()
+	endif
+	_Father = StorageUtil.GetFormValue(self,"FW.Child.Father",none) as Actor
+	_Mother = StorageUtil.GetFormValue(self,"FW.Child.Mother",none) as Actor
+	RegisterForSingleUpdateGameTime(5)
+	OnUpdateGameTime()
+EndEvent
+
+function SetParent(actor Mother, actor Father)
+	StorageUtil.SetFormValue(self,"FW.Child.Father",Father)
+	StorageUtil.SetFormValue(self,"FW.Child.Mother",Mother)
+	StorageUtil.SetFloatValue(self,"FW.Child.LastUpdate",Utility.GetCurrentGameTime())
+	_Father=Father
+	_Mother=Mother
+endFunction
+
+Event OnDeath(Actor akKiller)
+	StorageUtil.SetFloatValue(self,"FW.Child.LastUpdate",Utility.GetCurrentGameTime())
+endEvent
+
+Event OnUpdateGameTime()
+	StorageUtil.SetFloatValue(self,"FW.Child.LastUpdate",Utility.GetCurrentGameTime())
+	UpdateSize()
+	RegisterForSingleUpdateGameTime(5)
+endEvent
+
+function UpdateSize()
+	If Age >= SizeDuration
+		;SetScale(1.0)
+	elseif Age < 0.0
+		;SetScale(SmallSizeScale)
+	else
+		;SetScale((((1.0 - SmallSizeScale) / SizeDuration) * Age) + SmallSizeScale)
 	endIf
-	_Father = storageutil.GetFormValue(self as form, "FW.Child.Father", none) as actor
-	_Mother = storageutil.GetFormValue(self as form, "FW.Child.Mother", none) as actor
-	self.RegisterForSingleUpdateGameTime(5.00000)
-	self.OnUpdateGameTime()
 endFunction
 
-function SetName(String newName)
-
-	Name = newName
-	storageutil.SetStringValue(self as form, "FW.Child.Name", newName)
-endFunction
-
-; Skipped compiler generated GetState
-
-; Skipped compiler generated GotoState
-
-ColorForm function GetHairColor()
-
-	return HairColor
-endFunction
-
-function SetVampire(Bool bVamp)
-
-	Int xflag = storageutil.GetIntValue(self as form, "FW.Child.Flag", 0)
-	if math.LogicalAnd(xflag, 1) == 1 && bVamp == false
-		storageutil.SetIntValue(self as form, "FW.Child.Flag", math.LogicalXor(xflag, 1))
-	elseIf math.LogicalAnd(xflag, 1) == 0 && bVamp == true
-		storageutil.SetIntValue(self as form, "FW.Child.Flag", math.LogicalOr(xflag, 1))
-	endIf
-	bIsVampire = bVamp
-endFunction
-
-Int function GetSex()
-
-	return iSex
+function Delete()
+	StorageUtil.UnsetFloatValue(self,"FW.Child.LastUpdate")
+	StorageUtil.UnsetFormValue(self, "FW.Child.Father")
+	StorageUtil.UnsetFormValue(self, "FW.Child.Mother")
+	StorageUtil.UnsetStringValue(self, "FW.Child.Name")
+	StorageUtil.UnsetIntValue(self, "FW.Child.Flag")
 endFunction

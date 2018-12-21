@@ -1,72 +1,82 @@
-;/ Decompiled by Champollion V1.0.1
-Source   : FWAddOn_MiscBasicPain.psc
-Modified : 2016-12-06 03:53:09
-Compiled : 2017-01-18 08:36:09
-User     : admin
-Computer : PATRICK
-/;
-scriptName FWAddOn_MiscBasicPain extends FWAddOn_Misc
+﻿Scriptname FWAddOn_MiscBasicPain extends FWAddOn_Misc  
 
-;-- Properties --------------------------------------
-imagespacemodifier property LaborPainImodHigh auto
-fwsystem property System auto
-imagespacemodifier property MiddlePain auto
-imagespacemodifier property LaborPainImodMiddle auto
-imagespacemodifier property LowerPain auto
-imagespacemodifier property HigherPain auto
-imagespacemodifier property CriticalPain auto
-imagespacemodifier property LaborPainImodLow auto
+FWSystem property System auto
 
-;-- Variables ---------------------------------------
+ImageSpaceModifier Property LowerPain Auto
+ImageSpaceModifier Property MiddlePain Auto
+ImageSpaceModifier Property HigherPain Auto
+ImageSpaceModifier Property CriticalPain Auto
+ImageSpaceModifier Property LaborPainImodLow Auto
+ImageSpaceModifier Property LaborPainImodMiddle Auto
+ImageSpaceModifier Property LaborPainImodHigh Auto
 
-;-- Functions ---------------------------------------
 
-function OnDoDamageStart(actor a, Float Amount, Int DamageType, Float OptionalArgument)
+; Damage Type:								Optional Argument
+;  0	Unknown
+;  1	Mittelschmerz / Ovulation pains		strength of the pains
+;  2	PMS pains							
+;  3	Menstruation cramps					strength of the pains
+;  4	Pregnancy 1. sickness
+;  5	Pregnancy 2. sickness
+;  6	Pregnancy 3. sickness
+;  7	premonitory pains
+;  8	first stage pains
+;  9	Child-Pressing pains
+; 10	bearing-down pains
+; 11	afterpains
+; 12	baby milk drinking pains
+; 13	infection pains
+; 14	abortus pains
 
-	if DamageType == 1 || DamageType == 3 && OptionalArgument < 1.80000 || System == none
-		return 
-	endIf
-	if a == game.GetPlayer()
-		if DamageType == 7
-			System.Blur(0.500000, LowerPain)
-		elseIf DamageType == 8
-			System.Blur(1.00000, LowerPain)
-		elseIf DamageType == 10
-			System.Blur(1.00000, LaborPainImodMiddle)
-		elseIf DamageType == 9
-			System.Blur(1.00000, LaborPainImodHigh)
-		elseIf DamageType == 11
-			System.Blur(0.500000, LowerPain)
-		elseIf DamageType == 1 || Amount >= 2.00000 && Amount < 4.00000
-			System.Blur(0.500000, LowerPain)
-		elseIf Amount >= 4.00000 && Amount < 5.00000
-			System.Blur(1.00000, LowerPain)
-		elseIf Amount >= 5.00000 && Amount < 8.00000
-			System.Blur(0.500000, MiddlePain)
-		elseIf Amount >= 8.00000 && Amount < 10.0000
-			System.Blur(1.00000, MiddlePain)
-		elseIf Amount >= 10.0000 && Amount < 15.0000
-			System.Blur(0.500000, HigherPain)
-		elseIf Amount >= 15.0000 && Amount < 30.0000
-			System.Blur(1.00000, HigherPain)
-		elseIf Amount >= 30.0000 && Amount < 60.0000
-			System.Blur(0.500000, CriticalPain)
+function OnDoDamageStart(actor a, float Amount, int DamageType, float OptionalArgument)
+	if DamageType== 1 || (DamageType == 3 && OptionalArgument<1.8) || System==none
+		return
+	endif
+	
+	; Blur
+	if a==Game.GetPlayer()
+		if DamageType==7 ; Vorwehen
+			System.Blur(0.5, LowerPain)
+		elseif DamageType==8 ; Eröffnungswehen
+			System.Blur(1, LowerPain)
+		elseif DamageType==10
+			System.Blur(1, LaborPainImodMiddle)
+		elseif DamageType==9
+			System.Blur(1, LaborPainImodHigh)
+		elseif DamageType==11
+			System.Blur(0.5, LowerPain)
+		
+		elseif DamageType==1 || (Amount>=2 && Amount < 4)
+			System.Blur(0.5, LowerPain)
+		elseif Amount>=4 && Amount < 5
+			System.Blur(1, LowerPain)
+			
+		elseif Amount>=5 && Amount < 8
+			System.Blur(0.5, MiddlePain)
+		elseif Amount>=8 && Amount < 10
+			System.Blur(1, MiddlePain)
+			
+		elseif Amount>=10 && Amount < 15
+			System.Blur(0.5, HigherPain)
+		elseif Amount>=15 && Amount < 30
+			System.Blur(1, HigherPain)
+			
+		elseif Amount>=30 && Amount < 60
+			System.Blur(0.5, CriticalPain)
 		else
-			System.Blur(1.00000, CriticalPain)
+			System.Blur(1, CriticalPain)
+			
 		endIf
 	endIf
-	if Amount > 12.0000
+
+	; BleedOut
+	if Amount>12
 		System.PlayBleedOut(a)
 	endIf
 endFunction
 
-function OnDoDamageEnd(actor a, Float Amount, Int DamageType, Float OptionalArgument)
-
-	if Amount > 12.0000 && System != none
+function OnDoDamageEnd(actor a, float Amount, int DamageType, float OptionalArgument)
+	if Amount>12 && System!=none
 		System.StopBleedOut(a)
 	endIf
 endFunction
-
-; Skipped compiler generated GotoState
-
-; Skipped compiler generated GetState

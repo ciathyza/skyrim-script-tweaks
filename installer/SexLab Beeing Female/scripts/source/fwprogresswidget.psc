@@ -1,380 +1,251 @@
-;/ Decompiled by Champollion V1.0.1
-Source   : FWProgressWidget.psc
-Modified : 2017-01-03 08:19:43
-Compiled : 2017-01-18 08:35:19
-User     : admin
-Computer : PATRICK
-/;
-scriptName FWProgressWidget extends SKI_WidgetBase
+﻿Scriptname FWProgressWidget extends SKI_WidgetBase
 
-;-- Properties --------------------------------------
-String property ICN_Utherus2
-	String function get()
+int property CFG_PosX auto hidden
+int property CFG_PosY auto hidden
+bool property CFG_Enabled auto hidden
+int property CFG_Alpha auto hidden
+string property CFG_HAnchor auto hidden
+string property CFG_VAnchor auto hidden
 
-		return "Utherus2"
+
+string property ICN_AddOn = "AddOn" autoreadonly
+string property ICN_Animation = "Animation" autoreadonly
+string property ICN_Compatibility = "Compatibility" autoreadonly
+string property ICN_Drip = "Drip" autoreadonly
+string property ICN_File = "File" autoreadonly
+string property ICN_FileCheck = "FileCheck" autoreadonly
+string property ICN_Folicular = "Folicular" autoreadonly
+string property ICN_Init = "Init" autoreadonly
+string property ICN_Pregnancy = "Pregnancy" autoreadonly
+string property ICN_Pregnancy2 = "Pregnancy2" autoreadonly
+string property ICN_Pregnancy3 = "Pregnancy3" autoreadonly
+string property ICN_Pregnancy4 = "Pregnancy4" autoreadonly
+string property ICN_Progress = "Progress" autoreadonly
+string property ICN_Replanish = "Replanish" autoreadonly
+string property ICN_Search = "Search" autoreadonly
+string property ICN_Sound = "Sound" autoreadonly
+string property ICN_Sperm = "Sperm" autoreadonly
+string property ICN_Text = "Text" autoreadonly
+string property ICN_Update = "Update" autoreadonly
+string property ICN_Utherus = "Utherus" autoreadonly
+string property ICN_Utherus2 = "Utherus2" autoreadonly
+string property ICN_Voice = "Voice" autoreadonly
+string property ICN_Wait = "Wait" autoreadonly
+string property ICN_Checked = "Checked" autoreadonly
+string property ICN_Failed = "Failed" autoreadonly
+
+
+string _swfName = ""
+string _scriptName = ""
+int _widgetAlpha = 100
+bool _shown = false
+bool _bAboutToClose=false
+bool _bAboutToShow = false
+
+string lastIcon=""
+string lastMessage=""
+int lastPercent=0
+
+string property SWF_Name
+	{Set the SWF Filename like 'Widget.swf'}
+	string function get()
+		return _swfName
 	endFunction
-endproperty
-String property ICN_Pregnancy2
-	String function get()
 
-		return "Pregnancy2"
+	function set(string value)
+		_swfName = value
 	endFunction
-endproperty
-String property CFG_HAnchor auto hidden
-String property ICN_Text
-	String function get()
+endProperty
 
-		return "Text"
+string property Script_Name
+	{Set this script name}
+	string function get()
+		return _scriptName
 	endFunction
-endproperty
-String property ICN_File
-	String function get()
 
-		return "File"
+	function set(string value)
+		_scriptName = value
 	endFunction
-endproperty
-String property ICN_Sound
-	String function get()
+endProperty
 
-		return "Sound"
+bool property Shown hidden
+	{Set to true to show the widget}
+	bool function get()
+		return _shown
 	endFunction
-endproperty
-String property ICN_Animation
-	String function get()
 
-		return "Animation"
+	function set(bool value)
+		;if(Ready)
+			if value == true && CFG_Enabled==true
+				X = CFG_PosX
+				Y = CFG_PosY
+				HAnchor = CFG_HAnchor
+				VAnchor = CFG_VAnchor
+				_bAboutToClose = false
+				_bAboutToShow = true
+				;FadeTo(_widgetAlpha,0.5)
+				Alpha = CFG_Alpha
+				_shown = value
+			elseif value == false
+				_bAboutToClose=true
+				_bAboutToShow = false
+				FadeTo(0,1.5)
+				_shown = value
+			endif
+		;elseif value==true
+		;	Debug.Trace("fwprogresswidget::Shown = true; Widget not ready jet - wait")
+		;	_bAboutToShow = true
+		;	RegisterForSingleUpdate(1)
+		;endif
 	endFunction
-endproperty
-Int property Percent hidden
-	Int function get()
+endProperty
 
-		return ui.GetInt(self.HUD_MENU, self.WidgetRoot + ".getPercent")
-	endFunction
-	function set(Int value)
-
-		ui.InvokeInt(self.HUD_MENU, self.WidgetRoot + ".setPercent", value)
-		lastPercent = value
-	endFunction
-endproperty
-String property ICN_Failed
-	String function get()
-
-		return "Failed"
-	endFunction
-endproperty
-String property ICN_Utherus
-	String function get()
-
-		return "Utherus"
-	endFunction
-endproperty
-String property ICN_Compatibility
-	String function get()
-
-		return "Compatibility"
-	endFunction
-endproperty
-String property ICN_Pregnancy4
-	String function get()
-
-		return "Pregnancy4"
-	endFunction
-endproperty
-String property ICN_Init
-	String function get()
-
-		return "Init"
-	endFunction
-endproperty
-String property ICN_Drip
-	String function get()
-
-		return "Drip"
-	endFunction
-endproperty
-String property ICN_FileCheck
-	String function get()
-
-		return "FileCheck"
-	endFunction
-endproperty
-Bool property AboutToClose hidden
-	Bool function get()
-
+bool property AboutToClose hidden
+	bool function get()
 		return _bAboutToClose
 	endFunction
-	function set(Bool value)
-
-		if value == true && _bAboutToClose == false
-			self.Flash()
-			self.RegisterForSingleUpdate(3.00000)
-		elseIf value == false && _bAboutToClose == true
-			self.UnregisterForUpdate()
-		endIf
+	function set(bool value)
+		if value==true && _bAboutToClose==false
+			Flash()
+			RegisterForSingleUpdate(3)
+		elseif value==false && _bAboutToClose==true
+			UnregisterForUpdate()
+		endif
 		_bAboutToClose = value
 	endFunction
 endproperty
-String property Icon hidden
-	String function get()
 
-		return ui.GetString(self.HUD_MENU, self.WidgetRoot + ".getIcon")
+string property Icon hidden
+	string function get()
+		return UI.GetString(HUD_MENU, WidgetRoot + ".getIcon")
 	endFunction
-	function set(String value)
-
-		ui.InvokeString(self.HUD_MENU, self.WidgetRoot + ".setIcon", value)
-		lastIcon = value
+	function set(string value)
+		;if (Ready)
+			;Debug.Trace("fwprogresswidget::Icon = "+value)
+			UI.InvokeString(HUD_MENU, WidgetRoot + ".setIcon", value)
+			lastIcon = value
+		;endif
 	endFunction
-endproperty
-String property ICN_Replanish
-	String function get()
+endProperty
 
-		return "Replanish"
+string property Job hidden
+	string function get()
+		return UI.GetString(HUD_MENU, WidgetRoot + ".getPhase")
 	endFunction
-endproperty
-String property ICN_Pregnancy3
-	String function get()
-
-		return "Pregnancy3"
+	function set(string value)
+		;if (Ready)
+			;Debug.Trace("fwprogresswidget::Job = "+value)
+			UI.InvokeString(HUD_MENU, WidgetRoot + ".setPhase", value)
+			lastMessage = value
+		;endif
 	endFunction
-endproperty
-String property CFG_VAnchor auto hidden
-String property Job hidden
-	String function get()
+endProperty
 
-		return ui.GetString(self.HUD_MENU, self.WidgetRoot + ".getPhase")
+int property Percent hidden
+	int function get()
+		return UI.GetInt(HUD_MENU, WidgetRoot + ".getPercent")
 	endFunction
-	function set(String value)
-
-		ui.InvokeString(self.HUD_MENU, self.WidgetRoot + ".setPhase", value)
-		lastMessage = value
+	function set(int value)
+		;if (Ready)
+			;Debug.Trace("fwprogresswidget::Percent = "+value)
+			UI.InvokeInt(HUD_MENU, WidgetRoot + ".setPercent", value)
+			lastPercent = value
+		;endif
 	endFunction
-endproperty
-String property ICN_Folicular
-	String function get()
+endProperty
 
-		return "Folicular"
-	endFunction
-endproperty
-String property ICN_Voice
-	String function get()
-
-		return "Voice"
-	endFunction
-endproperty
-String property ICN_Update
-	String function get()
-
-		return "Update"
-	endFunction
-endproperty
-String property SWF_Name
-{Set the SWF Filename like 'Widget.swf'}
-	String function get()
-
-		return _swfName
-	endFunction
-	function set(String value)
-
-		_swfName = value
-	endFunction
-endproperty
-Int property CFG_PosY auto hidden
-Bool property Shown hidden
-{Set to true to show the widget}
-	Bool function get()
-
-		return _shown
-	endFunction
-	function set(Bool value)
-
-		if value == true && CFG_Enabled == true
-			self.X = CFG_PosX as Float
-			self.Y = CFG_PosY as Float
-			self.HAnchor = CFG_HAnchor
-			self.VAnchor = CFG_VAnchor
-			_bAboutToClose = false
-			_bAboutToShow = true
-			self.Alpha = CFG_Alpha as Float
-			_shown = value
-		elseIf value == false
-			_bAboutToClose = true
-			_bAboutToShow = false
-			self.FadeTo(0.000000, 1.50000)
-			_shown = value
-		endIf
-	endFunction
-endproperty
-Int property CFG_Alpha auto hidden
-String property Script_Name
-{Set this script name}
-	String function get()
-
-		return _scriptName
-	endFunction
-	function set(String value)
-
-		_scriptName = value
-	endFunction
-endproperty
-String property ICN_Wait
-	String function get()
-
-		return "Wait"
-	endFunction
-endproperty
-String property ICN_Checked
-	String function get()
-
-		return "Checked"
-	endFunction
-endproperty
-String property ICN_Sperm
-	String function get()
-
-		return "Sperm"
-	endFunction
-endproperty
-String property ICN_AddOn
-	String function get()
-
-		return "AddOn"
-	endFunction
-endproperty
-Bool property CFG_Enabled auto hidden
-String property ICN_Pregnancy
-	String function get()
-
-		return "Pregnancy"
-	endFunction
-endproperty
-String property ICN_Search
-	String function get()
-
-		return "Search"
-	endFunction
-endproperty
-String property ICN_Progress
-	String function get()
-
-		return "Progress"
-	endFunction
-endproperty
-Int property CFG_PosX auto hidden
-
-;-- Variables ---------------------------------------
-Int lastPercent = 0
-String lastMessage = ""
-Bool _bAboutToShow = false
-String lastIcon = ""
-String _swfName = ""
-String _scriptName = ""
-Bool _bAboutToClose = false
-Bool _shown = false
-Int _widgetAlpha = 100
-
-;-- Functions ---------------------------------------
-
-Float[] function GetDimensions()
-{Return the dimensions of the widget (width,height).}
-
-	Float[] dim = new Float[2]
-	dim[0] = self.GetWidth()
-	dim[1] = self.GetHeight()
-	return dim
-endFunction
-
-String function GetWidgetSource()
-
-	return "BeeingFemale/" + _swfName
-endFunction
-
-function OnUpdate()
-
-	if _bAboutToClose == true
-		self.Shown = false
-	elseIf _bAboutToShow == true
-		self.Shown = true
-	endIf
-endFunction
-
-; Skipped compiler generated GotoState
-
-function Flash()
-
-	ui.Invoke(self.HUD_MENU, self.WidgetRoot + ".startFlash")
-endFunction
-
-function set(String sJob, Int iPercent, String sIcon, Bool bClose)
-
-	if sJob != ""
-		self.Job = sJob
-	endIf
-	if iPercent >= 0
-		self.Percent = iPercent
-	endIf
-	if sIcon != ""
-		self.Icon = sIcon
-	endIf
-	if bClose == true
-		self.AboutToClose = true
-	elseIf _shown == false
-		self.Shown = true
-	endIf
-endFunction
-
-String function GetWidgetType()
-
-	return _scriptName
-endFunction
-
-Float function GetWidth()
-
-	if self.Ready
-		return ui.GetFloat(self.HUD_MENU, self.WidgetRoot + ".Width")
-	endIf
-	return 0.000000
-endFunction
-
-Float function GetHeight()
-
-	if self.Ready
-		return ui.GetFloat(self.HUD_MENU, self.WidgetRoot + ".Height")
-	endIf
-	return 0.000000
-endFunction
-
-function OnWidgetLoad()
-
-	_bAboutToClose = true
+event OnWidgetLoad()
+	_bAboutToClose=true
 	_bAboutToShow = false
-	self.FadeTo(0.000000, 0.0100000)
+	FadeTo(0.0,0.01)
 	_shown = false
 	parent.OnWidgetLoad()
-	self.OnWidgetReset()
+	OnWidgetReset()
+endEvent
+
+function Set(string sJob="", int iPercent=-1, string sIcon="", bool bClose = false)
+	if sJob!=""
+		Job = sJob
+	endif
+	if iPercent>=0
+		Percent = iPercent
+	endif
+	if sIcon!=""
+		Icon = sIcon
+	endif
+	if bClose==true
+		AboutToClose=true
+	elseif _shown==false
+		Shown = true
+	endif
 endFunction
 
-function OnWidgetReset()
-
-	self.X = CFG_PosX as Float
-	self.Y = CFG_PosY as Float
-	self.HAnchor = CFG_HAnchor
-	self.VAnchor = CFG_VAnchor
+event OnWidgetReset()
+	X = CFG_PosX
+	Y = CFG_PosY
+	HAnchor = CFG_HAnchor
+	VAnchor = CFG_VAnchor
 	parent.OnWidgetReset()
-	ui.InvokeString(self.HUD_MENU, self.WidgetRoot + ".setPhase", lastMessage)
-	ui.InvokeString(self.HUD_MENU, self.WidgetRoot + ".setIcon", lastIcon)
-	ui.InvokeInt(self.HUD_MENU, self.WidgetRoot + ".setPercent", lastPercent)
-endFunction
+	;if _shown==true
+	;	Alpha = 100.0
+	;else
+	;	Alpha = 50.0
+	;endif
+	UI.InvokeString(HUD_MENU, WidgetRoot + ".setPhase", lastMessage)
+	UI.InvokeString(HUD_MENU, WidgetRoot + ".setIcon", lastIcon)
+	UI.InvokeInt(HUD_MENU, WidgetRoot + ".setPercent", lastPercent)
+endEvent
 
 function showWidget()
-
 	if CFG_Enabled
-		self.Shown = true
-	endIf
+		Shown = true
+	endif
+endFunction
+
+function Flash()
+	;if (Ready)
+		UI.Invoke(HUD_MENU, WidgetRoot + ".startFlash")
+	;endif
 endFunction
 
 function hideWidget()
-
-	self.Shown = false
+	Shown = false
 endFunction
 
-; Skipped compiler generated GetState
+float function GetWidth()
+	if (Ready)
+		return UI.GetFloat(HUD_MENU, WidgetRoot + ".Width")
+	endIf
+	return 0.0
+endFunction
+
+float function GetHeight()
+	if (Ready)
+		return UI.GetFloat(HUD_MENU, WidgetRoot + ".Height")
+	endIf
+	return 0.0
+endFunction
+
+float[] function GetDimensions()
+	{Return the dimensions of the widget (width,height).}
+	float[] dim = new float[2]
+	dim[0] = GetWidth()
+	dim[1] = GetHeight()
+	return dim
+endFunction
+
+String Function GetWidgetSource()
+	return "BeeingFemale/"+_swfName
+EndFunction
+
+String Function GetWidgetType()
+	return _scriptName
+EndFunction
+
+event OnUpdate()
+	if _bAboutToClose==true
+		Shown = false
+	elseif _bAboutToShow==true
+		Shown = true
+	endif
+endEvent

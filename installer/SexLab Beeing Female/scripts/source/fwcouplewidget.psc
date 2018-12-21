@@ -1,496 +1,497 @@
-;/ Decompiled by Champollion V1.0.1
-Source   : FWCoupleWidget.psc
-Modified : 2016-12-06 03:52:50
-Compiled : 2017-01-18 08:35:28
-User     : admin
-Computer : PATRICK
-/;
-scriptName FWCoupleWidget extends ski_widgetbase
+﻿Scriptname FWCoupleWidget extends ski_widgetbase
 
-;-- Properties --------------------------------------
-String property Script_Name
-{Set this script name}
-	String function get()
+int property CFG_PosX auto hidden
+int property CFG_PosY auto hidden
+bool property CFG_Enabled auto hidden
+int property CFG_Alpha auto hidden
+string property CFG_HAnchor auto hidden
+string property CFG_VAnchor auto hidden
 
-		return _scriptName
-	endFunction
-	function set(String value)
+string _swfName = ""
+string _scriptName = ""
+int _widgetAlpha = 0;100
+FWSystem property System auto
+AssociationType spouse
+bool bIsInUpdate=false
+bool bEnabled = false
 
-		_scriptName = value
-	endFunction
-endproperty
-Int property CFG_PosX auto hidden
-String property CFG_VAnchor auto hidden
-Int property CFG_Alpha auto hidden
-fwsystem property System auto
-Int property CFG_PosY auto hidden
-String property CFG_HAnchor auto hidden
-String property SWF_Name
-{Set the SWF Filename like 'Widget.swf'}
-	String function get()
-
-		return _swfName
-	endFunction
-	function set(String value)
-
-		_swfName = value
-	endFunction
-endproperty
-String property JsonFile
-	String function get()
-
-		if _file == ""
-			return ""
-		else
-			String path = "../../../BeeingFemale/Couples/"
-			String Full = path + _file
-			return Full
-		endIf
-	endFunction
-endproperty
-Bool property enabled
-	Bool function get()
-
+bool property enabled
+	bool function get()
 		return bEnabled
 	endFunction
-	function set(Bool val)
-
+	function set(bool val)
 		bEnabled = val
-		if val == false
-			self.FadeTo(0.000000, 0.000000)
-			_widgetAlpha = 0
+		if val==false
+			FadeTo(0, 0)
+			_widgetAlpha=0
 		else
-			_widgetAlpha = 100
-		endIf
-		self.updateConfig()
+			_widgetAlpha=100
+		endif
+		updateConfig()
 	endFunction
-endproperty
+endProperty
+
+actor _female = none
+string _name = ""
+string _file = ""
+string _mod = ""
+string _id = ""
+
 actor property Female
 	actor function get()
-
 		return _female
 	endFunction
-	function set(actor value)
 
+	function set(actor value)
 		if bIsInUpdate
-			self.UnregisterForUpdate()
-			bIsInUpdate = false
-		endIf
-		if value != none
-			if value == _female
-				return 
-			elseIf value.GetLeveledActorBase().GetSex() == 1
+			UnregisterForUpdate()
+			bIsInUpdate=false
+		endif
+		if value!=none
+			if value==_female
+				return
+			elseif value.GetLeveledActorBase().GetSex()==1
 				_female = value
 				_name = value.GetLeveledActorBase().GetName()
-				_file = self.GetWomanID()
-				self.findSpouse()
-				self.RefreshAll()
-				self.showWidget()
-				if jsonutil.HasStringValue(self.JsonFile, "Name") == false
-					jsonutil.SetStringValue(self.JsonFile, "Name", _name)
-				endIf
-				if jsonutil.HasFormValue(self.JsonFile, "Husband") == false
-					self.RegisterForUpdate(5.00000)
+				_file = GetWomanID()
+				findSpouse()
+				RefreshAll()
+				showWidget()
+				if JsonUtil.HasStringValue(JsonFile, "Name")==false
+					JsonUtil.SetStringValue(JsonFile, "Name", _name)
+				endif
+				;Debug.Notification("NPC selected: "+_name)
+				if JsonUtil.HasFormValue(JsonFile, "Husband")==false
+					RegisterForUpdate(5)
 					bIsInUpdate = true
-				elseIf jsonutil.GetFormValue(self.JsonFile, "Husband", none) == none
-					self.RegisterForUpdate(5.00000)
+				elseif JsonUtil.GetFormValue(JsonFile, "Husband")==none
+					RegisterForUpdate(5)
 					bIsInUpdate = true
-				endIf
+				endif
 			else
-				self.hideWidget()
-			endIf
+				;Debug.Notification("Not a female char")
+				hideWidget()
+			endif
 		else
-			self.hideWidget()
-		endIf
+			;Debug.Notification("Char was none")
+			hideWidget()
+		endif
 	endFunction
-endproperty
-Bool property CFG_Enabled auto hidden
+endProperty
 
-;-- Variables ---------------------------------------
-String _file = ""
-Bool bEnabled = false
-String _swfName = ""
-String _mod = ""
-Bool bIsInUpdate = false
-actor xTarget
-actor _female
-String _id = ""
-Int _widgetAlpha = 0
-String _scriptName = ""
-AssociationType spouse
-String _name = ""
+string property JsonFile
+	string function get()
+		if _file==""
+			return ""
+		else
+			string path = "../../../BeeingFemale/Couples/"
+			string Full = path + _file
+			return full
+		endif
+	endFunction
+endProperty
 
-;-- Functions ---------------------------------------
+string property SWF_Name
+	{Set the SWF Filename like 'Widget.swf'}
+	string function get()
+		return _swfName
+	endFunction
 
-String function GetWidgetSource()
+	function set(string value)
+		_swfName = value
+	endFunction
+endProperty
 
-	return "BeeingFemale/" + _swfName
-endFunction
+string property Script_Name
+	{Set this script name}
+	string function get()
+		return _scriptName
+	endFunction
 
-String function GetWomanID()
+	function set(string value)
+		_scriptName = value
+	endFunction
+endProperty
 
-	_mod = fwutility.GetModFromID(_female as form, false)
-	_id = fwutility.Hex(_female.GetFormID(), 6)
-	return fwutility.GetJsonFileCombine(_mod, _id)
-endFunction
+event OnWidgetReset()
+	X = CFG_PosX
+	Y = CFG_PosY
+	HAnchor = CFG_HAnchor
+	VAnchor = CFG_VAnchor
+	female = none
+	_name=""
+	spouse = Game.GetFormFromFile(0x142CA,"Skyrim.esm") as AssociationType
+	parent.OnWidgetReset()
+	updateConfig()
+	UpdateContent()
+endEvent
 
-function showWidget()
+event OnWidgetLoad()
+	parent.OnWidgetLoad()
+	OnWidgetReset()
+endEvent
 
-	if self.Ready && CFG_Enabled as Bool
-		self.X = CFG_PosX as Float
-		self.Y = CFG_PosY as Float
-		self.HAnchor = CFG_HAnchor
-		self.VAnchor = CFG_VAnchor
-		ui.InvokeBool(self.HUD_MENU, self.WidgetRoot + ".setVisible", true)
-		self.FadeTo(CFG_Alpha as Float, 0.200000)
-	endIf
-endFunction
-
-function OnUpdate()
-
-	self.findSpouse()
-endFunction
-
-String function GetWidgetType()
-
-	return _scriptName
-endFunction
-
-Bool function IsSpouse(actor a)
-
-	if _female != none
-		if a != none
-			if (a.GetRelationshipRank(_female) >= 4 || _female.GetRelationshipRank(a) >= 4) && a.IsChild() == false
-				return true
-			elseIf a.HasAssociation(spouse, _female) || _female.HasAssociation(spouse, a)
-				return true
-			endIf
-		endIf
-	endIf
-	return false
+string function GetWomanID()
+	_mod = FWUtility.GetModFromID(_female,false)
+	_id = FWUtility.Hex(_female.GetFormID(), 6)
+	return FWUtility.GetJsonFileCombine(_mod,_id)
 endFunction
 
 function hideWidget()
-
-	if self.Ready
-		self.FadeTo(0.000000, 3.00000)
+	if(Ready)
+		;Debug.Notification("Hide Widget")
+		FadeTo(0, 3.0)
 	endIf
 endFunction
 
-Float function GetHeight()
-
-	if self.Ready
-		return ui.GetFloat(self.HUD_MENU, self.WidgetRoot + ".Height")
-	endIf
-	return 0.000000
+function showWidget()
+	if(Ready && CFG_Enabled)
+		;Debug.Notification("Show Widget")
+		X = CFG_PosX
+		Y = CFG_PosY
+		HAnchor = CFG_HAnchor
+		VAnchor = CFG_VAnchor
+		UI.InvokeBool(HUD_MENU, WidgetRoot + ".setVisible", true)
+		FadeTo(CFG_Alpha, 0.2)
+	endif
 endFunction
 
-; Skipped compiler generated GotoState
-
-function OnKeyDown(Int keyCode)
-
-	if bEnabled == true
-		if keyCode == 18
-			xTarget = game.GetCurrentCrosshairRef() as actor
-		endIf
+float function GetWidth()
+	if (Ready)
+		return UI.GetFloat(HUD_MENU, WidgetRoot + ".Width")
 	endIf
+	return 0.0
 endFunction
 
-function RefreshAll()
-
-	if self.Ready
-		if _name != ""
-			String[] S = new String[3]
-			S[0] = _name
-			S[1] = _id
-			S[2] = _mod
-			ui.InvokeStringA(self.HUD_MENU, self.WidgetRoot + ".setNPC", S)
-		endIf
+float function GetHeight()
+	if (Ready)
+		return UI.GetFloat(HUD_MENU, WidgetRoot + ".Height")
 	endIf
-	self.RefreshHusband()
-	self.RefreshAffair()
-	self.RefreshPartner()
+	return 0.0
 endFunction
 
-Float function GetWidth()
-
-	if self.Ready
-		return ui.GetFloat(self.HUD_MENU, self.WidgetRoot + ".Width")
-	endIf
-	return 0.000000
-endFunction
-
-function findSpouse()
-
-	if _female as Bool == false
-		return 
-	endIf
-	if jsonutil.HasFormValue(self.JsonFile, "Husband")
-		if jsonutil.GetFormValue(self.JsonFile, "Husband", none) != none
-			if bIsInUpdate
-				bIsInUpdate = false
-				self.UnregisterForUpdate()
-			endIf
-			return 
-		endIf
-	endIf
-	actor a1 = game.FindClosestActorFromRef(game.GetPlayer() as objectreference, 1000.00)
-	actor a2 = game.FindClosestActorFromRef(_female as objectreference, 1000.00)
-	actor a3 = game.FindRandomActorFromRef(_female as objectreference, 1000.00)
-	actor a4 = game.FindRandomActorFromRef(_female as objectreference, 1000.00)
-	actor a5 = game.FindRandomActorFromRef(_female as objectreference, 1000.00)
-	if self.IsSpouse(a1)
-		jsonutil.SetFormValue(self.JsonFile, "Husband", a1 as form)
-		if self.Ready
-			ui.InvokeString(self.HUD_MENU, self.WidgetRoot + ".setHusband", a1.GetLeveledActorBase().GetName())
-		endIf
-	elseIf self.IsSpouse(a2)
-		jsonutil.SetFormValue(self.JsonFile, "Husband", a2 as form)
-		if self.Ready
-			ui.InvokeString(self.HUD_MENU, self.WidgetRoot + ".setHusband", a2.GetLeveledActorBase().GetName())
-		endIf
-	elseIf self.IsSpouse(a3)
-		jsonutil.SetFormValue(self.JsonFile, "Husband", a3 as form)
-		if self.Ready
-			ui.InvokeString(self.HUD_MENU, self.WidgetRoot + ".setHusband", a3.GetLeveledActorBase().GetName())
-		endIf
-	elseIf self.IsSpouse(a4)
-		jsonutil.SetFormValue(self.JsonFile, "Husband", a4 as form)
-		if self.Ready
-			ui.InvokeString(self.HUD_MENU, self.WidgetRoot + ".setHusband", a4.GetLeveledActorBase().GetName())
-		endIf
-	elseIf self.IsSpouse(a5)
-		jsonutil.SetFormValue(self.JsonFile, "Husband", a5 as form)
-		if self.Ready
-			ui.InvokeString(self.HUD_MENU, self.WidgetRoot + ".setHusband", a5.GetLeveledActorBase().GetName())
-		endIf
-	endIf
-endFunction
-
-function UpdateContent()
-
-	if self.Ready
-		self.RefreshAll()
-	endIf
-endFunction
-
-function OnKeyUp(Int keyCode, Float holdTime)
-
-	if bEnabled == false
-		return 
-	endIf
-	actor targetNpc = game.GetCurrentCrosshairRef() as actor
-	if targetNpc == none
-		if xTarget != none
-			targetNpc = xTarget
-		endIf
-	endIf
-	xTarget = none
-	if targetNpc == none
-		if keyCode == 18
-			if holdTime > 1.50000
-				self.Female = none
-			endIf
-		endIf
-		return 
-	endIf
-	if jsonutil.HasFormValue(self.JsonFile, "Husband") == false
-		if self.IsSpouse(targetNpc)
-			if bIsInUpdate
-				bIsInUpdate = false
-				self.UnregisterForUpdate()
-			endIf
-			jsonutil.SetFormValue(self.JsonFile, "Husband", targetNpc as form)
-			if self.Ready
-				ui.InvokeString(self.HUD_MENU, self.WidgetRoot + ".setHusband", targetNpc.GetLeveledActorBase().GetName())
-			endIf
-		endIf
-	elseIf jsonutil.GetFormValue(self.JsonFile, "Husband", none) == none
-		if self.IsSpouse(targetNpc)
-			if bIsInUpdate
-				bIsInUpdate = false
-				self.UnregisterForUpdate()
-			endIf
-			jsonutil.SetFormValue(self.JsonFile, "Husband", targetNpc as form)
-			if self.Ready
-				ui.InvokeString(self.HUD_MENU, self.WidgetRoot + ".setHusband", targetNpc.GetLeveledActorBase().GetName())
-			endIf
-		endIf
-	endIf
-	if keyCode == 18
-		if holdTime > 1.50000 && targetNpc != none && System.IsValidateFemaleActor(targetNpc, false) as Bool
-			self.Female = targetNpc
-		elseIf holdTime > 1.00000
-			self.Female = none
-		endIf
-	elseIf keyCode == 35 && holdTime > 1.50000 && _name != "" && targetNpc != none
-		if System.IsValidateMaleActor(targetNpc, false) as Bool && _female.GetRelationshipRank(targetNpc) >= 0
-			if jsonutil.GetFormValue(self.JsonFile, "Husband", none) == targetNpc as form
-				if bIsInUpdate == false
-					bIsInUpdate = true
-					self.RegisterForUpdate(5.00000)
-				endIf
-				jsonutil.UnsetFormValue(self.JsonFile, "Husband")
-			else
-				if bIsInUpdate
-					bIsInUpdate = false
-					self.UnregisterForUpdate()
-				endIf
-				jsonutil.SetFormValue(self.JsonFile, "Husband", targetNpc as form)
-				if self.Ready
-					ui.InvokeString(self.HUD_MENU, self.WidgetRoot + ".setHusband", targetNpc.GetLeveledActorBase().GetName())
-				endIf
-			endIf
-		elseIf !System.IsValidateMaleActor(targetNpc, false) && _female.GetRelationshipRank(targetNpc) >= 0
-			jsonutil.UnsetFormValue(self.JsonFile, "Husband")
-		endIf
-	elseIf keyCode == 34 && holdTime > 1.50000 && _name != "" && targetNpc != none
-		if System.IsValidateActor(targetNpc, false) as Bool && _female.GetRelationshipRank(targetNpc) >= 0
-			if jsonutil.FormListHas(self.JsonFile, "Affairs", targetNpc as form)
-				jsonutil.FormListRemove(self.JsonFile, "Affairs", targetNpc as form, true)
-				self.RefreshAffair()
-			else
-				jsonutil.FormListAdd(self.JsonFile, "Affairs", targetNpc as form, true)
-				if self.Ready
-					ui.InvokeString(self.HUD_MENU, self.WidgetRoot + ".addAffair", targetNpc.GetLeveledActorBase().GetName())
-				endIf
-			endIf
-		endIf
-	elseIf keyCode == 25 && holdTime > 1.50000 && _name != "" && targetNpc != none
-		if System.IsValidateActor(targetNpc, false) as Bool && _female.GetRelationshipRank(targetNpc) >= 0
-			if jsonutil.FormListHas(self.JsonFile, "Partners", targetNpc as form)
-				jsonutil.FormListRemove(self.JsonFile, "Partners", targetNpc as form, true)
-				self.RefreshPartner()
-			else
-				jsonutil.FormListAdd(self.JsonFile, "Partners", targetNpc as form, true)
-				if self.Ready
-					ui.InvokeString(self.HUD_MENU, self.WidgetRoot + ".addPartner", targetNpc.GetLeveledActorBase().GetName())
-				endIf
-			endIf
-		endIf
-	endIf
-endFunction
-
-function RefreshPartner()
-
-	if self.Ready
-		ui.InvokeString(self.HUD_MENU, self.WidgetRoot + ".setPartner", "")
-		if _name != ""
-			Int i = jsonutil.FormListCount(self.JsonFile, "Partners")
-			while i > 0
-				i -= 1
-				actor Partner = jsonutil.FormListGet(self.JsonFile, "Partners", i) as actor
-				if Partner != none
-					ui.InvokeString(self.HUD_MENU, self.WidgetRoot + ".addPartner", Partner.GetLeveledActorBase().GetName())
-				endIf
-			endWhile
-		endIf
-	endIf
-endFunction
-
-function RefreshAffair()
-
-	if self.Ready
-		ui.InvokeString(self.HUD_MENU, self.WidgetRoot + ".setAffair", "")
-		if _name != ""
-			Int i = jsonutil.FormListCount(self.JsonFile, "Affairs")
-			while i > 0
-				i -= 1
-				actor Affair = jsonutil.FormListGet(self.JsonFile, "Affairs", i) as actor
-				if Affair != none
-					ui.InvokeString(self.HUD_MENU, self.WidgetRoot + ".addAffair", Affair.GetLeveledActorBase().GetName())
-				endIf
-			endWhile
-		endIf
-	endIf
-endFunction
-
-function RefreshHusband()
-
-	if self.Ready
-		ui.InvokeString(self.HUD_MENU, self.WidgetRoot + ".setHusband", "")
-		if _name != ""
-			actor Husband = jsonutil.GetFormValue(self.JsonFile, "Husband", none) as actor
-			if Husband != none
-				ui.InvokeString(self.HUD_MENU, self.WidgetRoot + ".setHusband", Husband.GetLeveledActorBase().GetName())
-			endIf
-		endIf
-	endIf
-endFunction
-
-Float[] function GetDimensions()
-{Return the dimensions of the widget (width,height).}
-
-	Float[] dim = new Float[2]
-	dim[0] = self.GetWidth()
-	dim[1] = self.GetHeight()
+float[] function GetDimensions()
+	{Return the dimensions of the widget (width,height).}
+	float[] dim = new float[2]
+	dim[0] = GetWidth()
+	dim[1] = GetHeight()
 	return dim
 endFunction
 
-; Skipped compiler generated GetState
+String Function GetWidgetSource()
+	return "BeeingFemale/"+_swfName
+EndFunction
 
-function ConvertAllFromActorBase()
+String Function GetWidgetType()
+	return _scriptName
+EndFunction
 
-	Int c = storageutil.FormListCount(none, "FW.SavedNPCs")
-	debug.Notification("Start converting: " + c as String + " NPCs")
-	String xp1 = "../../../BeeingFemale/Couples/ActorBase/"
-	String xp2 = "../../../BeeingFemale/Couples/"
-	while c > 0
-		c -= 1
-		actor a = storageutil.FormListGet(none, "FW.SavedNPCs", c) as actor
-		String _m = fwutility.GetModFromID(a as form, false)
-		String _h = fwutility.Hex(a.GetLeveledActorBase().GetFormID(), 6)
-		String _h1 = xp1 + fwutility.GetJsonFileCombine(_m, _h)
-		if jsonutil.HasFormValue(_h1, "Husband") || jsonutil.FormListCount(_h1, "Affairs") > 0 || jsonutil.FormListCount(_h1, "Partners") > 0
-			debug.Notification("convert " + a.GetLeveledActorBase().GetName())
-			String _h2 = xp2 + fwutility.GetJsonFileCombine(_m, fwutility.Hex(a.GetFormID(), 6))
-			jsonutil.SetFormValue(_h2, "Husband", jsonutil.GetFormValue(_h1, "Husband", none))
-			Int c2 = jsonutil.FormListCount(_h1, "Affairs")
-			while c2 > 0
-				c2 -= 1
-				jsonutil.FormListAdd(_h2, "Affairs", jsonutil.FormListGet(_h1, "Affairs", c2), true)
-			endWhile
-			c2 = jsonutil.FormListCount(_h1, "Partners")
-			while c2 > 0
-				c2 -= 1
-				jsonutil.FormListAdd(_h2, "Partners", jsonutil.FormListGet(_h1, "Partners", c2), true)
-			endWhile
-			jsonutil.Save(_h2, false)
-		endIf
-	endWhile
-	debug.MessageBox("Convert done")
+Event OnUpdate()
+	findSpouse()
+endEvent
+
+function findSpouse()
+	if _female==false
+		return
+	endif
+	if JsonUtil.HasFormValue(JsonFile, "Husband")
+		if JsonUtil.GetFormValue(JsonFile, "Husband") != none
+			if bIsInUpdate
+				bIsInUpdate=false
+				UnregisterForUpdate()
+			endif
+			return
+		endif
+	endif
+	; Search for Spouse
+	actor a1 = Game.FindClosestActorFromRef(Game.GetPlayer(), 1000)
+	actor a2 = Game.FindClosestActorFromRef(_female, 1000)
+	actor a3 = Game.FindRandomActorFromRef(_female, 1000)
+	actor a4 = Game.FindRandomActorFromRef(_female, 1000)
+	actor a5 = Game.FindRandomActorFromRef(_female, 1000)
+	if IsSpouse(a1)
+		JsonUtil.SetFormValue(JsonFile, "Husband", a1)
+		if(Ready)
+			UI.InvokeString(HUD_MENU, WidgetRoot + ".setHusband", a1.GetLeveledActorBase().GetName())
+		endif
+	elseif IsSpouse(a2)
+		JsonUtil.SetFormValue(JsonFile, "Husband", a2)
+		if(Ready)
+			UI.InvokeString(HUD_MENU, WidgetRoot + ".setHusband", a2.GetLeveledActorBase().GetName())
+		endif
+	elseif IsSpouse(a3)
+		JsonUtil.SetFormValue(JsonFile, "Husband", a3)
+		if(Ready)
+			UI.InvokeString(HUD_MENU, WidgetRoot + ".setHusband", a3.GetLeveledActorBase().GetName())
+		endif
+	elseif IsSpouse(a4)
+		JsonUtil.SetFormValue(JsonFile, "Husband", a4)
+		if(Ready)
+			UI.InvokeString(HUD_MENU, WidgetRoot + ".setHusband", a4.GetLeveledActorBase().GetName())
+		endif
+	elseif IsSpouse(a5)
+		JsonUtil.SetFormValue(JsonFile, "Husband", a5)
+		if(Ready)
+			UI.InvokeString(HUD_MENU, WidgetRoot + ".setHusband", a5.GetLeveledActorBase().GetName())
+		endif
+	endif
 endFunction
 
-function OnWidgetReset()
-
-	self.X = CFG_PosX as Float
-	self.Y = CFG_PosY as Float
-	self.HAnchor = CFG_HAnchor
-	self.VAnchor = CFG_VAnchor
-	self.Female = none
-	_name = ""
-	spouse = game.GetFormFromFile(82634, "Skyrim.esm") as AssociationType
-	parent.OnWidgetReset()
-	self.updateConfig()
-	self.UpdateContent()
-endFunction
-
-function OnWidgetLoad()
-
-	parent.OnWidgetLoad()
-	self.OnWidgetReset()
+bool function IsSpouse(actor a)
+	; 4 - Lover
+	; 3 - Ally
+	; 2 - Confidant
+	; 1 - Friend
+	; 0 - Acquaintance
+	; -1 - Rival
+	; -2 - Foe
+	; -3 - Enemy
+	; -4 - Archnemesis
+	; int Function GetRelationshipRank(Actor akOther)
+	; bool Function HasAssociation(AssociationType akAssociation, Actor akOther = None)
+	if _female!=none
+		if a!=none
+			if (a.GetRelationshipRank(_female) >= 4 || _female.GetRelationshipRank(a) >=4) && a.IsChild()==false
+				return true
+			elseif a.HasAssociation(spouse, _female) || _female.HasAssociation(spouse, a)
+				return true
+			endif
+		endif
+	endif
+	return false
 endFunction
 
 function updateConfig()
+	if GetType()==77
+		UnregisterForAllKeys()
+		
+		if(bEnabled)
+			RegisterForKey(0x12) ; E
+			RegisterForKey(0x23) ; H
+			RegisterForKey(0x22) ; G
+			RegisterForKey(0x19) ; P
+			Debug.Notification("Couple Widget Key-Events registrated")
+		endif
+	endif
+endFunction
 
-	if self.GetType() == 77
-		self.UnregisterForAllKeys()
-		if bEnabled
-			self.RegisterForKey(18)
-			self.RegisterForKey(35)
-			self.RegisterForKey(34)
-			self.RegisterForKey(25)
-			debug.Notification("Couple Widget Key-Events registrated")
-		endIf
-	endIf
+actor xTarget = none
+event OnKeyDown(int keyCode)
+	if bEnabled==true
+		if keyCode == 0x12
+			xTarget = Game.GetCurrentCrosshairRef() as Actor
+		endif
+	endif
+endEvent
+
+function ConvertAllFromActorBase()
+	int c = StorageUtil.FormListCount(none, "FW.SavedNPCs")
+	Debug.Notification("Start converting: " + c+ " NPCs")
+	string xp1 = "../../../BeeingFemale/Couples/ActorBase/"
+	string xp2 = "../../../BeeingFemale/Couples/"
+	while c>0
+		c-=1
+		actor a = StorageUtil.FormListGet(none, "FW.SavedNPCs",c) as actor
+		string _m = FWUtility.GetModFromID(a,false)
+		string _h = FWUtility.Hex(a.GetLeveledActorBase().GetFormID(),6)
+		string _h1 = xp1 + FWUtility.GetJsonFileCombine(_m,_h)
+		;Debug.Notification(FWUtility.GetJsonFileCombine(_m,_h))
+		if JsonUtil.HasFormValue(_h1,"Husband") || JsonUtil.FormListCount(_h1,"Affairs")>0 || JsonUtil.FormListCount(_h1,"Partners")>0
+			Debug.Notification("convert " + a.GetLeveledActorBase().GetName())
+			string _h2 = xp2 + FWUtility.GetJsonFileCombine(_m,FWUtility.Hex(a.GetFormID(),6))
+			
+			; Convert Husband
+			JsonUtil.SetFormValue(_h2, "Husband", JsonUtil.GetFormValue(_h1,"Husband"))
+			
+			; Convert Affair
+			int c2 = JsonUtil.FormListCount(_h1, "Affairs")
+			while c2>0
+				c2-=1
+				JsonUtil.FormListAdd(_h2, "Affairs", JsonUtil.FormListGet(_h1, "Affairs", c2))
+			endWhile
+			
+			; Convert Partners
+			c2 = JsonUtil.FormListCount(_h1, "Partners")
+			while c2>0
+				c2-=1
+				JsonUtil.FormListAdd(_h2, "Partners", JsonUtil.FormListGet(_h1, "Partners", c2))
+			endWhile
+			
+			; Save
+			JsonUtil.Save(_h2)
+		endif
+	endWhile
+	Debug.MessageBox("Convert done")
+endFunction
+
+
+
+event OnKeyUp(int keyCode, float holdTime)
+	if bEnabled==false
+		return
+	endif
+	actor targetNpc = Game.GetCurrentCrosshairRef() as Actor
+	if targetNpc == none
+		if xTarget != none
+			targetNpc =xTarget
+		endif
+	endif
+	xTarget = none
+	if targetNpc==none ; unselect the woman, when the keywas E
+		if keyCode == 0x12
+			if holdTime > 1.5
+				female = none
+			endif
+		endif
+		return
+	endif
+	if JsonUtil.HasFormValue(JsonFile, "Husband")==false
+		if IsSpouse(targetNpc)
+			if bIsInUpdate
+				bIsInUpdate=false
+				UnregisterForUpdate()
+			endif
+			JsonUtil.SetFormValue(JsonFile, "Husband", targetNpc)
+			if(Ready)
+				UI.InvokeString(HUD_MENU, WidgetRoot + ".setHusband", targetNpc.GetLeveledActorBase().GetName())
+			endif
+		endif
+	elseif JsonUtil.GetFormValue(JsonFile, "Husband")==none
+		if IsSpouse(targetNpc)
+			if bIsInUpdate
+				bIsInUpdate=false
+				UnregisterForUpdate()
+			endif
+			JsonUtil.SetFormValue(JsonFile, "Husband", targetNpc)
+			if(Ready)
+				UI.InvokeString(HUD_MENU, WidgetRoot + ".setHusband", targetNpc.GetLeveledActorBase().GetName())
+			endif
+		endif
+	endif
+	
+	
+	if keyCode == 0x12
+		;Debug.Notification("KeyPressEvent raised: E")
+		if holdTime > 1.5 && targetNpc!=none && System.IsValidateFemaleActor(targetNpc)
+			female = targetNpc
+		elseif holdTime > 1.0
+			female = none
+		endif
+	elseif keyCode== 0x23 && holdTime>1.5 && _name!="" && targetNpc!=none
+		;Debug.Notification("KeyPressEvent raised: H")
+		if System.IsValidateMaleActor(targetNpc) && _female.GetRelationshipRank(targetNpc)>=0
+			if JsonUtil.GetFormValue(JsonFile, "Husband") == targetNpc
+				if bIsInUpdate==false
+					bIsInUpdate=true
+					RegisterForUpdate(5)
+				endif
+				JsonUtil.UnsetFormValue(JsonFile, "Husband")
+			else
+				if bIsInUpdate
+					bIsInUpdate=false
+					UnregisterForUpdate()
+				endif
+				JsonUtil.SetFormValue(JsonFile, "Husband", targetNpc)
+				if(Ready)
+					UI.InvokeString(HUD_MENU, WidgetRoot + ".setHusband", targetNpc.GetLeveledActorBase().GetName())
+				endif
+			endif
+		elseif !System.IsValidateMaleActor(targetNpc) && _female.GetRelationshipRank(targetNpc)>=0
+			JsonUtil.UnsetFormValue(JsonFile, "Husband")
+		endif
+	elseif keyCode== 0x22 && holdTime>1.5 && _name!="" && targetNpc!=none
+		;Debug.Notification("KeyPressEvent raised: A")
+		if System.IsValidateActor(targetNpc) && _female.GetRelationshipRank(targetNpc)>=0
+			if JsonUtil.FormListHas(JsonFile, "Affairs", targetNpc)
+				JsonUtil.FormListRemove(JsonFile, "Affairs", targetNpc)
+				RefreshAffair()
+			else
+				JsonUtil.FormListAdd(JsonFile, "Affairs", targetNpc)
+				if(Ready)
+					UI.InvokeString(HUD_MENU, WidgetRoot + ".addAffair", targetNpc.GetLeveledActorBase().GetName())
+				endif
+			endif
+		endif
+	elseif keyCode== 0x19 && holdTime>1.5 && _name!="" && targetNpc!=none
+		;Debug.Notification("KeyPressEvent raised: P")
+		if System.IsValidateActor(targetNpc) && _female.GetRelationshipRank(targetNpc)>=0
+			if JsonUtil.FormListHas(JsonFile, "Partners", targetNpc)
+				JsonUtil.FormListRemove(JsonFile, "Partners", targetNpc)
+				RefreshPartner()
+			else
+				JsonUtil.FormListAdd(JsonFile, "Partners", targetNpc)
+				if(Ready)
+					UI.InvokeString(HUD_MENU, WidgetRoot + ".addPartner", targetNpc.GetLeveledActorBase().GetName())
+				endif
+			endif
+		endif
+	endif
+endEvent
+
+function RefreshAll()
+	if(Ready)
+		if _name!=""
+			; NPC Name
+			string[] s = new String[3]
+			s[0] = _name
+			s[1] = _id
+			s[2] = _mod
+			UI.InvokeStringA(HUD_MENU, WidgetRoot + ".setNPC", s)
+		endif
+	endif
+	RefreshHusband()
+	RefreshAffair()
+	RefreshPartner()
+endFunction
+
+function RefreshHusband()
+	if(Ready)
+		UI.InvokeString(HUD_MENU, WidgetRoot + ".setHusband", "")
+		if _name!=""
+			actor Husband = JsonUtil.GetFormValue(JsonFile, "Husband") as actor
+			if Husband!=none
+				UI.InvokeString(HUD_MENU, WidgetRoot + ".setHusband", Husband.GetLeveledActorBase().GetName())
+			endif
+		endif
+	endif
+endFunction
+
+function RefreshAffair()
+	if(Ready)
+		; Clear
+		UI.InvokeString(HUD_MENU, WidgetRoot + ".setAffair", "")
+		if _name!=""
+			int i=JsonUtil.FormListCount(JsonFile, "Affairs")
+			while i>0
+				i-=1
+				actor Affair=JsonUtil.FormListGet(JsonFile, "Affairs",i) as actor
+				if Affair!=none
+					UI.InvokeString(HUD_MENU, WidgetRoot + ".addAffair", Affair.GetLeveledActorBase().GetName())
+				endif
+			endwhile
+		endif
+	endif
+endFunction
+
+function RefreshPartner()
+	if(Ready)
+		; Clear
+		UI.InvokeString(HUD_MENU, WidgetRoot + ".setPartner", "")
+		if _name!=""
+			int i=JsonUtil.FormListCount(JsonFile, "Partners")
+			while i>0
+				i-=1
+				actor Partner=JsonUtil.FormListGet(JsonFile, "Partners",i) as actor
+				if Partner!=none
+					UI.InvokeString(HUD_MENU, WidgetRoot + ".addPartner", Partner.GetLeveledActorBase().GetName())
+				endif
+			endwhile
+		endif
+	endif
+endFunction
+
+function UpdateContent()
+	if(Ready)
+		RefreshAll()
+	endif
 endFunction

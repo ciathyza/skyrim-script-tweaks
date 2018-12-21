@@ -1,42 +1,25 @@
-;/ Decompiled by Champollion V1.0.1
-Source   : BFA_AbilityEffectPMSHustleBustle.psc
-Modified : 2016-12-06 03:52:18
-Compiled : 2017-01-15 06:28:41
-User     : admin
-Computer : PATRICK
-/;
-scriptName BFA_AbilityEffectPMSHustleBustle extends activemagiceffect
+﻿Scriptname BFA_AbilityEffectPMSHustleBustle extends activemagiceffect  
 
-;-- Properties --------------------------------------
-
-;-- Variables ---------------------------------------
+float SpeedMultMod
 actor PlayerRef
-Float SpeedMultMod
 
-;-- Functions ---------------------------------------
-
-function OnEffectStart(actor target, actor caster)
-
+Event OnEffectStart(Actor target, Actor caster)
 	PlayerRef = target
-	if PlayerRef
-		PlayerRef.ModActorValue("Stamina", 60.0000)
-		PlayerRef.ModActorValue("StaminaRateMult", 60.0000)
-		SpeedMultMod = PlayerRef.GetBaseActorValue("SpeedMult") * 0.0800000
+	
+	If PlayerRef
+		PlayerRef.ModActorValue("Stamina", 60)
+		PlayerRef.ModActorValue("StaminaRateMult", 60)
+		SpeedMultMod = PlayerRef.GetBaseActorValue("SpeedMult") * 0.08
 		PlayerRef.ModActorValue("SpeedMult", SpeedMultMod)
-	else
-		self.Dispel()
-	endIf
-endFunction
+	Else
+		Dispel()
+	EndIf
+EndEvent
 
-; Skipped compiler generated GetState
-
-; Skipped compiler generated GotoState
-
-function OnEffectFinish(actor target, actor caster)
-
-	if PlayerRef
-		PlayerRef.ModActorValue("Stamina", -60.0000)
-		PlayerRef.ModActorValue("StaminaRateMult", -60.0000)
+Event OnEffectFinish(Actor target, Actor caster)
+	If PlayerRef
+		PlayerRef.ModActorValue("Stamina", -60)
+		PlayerRef.ModActorValue("StaminaRateMult", -60)
 		PlayerRef.ModActorValue("SpeedMult", -SpeedMultMod)
-	endIf
-endFunction
+	EndIf
+EndEvent

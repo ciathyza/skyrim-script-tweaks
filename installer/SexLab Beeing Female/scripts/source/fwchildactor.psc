@@ -1,1524 +1,1712 @@
-;/ Decompiled by Champollion V1.0.1
-Source   : FWChildActor.psc
-Modified : 2017-01-14 16:10:51
-Compiled : 2017-01-18 08:35:43
-User     : admin
-Computer : PATRICK
-/;
-scriptName FWChildActor extends Actor conditional
+﻿Scriptname FWChildActor extends Actor conditional
 
-;-- Properties --------------------------------------
-Int property GetOtherParentRank hidden
-	Int function get()
+FWChildSettings property ChildSettings auto
+bool property HasMagicka = false auto
+bool property CanWearWeapons = false auto
 
-		if ChildSettings.Faction_OtherParent == none
-			return 0
-		else
-			return self.GetFactionRank(ChildSettings.Faction_OtherParent)
-		endIf
-	endFunction
-endproperty
-Float property Age hidden
-	Float function get()
 
-		if dob == 0.000000
-			dob = storageutil.GetFloatValue(self as form, "FW.Child.DOB", 0.000000)
-		endIf
-		return utility.GetCurrentGameTime() - dob
-	endFunction
-endproperty
-Actor property Follow auto conditional hidden
-Float property DayOfBirth hidden
-	Float function get()
+; Variable06 and Variable07 for Hearthfire - Source: BYOHRelationshipAdoptionScript.psc
+;----------------------------------------------------------------------------------------------------
+;STANDARD VARIABLES
+;----------------------------------------------------------------------------------------------------
+;RelationshipAdoption makes extensive use of Actor Values Variable06-07 for package conditionals and state-tracking. Values are:
+;
+;******************************
+; Variable06 - Child State: Primarily used for package conditionals to override the child's standard schedule.
+;   - -2 - Just Adopted, block packages until the child moves to their new home.
+;   - -1 - Just Adopted, travel to home, then trigger the scheduler.
+;   -  0 -  Normal
+;   -  1 - Override Behaviors: Small overrides to the child's schedule that don't trump real Orders. Used to make the child feel more responsive.
+;      - 1.0 - Child was recently adopted and sandboxes in their new house for an hour.
+;	   - 1.1 - Child was given a weapon and spars with it for an hour.
+;	   - 1.2 - Child was given a doll and plays with it for an hour.
+;      - 1.3 - Child runs off crying and sandboxes in their room for an hour.
+;   -  2 - Override Orders: Child ordered outside (Inside, 6am-9pm)
+;   -  3 - Override Orders: Child ordered inside (Outside, any time)
+;   -  4 - Override Orders: Child ordered to do chores (Anywhere, 6am-9pm)
+;   -  5 - Override Orders: Child ordered to bed (Anywhere, 6pm-8am)
+;   - 10 - Override Behavior: Child will "Never Speak to You Again" due to a hostile action. This lasts for 24h.
+;******************************
+; Variable07 - Forcegreet State: Determines which forcegreet to run when the player 'comes home' after an absence.
+;   -  0 - [NOT INITIALIZED]
+;   -  1 - DLG: Thanks for Adopting	  - First FG after Adoption, Dirty Move.
+;   -  2 - DLG: Thanks and Chest	  - First FG after Adoption, Clean Move.
+;   -  3 - DLG: Check the Chest       - First Clean Move after Adoption.
+;   -  4 - Adopt a Pet				  - Player has an Animal Companion, child asks to keep it.
+;   -  5 - Adopt a Critter			  - Child brings home a critter. 10% chance (plus other conditions).
+;   -  6 - Name Calling 1             - Scene: Children call each other names, then play tag. 10% chance (plus other conditions).
+;   -  7 - Name Calling 2             - Scene: Children call each other names, one runs off crying. 10% chance (plus other conditions).
+;   -    -
+;   - 10 - Ask for Allowance          - Generic, 25% Chance
+;   - 11 - Give Gift to Player        - Generic, 25% Chance
+;   - 12 - Ask for a Present		  - Generic, 25% Chance
+;   - 13 - Suggest a Game			  - Generic, 25% Chance
+;******************************
+; Variable03 - Orders - BF Variable
+;   -  0 - Wait
+;   -  1 - Wait and Play
+;   -  2 - *Waiting free slot*
+;   -  3 - *Waiting free slot*
+;   -  4 - *Waiting free slot*
+;   -  5 - *Waiting free slot*
+;   -  6 - *Waiting free slot*
+;   -  7 - *Waiting free slot*
+;   -  8 - *Waiting free slot*
+;   -  9 - *Waiting free slot*
+; 
+;   - 10 - GoTo Spoon
+;   - 11 - GoTo Home
+;   - 12 - GoTo Meet place
+;   - 13 - *GoTo free slot*
+;   - 14 - *GoTo free slot*
+;   - 15 - *GoTo free slot*
+;   - 16 - *GoTo free slot*
+;   - 17 - *GoTo free slot*
+;   - 18 - *GoTo free slot*
+;   - 19 - *GoTo free slot*
+;   - 20 - *GoTo free slot*
+;   - 21 - *GoTo free slot*
+;   - 22 - *GoTo free slot*
+;   - 23 - *GoTo free slot*
+;   - 24 - *GoTo free slot*
+;   - 25 - *GoTo free slot*
+;   - 26 - *GoTo free slot*
+;   - 27 - *GoTo free slot*
+;   - 28 - *GoTo free slot*
+;   - 29 - *GoTo free slot*
+;
+;   - 30 - Follow
+;   - 31 - Follow and Play
+;   - 32 - *Follow free slot*
+;   - 33 - *Follow free slot*
+;   - 34 - *Follow free slot*
+;   - 35 - *Follow free slot*
+;   - 36 - *Follow free slot*
+;   - 37 - *Follow free slot*
+;   - 38 - *Follow free slot*
+;   - 39 - *Follow free slot*
+;   - 40 - *Follow free slot*
+;   - 41 - *Follow free slot*
+;   - 42 - *Follow free slot*
+;   - 43 - *Follow free slot*
+;   - 44 - *Follow free slot*
+;   - 45 - *Follow free slot*
+;   - 46 - *Follow free slot*
+;   - 47 - *Follow free slot*
+;   - 48 - *Follow free slot*
+;   - 49 - *Follow free slot*
+;
+;   - 99 - Leave me alone (Delete)
 
-		if dob == 0.000000
-			dob = storageutil.GetFloatValue(self as form, "FW.Child.DOB", 0.000000)
-		endIf
-		return dob
-	endFunction
-	function set(Float value)
 
-		dob = value
-		storageutil.SetFloatValue(self as form, "FW.Child.DOB", value)
-	endFunction
-endproperty
-Float property SizeDuration
-	Float function get()
 
-		return _SizeDuration
-	endFunction
-	function set(Float value)
 
-		_SizeDuration = value
-		self.UpdateSize()
-	endFunction
-endproperty
-Int property Sex hidden
-	Int function get()
+; Flags
+;---------------------------
+;  1 IsVampire
+;  2 Hair from Mother
+;  4 IsFemale
+;  8 Eyes from Mother
+; 16 Nose from Mother
+; 32 Fathers Last name
 
-		return iSex
-	endFunction
-	function set(Int value)
 
-		iSex = value
-	endFunction
-endproperty
-Bool property HasMagicka = false auto
-Bool property IsVampire hidden
-	Bool function get()
-
-		return bIsVampire
-	endFunction
-	function set(Bool value)
-
-		Int xflag = storageutil.GetIntValue(self as form, "FW.Child.Flag", 0)
-		if math.LogicalAnd(xflag, 1) == 1 && value == false
-			storageutil.SetIntValue(self as form, "FW.Child.Flag", math.LogicalXor(xflag, 1))
-		elseIf math.LogicalAnd(xflag, 1) == 0 && value == true
-			storageutil.SetIntValue(self as form, "FW.Child.Flag", math.LogicalOr(xflag, 1))
-		endIf
-		bIsVampire = value
-	endFunction
-endproperty
-Bool property IsMale hidden
-	Bool function get()
-
-		return iSex == 1
-	endFunction
-	function set(Bool value)
-
-		if value == true
-			iSex = 0
-		else
-			iSex = 1
-		endIf
-	endFunction
-endproperty
-race property ChildRace hidden
-	race function get()
-
-		return storageutil.GetFormValue(self as form, "FW.Child.Race", none) as race
-	endFunction
-	function set(race value)
-
-		storageutil.SetFormValue(self as form, "FW.Child.Race", value as form)
-	endFunction
-endproperty
-Bool property IsLearning
-	Bool function get()
-
-		return bIsLearning
-	endFunction
-endproperty
-Bool property IsFemale hidden
-	Bool function get()
-
-		return iSex == 1
-	endFunction
-	function set(Bool value)
-
-		if value == true
-			iSex = 1
-		else
-			iSex = 0
-		endIf
-	endFunction
-endproperty
-Actor property Mother hidden
-	Actor function get()
-
-		if _Mother == none
-			_Mother = storageutil.GetFormValue(self as form, "FW.Child.Mother", none) as Actor
-		endIf
+actor _Mother
+actor property Mother hidden
+	actor function get()
+		if _Mother==none
+			_Mother=StorageUtil.GetFormValue(self,"FW.Child.Mother",none) as Actor
+		endif
 		return _Mother
 	endFunction
-	function set(Actor value)
-
-		if _Mother != none
-			self.SetRelationshipRank(_Mother, 0)
-			self.Mother.SetRelationshipRank(self as Actor, 0)
-		endIf
-		storageutil.SetFormValue(self as form, "FW.Child.Mother", value as form)
-		if _Mother == game.GetPlayer()
+	function Set(actor value)
+		if _Mother!=none
+			SetRelationshipRank(_Mother,0)
+			Mother.SetRelationshipRank(self,0)
+		endif
+		StorageUtil.SetFormValue(self,"FW.Child.Mother",value)
+		if _Mother==Game.GetPlayer()
 			ChildSettings.RemovePlayerChild(self)
-		endIf
+		endif
+		
 		_Mother = value
-		if value == game.GetPlayer()
+		if value == Game.GetPlayer()
 			ChildSettings.AddPlayerChild(self)
-		endIf
-		if _Mother != none
-			self.SetRelationshipRank(_Mother, ChildSettings.ParentRelationShipLevel)
-			_Mother.SetRelationshipRank(_Mother, ChildSettings.ParentRelationShipLevel)
-		endIf
+		endif
+		if _Mother!=none
+			SetRelationshipRank(_Mother, ChildSettings.ParentRelationShipLevel)
+			_Mother.SetRelationshipRank(_Mother,ChildSettings.ParentRelationShipLevel)
+		endif
+		
+		;if _Father!=Game.GetPlayer() && _Mother!=Game.GetPlayer() && _Father!=none && Mother!=none
+		;	_Mother.SetRelationshipRank(_Father,ChildSettings.ParentRelationShipLevel)
+		;	_Father.SetRelationshipRank(_Mother,ChildSettings.ParentRelationShipLevel)
+		;endif
 	endFunction
-endproperty
-Float property PlayerLastSeen = 0.000000 auto hidden
-Bool property CanWearWeapons = false auto
-Int property Order hidden
-	Int function get()
+endProperty
 
-		return _order
-	endFunction
-	function set(Int value)
-
-		if value == 0
-			self.Order_Wait()
-		elseIf value == 1
-			self.Order_WaitAndPlay()
-		elseIf value == 10
-			self.Order_FollowAndPlayOther()
-		elseIf value == 11
-			self.Order_GoHome()
-		elseIf value == 12
-			self.Order_MeetPlace()
-		elseIf value == 30
-			if _Mother == game.GetPlayer() || _Father == game.GetPlayer()
-				self.Order_Follow(game.GetPlayer())
-			endIf
-		elseIf value == 31
-			if _Mother == game.GetPlayer() || _Father == game.GetPlayer()
-				self.Order_FollowAndPlay(game.GetPlayer())
-			endIf
-		elseIf value == 99
-			self.Order_LeaveMeAlone()
-		else
-			_order = value
-			self.RefreshAI()
-		endIf
-	endFunction
-endproperty
-Float property SmallSizeScale
-	Float function get()
-
-		return _SmallSizeScale
-	endFunction
-	function set(Float value)
-
-		_SmallSizeScale = value
-		self.UpdateSize()
-	endFunction
-endproperty
-Bool property UseFathersLastName hidden
-	Bool function get()
-
-		return bUseFathersLastName
-	endFunction
-	function set(Bool value)
-
-		Int xflag = storageutil.GetIntValue(self as form, "FW.Child.Flag", 0)
-		if value == true
-			storageutil.SetIntValue(self as form, "FW.Child.Flag", math.LogicalOr(xflag, 32))
-		else
-			storageutil.SetIntValue(self as form, "FW.Child.Flag", math.LogicalXor(xflag, 32))
-		endIf
-		if _Name == ""
-			return 
-		endIf
-		String LastName = self.GetLastName()
-		parent.SetName(_Name)
-		self.SetDisplayName(_Name + LastName, true)
-		bUseFathersLastName = value
-	endFunction
-endproperty
-fwchildsettings property ChildSettings auto
-String property Name hidden
-	String function get()
-
-		return _Name
-	endFunction
-	function set(String value)
-
-		if value == ""
-			return 
-		endIf
-		_Name = value
-		String LastName = self.GetLastName()
-		parent.SetName(_Name)
-		self.SetDisplayName(_Name + LastName, true)
-	endFunction
-endproperty
-Actor property Father hidden
-	Actor function get()
-
-		if _Father == none
-			_Father = storageutil.GetFormValue(self as form, "FW.Child.Father", none) as Actor
-		endIf
+actor _Father
+actor property Father hidden
+	actor function get()
+		if _Father==none
+			_Father=StorageUtil.GetFormValue(self,"FW.Child.Father",none) as Actor
+		endif
 		return _Father
 	endFunction
-	function set(Actor value)
-
-		if _Father != none
-			self.SetRelationshipRank(_Father, 0)
-			_Father.SetRelationshipRank(self as Actor, 0)
-		endIf
-		storageutil.SetFormValue(self as form, "FW.Child.Father", value as form)
-		if _Father == game.GetPlayer()
+	function Set(actor value)
+		if _Father!=none
+			SetRelationshipRank(_Father,0)
+			_Father.SetRelationshipRank(self,0)
+		endif
+		StorageUtil.SetFormValue(self,"FW.Child.Father",value)
+		if _Father==Game.GetPlayer()
 			ChildSettings.RemovePlayerChild(self)
-		endIf
+		endif
+		
 		_Father = value
-		if value == game.GetPlayer()
+		if value == Game.GetPlayer()
 			ChildSettings.AddPlayerChild(self)
-		endIf
-		if _Father != none
-			self.SetRelationshipRank(_Father, ChildSettings.ParentRelationShipLevel)
-			_Father.SetRelationshipRank(self as Actor, ChildSettings.ParentRelationShipLevel)
-		endIf
+		endif
+		if _Father!=none
+			SetRelationshipRank(_Father,ChildSettings.ParentRelationShipLevel)
+			_Father.SetRelationshipRank(self,ChildSettings.ParentRelationShipLevel)
+		endif
+		
+		;if _Father!=Game.GetPlayer() && _Mother!=Game.GetPlayer() && _Father!=none && Mother!=none
+		;	_Mother.SetRelationshipRank(_Father,ChildSettings.ParentRelationShipLevel)
+		;	_Father.SetRelationshipRank(_Mother,ChildSettings.ParentRelationShipLevel)
+		;endif
+	endFunction
+endProperty
+
+float property Age hidden
+	float function get()
+		if dob==0
+			dob=StorageUtil.GetFloatValue(self,"FW.Child.DOB",0)
+		endif
+		return Utility.GetCurrentGameTime() - dob
+	endFunction
+endProperty
+
+
+float dob = 0.0 ; Day of birth
+float property DayOfBirth hidden
+	float function get()
+		if dob==0
+			dob=StorageUtil.GetFloatValue(self,"FW.Child.DOB",0)
+		endif
+		return dob
+	endFunction
+	function set(float value)
+		dob = value
+		StorageUtil.SetFloatValue(self,"FW.Child.DOB",value)
+	endFunction
+endProperty
+
+actor property Follow auto hidden conditional
+
+
+;  0: Error
+;  1: Mother
+;  2: Father
+;  3: Mother is dead
+;  4: Father is dead
+;  5: Don't know him/it (bandits, creatures, ...)
+int property GetOtherParentRank hidden
+	int function get()
+		if ChildSettings.Faction_OtherParent==none
+			return 0
+		else
+			return GetFactionRank(ChildSettings.Faction_OtherParent)
+		endif
+	endFunction
+endProperty
+
+int _order = 0
+int property Order hidden
+	int function get()
+		return _order
+	endfunction
+	function set(int value)
+		
+		; Wait Orders
+		if value==0
+			Order_Wait()
+		elseif value==1
+			Order_WaitAndPlay()
+		
+		; GoTo Orders
+		elseif value==10
+			Order_FollowAndPlayOther()
+		elseif value==11
+			Order_GoHome()
+		elseif value==12
+			Order_MeetPlace()
+		
+		; Follow Orders
+		elseif value==30
+			if _Mother==Game.GetPlayer() || _Father == Game.GetPlayer()
+				Order_Follow(Game.GetPlayer())
+			endif
+		elseif value==31
+			if _Mother==Game.GetPlayer() || _Father == Game.GetPlayer()
+				Order_FollowAndPlay(Game.GetPlayer())
+			endif
+			
+		elseif value==99
+			Order_LeaveMeAlone()
+			
+		else
+			_order = value
+			RefreshAI()
+		endif
 	endFunction
 endproperty
 
-;-- Variables ---------------------------------------
-Int _order = 0
-Bool bIsLearning = false
-Int iSex
-String _Name = ""
-Bool bInventoryChangedWheelLearning = false
-Float dontSleepStart = 0.000000
-Bool bGivePerkRunning = false
-Bool bOnLoadRunning = false
-Float FollowPositionX = 0.000000
-Actor _Father
-Float _SmallSizeScale
-Float DoFavourStart = 0.000000
-Bool bUseFathersLastName
-Actor _Mother
+bool bIsVampire = false
+bool property IsVampire hidden
+	bool function get()
+		return bIsVampire
+	endFunction
+	function set(bool value)
+		int xflag = StorageUtil.GetIntValue(self, "FW.Child.Flag", 0)
+		if (Math.LogicalAnd(xflag,1) == 1) && value==false
+			StorageUtil.SetIntValue(self, "FW.Child.Flag", Math.LogicalXor(xflag,1) )
+		elseif (Math.LogicalAnd(xflag,1) == 0) && value==true
+			StorageUtil.SetIntValue(self, "FW.Child.Flag", Math.LogicalOr(xflag,1) )
+		endif
+		bIsVampire = value
+	endFunction
+endProperty
+
+bool bUseFathersLastName
+bool property UseFathersLastName hidden
+	bool function get()
+		return bUseFathersLastName
+	endFunction
+	function set(bool value)
+		int xflag = StorageUtil.GetIntValue(self, "FW.Child.Flag", 0)
+		if value==true
+			StorageUtil.SetIntValue(self, "FW.Child.Flag", Math.LogicalOr(xflag,32) )
+		else
+			StorageUtil.SetIntValue(self, "FW.Child.Flag", Math.LogicalXor(xflag,32) )
+		endif
+		if _Name==""
+			return
+		endif
+		string LastName = GetLastName()
+		;Debug.Notification("UseFathersLastName: 1. '"+_Name+"' 2. '"+LastName+"'")
+		parent.SetName(_Name)
+		SetDisplayName(_Name+LastName,true)
+		bUseFathersLastName = value
+	endFunction
+endProperty
+
+string _Name = ""
+string property Name hidden
+	string function get()
+		return _Name
+	endFunction
+	function set(string value)
+		if value==""
+			return
+		endif
+		_Name=value
+		string LastName = GetLastName()
+		;Debug.Notification("Name: 1. '"+_Name+"' 2. '"+LastName+"'")
+		parent.SetName(_Name)
+		SetDisplayName(_Name+LastName,true)
+	endFunction
+endProperty
+
+int iSex
+int property Sex hidden
+	int function get()
+		return iSex
+	endFunction
+	function set(int value)
+		iSex = value
+	endFunction
+endProperty
+
+bool property IsFemale hidden
+	bool function get()
+		return iSex==1
+	endFunction
+	function Set(bool value)
+		if value==true
+			iSex=1
+		else
+			iSex=0
+		endif
+	endFunction
+endProperty
+
+bool property IsMale hidden
+	bool function get()
+		return iSex==1
+	endFunction
+	function Set(bool value)
+		if value==true
+			iSex=0
+		else
+			iSex=1
+		endif
+	endFunction
+endProperty
+
+float _SmallSizeScale
+float property SmallSizeScale
+	float function get()
+		return _SmallSizeScale
+	endFunction
+	function Set(float value)
+		_SmallSizeScale=value
+		UpdateSize()
+	endFunction
+endProperty
+
+float _SizeDuration
+float property SizeDuration
+	float function get()
+		return _SizeDuration
+	endFunction
+	function Set(float value)
+		_SizeDuration=value
+		UpdateSize()
+	endFunction
+endProperty
+
+float property PlayerLastSeen = 0.0 auto hidden
+
+bool property IsLearning
+	bool function get()
+		return bIsLearning
+	endFunction
+endProperty
+
 ColorForm HairColor
-Bool bIsVampire = false
-Float _SizeDuration
-Float dob = 0.000000
-Float FollowPositionY = 0.000000
-
-;-- Functions ---------------------------------------
-
-Bool function IsNearActor(Actor akTarget, Float Distance)
-
-	cell targetCell = self.GetParentCell()
-	cell playerCell = akTarget.GetParentCell()
-	if targetCell != playerCell
-		if targetCell as Bool && targetCell.IsInterior() || playerCell as Bool && playerCell.IsInterior()
-			return false
-		elseIf akTarget.GetDistance(self as objectreference) > Distance
-			return false
-		else
-			return true
-		endIf
-	else
-		return true
-	endIf
-endFunction
-
-function SetHairColor(ColorForm newColor)
-
-	HairColor = newColor
-	self.GetActorBase().SetHairColor(newColor)
-	self.QueueNiNodeUpdate()
-endFunction
-
-function OnUpdateGameTime()
-
-	if self.GetType() == 62
-		if self.IsDead() == false
-			storageutil.SetFloatValue(self as form, "FW.Child.LastUpdate", utility.GetCurrentGameTime())
-			self.UpdateSize()
-			self.UpdateStats()
-			self.RefreshFactions()
-		endIf
-	endIf
-endFunction
-
-Bool function HasFamilyRelationship(Actor akOther)
-
-	if akOther == _Mother || akOther == _Father
-		return true
-	else
-		return parent.HasFamilyRelationship(akOther)
-	endIf
-endFunction
-
-; Skipped compiler generated GetState
-
-function AddExperience(Float Amount)
-
-	if self.GetLevel() < game.GetPlayer().GetLevel()
-		self.ModAV("Experience", Amount)
-	endIf
-endFunction
-
-function OnInit()
-
-	self.OnPlayerLoadGame()
-endFunction
-
-function AddLevel(Int Amount)
-
-	if Amount > 0
-		Int newLevel = self.GetLevel() + Amount
-		if newLevel > fwchildsettings.ChildMaxLevel()
-			newLevel = fwchildsettings.ChildMaxLevel()
-		endIf
-		storageutil.SetIntValue(self as form, "FW.Child.Level", newLevel)
-	endIf
-endFunction
-
-function OnLoad()
-
-	self.OnPlayerLoadGame()
-endFunction
-
-function Order_DontSleepNow()
-
-	dontSleepStart = utility.GetCurrentGameTime()
-	self.SetFactionRank(ChildSettings.Faction_MaySleep, 0)
-	self.RefreshAI()
-endFunction
-
-Int function GetRelationshipRank(Actor akOther)
-
-	if akOther == _Father || akOther == _Mother
-		if parent.GetRelationshipRank(akOther) != ChildSettings.ParentRelationShipLevel
-			self.SetRelationshipRank(akOther, ChildSettings.ParentRelationShipLevel)
-		endIf
-		if akOther.GetRelationshipRank(self as Actor) != ChildSettings.ParentRelationShipLevel
-			akOther.SetRelationshipRank(self as Actor, ChildSettings.ParentRelationShipLevel)
-		endIf
-		return 2
-	else
-		return parent.GetRelationshipRank(akOther)
-	endIf
-endFunction
-
-Float function GetBaseActorValue(String asValueName)
-
-	if asValueName == "Comprehension"
-		return 15.0000
-	elseIf asValueName == "SkillPoints"
-		return 0.000000
-	elseIf asValueName == "PerkPoints"
-		return 0.000000
-	elseIf asValueName == "Experience"
-		return 0.000000
-	endIf
-	return parent.GetBaseActorValue(asValueName)
-endFunction
-
-Int function calculateSkillPoints()
-
-	Float BasePoints = 126.000
-	Float CurPoints = 0.000000
-	CurPoints += storageutil.GetFloatValue(self as form, "FW.Child.StatComprehension", self.GetAV("Comprehension"))
-	CurPoints += storageutil.GetFloatValue(self as form, "FW.Child.StatDestruction", self.GetAV("Destruction"))
-	CurPoints += storageutil.GetFloatValue(self as form, "FW.Child.StatIllusion", self.GetAV("Illusion"))
-	CurPoints += storageutil.GetFloatValue(self as form, "FW.Child.StatConjuration", self.GetAV("Conjuration"))
-	CurPoints += storageutil.GetFloatValue(self as form, "FW.Child.StatRestoration", self.GetAV("Restoration"))
-	CurPoints += storageutil.GetFloatValue(self as form, "FW.Child.StatAlteration", self.GetAV("Alteration"))
-	CurPoints += storageutil.GetFloatValue(self as form, "FW.Child.StatBlock", self.GetAV("Block"))
-	CurPoints += storageutil.GetFloatValue(self as form, "FW.Child.StatOneHanded", self.GetAV("OneHanded"))
-	CurPoints += storageutil.GetFloatValue(self as form, "FW.Child.StatTwoHanded", self.GetAV("TwoHanded"))
-	CurPoints += storageutil.GetFloatValue(self as form, "FW.Child.StatMarksman", self.GetAV("Marksman"))
-	CurPoints += storageutil.GetFloatValue(self as form, "FW.Child.StatSneak", self.GetAV("Sneak"))
-	CurPoints += storageutil.GetFloatValue(self as form, "FW.Child.StatMagicka", self.GetAV("Magicka")) / 5.00000
-	CurPoints += storageutil.GetFloatValue(self as form, "FW.Child.StatCarryWeight", self.GetAV("CarryWeight")) / 5.00000
-	CurPoints += storageutil.GetFloatValue(self as form, "FW.Child.StatHealth", self.GetAV("Health")) / 5.00000
-	return (self.GetLevel() - 1) * ChildSettings.SkillpointsPerLevel - (CurPoints - BasePoints) as Int
-endFunction
-
-function SetStateValue(String StateName, Float BaseValue)
-
-	Float val1 = BaseValue
-	Float val2 = BaseValue
-	if self.Mother != none
-		val1 = self.Mother.GetAV(StateName)
-	endIf
-	if self.Father != none
-		val2 = self.Father.GetAV(StateName)
-	endIf
-	Float newVal = (val1 + val2) / 2.00000
-	self.SetAV(StateName, newVal)
-endFunction
-
-function GivePerks()
-
-	if bGivePerkRunning == true
-		return 
-	endIf
-	bGivePerkRunning = true
-	Int i = ChildSettings.ChildPerkFile.length
-	while i > 0
-		i -= 1
-		self.handlePerk(i)
-	endWhile
-	bGivePerkRunning = false
-endFunction
-
-function DeleteChild()
-
-	self.UnregisterForUpdate()
-	self.RegisterForUpdate(3.00000)
-	self.RemoveFromAllFactions()
-	self.AllowPCDialogue(false)
-	self.GotoState("MarkForDelete")
-endFunction
-
-function ForceActorValue(String asValueName, Float afNewValue)
-
-	if self.IsSpecialAV(asValueName)
-		storageutil.SetFloatValue(self as form, "FW.Child.Stat" + asValueName, afNewValue)
-	endIf
-	if asValueName != "Comprehension" && asValueName != "SkillPoints" && asValueName != "PerkPoints" && asValueName != "Experience"
-		parent.ForceActorValue(asValueName, afNewValue)
-	endIf
-endFunction
-
-function Order_GoToOtherParent()
-
-	self.Order_FollowAndPlayOther()
-	self.RefreshAI()
-	self.GotoState("None")
-endFunction
-
-function Upgrade(Int oldVersion, Int newVersion)
-
-	if oldVersion < 9
-		self.RemoveFromFaction(game.GetFormFromFile(378958, "Skyrim.esm") as faction)
-	endIf
-endFunction
-
-function RefreshFactions()
-
-	if self.GetType() != 62
-		return 
-	elseIf !ChildSettings
-		return 
-	elseIf !ChildSettings.Factions_To_Transfer
-		return 
-	endIf
-	if self.Mother
-		faction[] fa = self.Mother.GetFactions(-10, 20)
-		Int i = fwutility.MinInt(fa.length, 25)
-		while i > 0
-			i -= 1
-			if fa[i]
-				if ChildSettings.Factions_To_Transfer.HasForm(fa[i] as form)
-					Int r1 = self.Mother.GetFactionRank(fa[i])
-					Int r2 = self.GetFactionRank(fa[i])
-					Int FaRank = fwutility.MaxInt(r1, r2)
-					self.SetFactionRank(fa[i], FaRank)
-				endIf
-			endIf
-		endWhile
-	endIf
-	if self.Father
-		faction[] fa = self.Father.GetFactions(-10, 20)
-		Int i = fwutility.MinInt(fa.length, 25)
-		while i > 0
-			i -= 1
-			if fa[i]
-				if ChildSettings.Factions_To_Transfer.HasForm(fa[i] as form)
-					Int r1 = self.Father.GetFactionRank(fa[i])
-					Int r2 = self.GetFactionRank(fa[i])
-					Int farank = fwutility.MaxInt(r1, r2)
-					self.SetFactionRank(fa[i], farank)
-				endIf
-			endIf
-		endWhile
-	endIf
-endFunction
-
-function handlePerk(Int p)
-
-	if self.GetType() == 0
-		return 
-	endIf
-	if ChildSettings == none
-		return 
-	endIf
-	if ChildSettings.GetType() == 0
-		return 
-	endIf
-	if ChildSettings.ChildPerkFile.length <= 0
-		return 
-	endIf
-	if p >= 0
-		if ChildSettings.ChildPerkFile[p] == ""
-			return 
-		endIf
-		Int pos = storageutil.StringListFind(self as form, "FW.Child.Perks", ChildSettings.ChildPerkFile[p])
-		if pos >= 0
-			Bool bUseAllSpells = ChildSettings.ChildPerkBool[p]
-			Int level = storageutil.IntListGet(self as form, "FW.Child.PerksLevel", pos)
-			Int num = ChildSettings.ChildPerkRank[p]
-			Int rankID = 0
-			while rankID < num
-				rankID += 1
-				String modName = fwutility.ModFile(fwutility.getIniCString("ChildPerk", ChildSettings.ChildPerkFile[p], "Rank" + rankID as String, "modName", ""))
-				Int formID = fwutility.getIniCInt("ChildPerk", ChildSettings.ChildPerkFile[p], "Rank" + rankID as String, "formID", 0)
-				if modName != "" && formID > 1
-					form frm = game.GetFormFromFile(formID, modName)
-					if frm != none
-						spell S = frm as spell
-						faction f = frm as faction
-						armor a = frm as armor
-						shout sh = frm as shout
-						if S != none
-							if self.HasSpell(S as form) == false && (rankID == level || rankID < level && bUseAllSpells)
-								self.AddSpell(S, true)
-							elseIf self.HasSpell(S as form) == true
-								if rankID > level || rankID < level && !bUseAllSpells
-									self.RemoveSpell(S)
-								else
-									Int j = S.GetNumEffects()
-									while j > 0
-										j -= 1
-										magiceffect me = S.GetNthEffectMagicEffect(j)
-										if self.HasMagicEffect(me) == false
-											j = 0
-											self.RemoveSpell(S)
-											self.AddSpell(S, true)
-										endIf
-									endWhile
-								endIf
-							endIf
-						elseIf f != none
-							if rankID == level || rankID < level && bUseAllSpells
-								self.AddToFaction(f)
-							elseIf rankID > level || rankID < level && !bUseAllSpells
-								self.RemoveFromFaction(f)
-							endIf
-						elseIf a != none
-							if rankID == level || rankID < level && bUseAllSpells
-								if self.GetItemCount(a as form) == 0
-									self.AddItem(a as form, 1, false)
-								endIf
-							elseIf rankID > level || rankID < level && !bUseAllSpells
-								if self.GetItemCount(a as form) > 0
-									self.RemoveItem(a as form, 1, false, none)
-								endIf
-							endIf
-						elseIf sh != none
-							if rankID == level || rankID < level && bUseAllSpells
-								if self.HasSpell(sh as form) == false
-									self.AddShout(sh)
-								endIf
-							elseIf rankID > level || rankID < level && !bUseAllSpells
-								if self.HasSpell(sh as form) == true
-									self.RemoveShout(sh)
-								endIf
-							endIf
-						elseIf frm == none
-							debug.Trace("Perk not Found: " + ChildSettings.ChildPerkFile[p] + "[" + rankID as String + "]::No Form - " + modName + " " + formID as String, 0)
-						else
-							debug.Trace("Perk not Found: " + ChildSettings.ChildPerkFile[p] + "[" + rankID as String + "]::" + frm.GetName(), 0)
-						endIf
-					else
-						debug.Trace("Perk not Found: " + ChildSettings.ChildPerkFile[p] + "[" + rankID as String + "]::No Form - " + modName + " " + formID as String, 0)
-					endIf
-				endIf
-			endWhile
-		elseIf p >= 0
-			Int num = ChildSettings.ChildPerkRank[p]
-			String pF = ChildSettings.ChildPerkFile[p]
-			Int rankid = 0
-			while rankid < num
-				rankid += 1
-				String mf = fwutility.getIniCString("ChildPerk", pF, "Rank" + rankid as String, "modName", "")
-				String mN = fwutility.ModFile(mf)
-				Int formid = fwutility.getIniCInt("ChildPerk", pF, "Rank" + rankid as String, "formID", 0)
-				if mN != "" && formid > 1
-					form frm = game.GetFormFromFile(formid, mN)
-					if frm != none
-						spell s = frm as spell
-						faction f = frm as faction
-						armor a = frm as armor
-						shout sh = frm as shout
-						if s != none
-							if self.HasSpell(s as form)
-								self.RemoveSpell(s)
-							endIf
-						elseIf f != none
-							self.RemoveFromFaction(f)
-						elseIf a != none
-							if self.GetItemCount(a as form) > 0
-								self.RemoveItem(a as form, 1, false, none)
-							endIf
-						elseIf sh != none
-							if self.HasSpell(sh as form) == true
-								self.RemoveShout(sh)
-							endIf
-						endIf
-					endIf
-				endIf
-			endWhile
-		endIf
-	endIf
-endFunction
-
-function SetExperience(Float newExp)
-
-	self.SetAV("Experience", newExp)
-endFunction
-
-; Skipped compiler generated GotoState
-
-function Order_FollowAndPlay(Actor ActorToFollow)
-
-	if ActorToFollow == none
-		ActorToFollow = game.GetPlayer()
-	endIf
-	if ActorToFollow == game.GetPlayer()
-		_order = 31
-		self.SetPlayerTeammate(true, true)
-	else
-		ChildSettings.SetOtherParentAlias(none, false)
-		_order = 10
-	endIf
-	Follow = ActorToFollow
-	self.RefreshAI()
-	self.GotoState("Follow")
-endFunction
-
-function CheckInventory()
-
-	Int c = self.GetNumItems()
-	while c > 0
-		if bInventoryChangedWheelLearning == true
-			c = self.GetNumItems()
-			bInventoryChangedWheelLearning = false
-		endIf
-		c -= 1
-		book b = self.GetNthForm(c) as book
-		if b != none
-			self.learnSpell(b)
-		endIf
-	endWhile
-	bIsLearning = false
-endFunction
-
-function SetActorValue(String asValueName, Float afValue)
-
-	if self.IsSpecialAV(asValueName)
-		storageutil.SetFloatValue(self as form, "FW.Child.Stat" + asValueName, afValue)
-	endIf
-	if asValueName != "Comprehension" && asValueName != "SkillPoints" && asValueName != "PerkPoints" && asValueName != "Experience"
-		parent.SetActorValue(asValueName, afValue)
-	endIf
-	if asValueName == "Experience"
-		self.CheckForLevelUp()
-	endIf
-endFunction
-
-String function GetActorsLastName(Actor a)
-
-	if a == none
-		return ""
-	endIf
-	String Name1 = a.GetName()
-	String Name2 = a.GetDisplayName()
-	actorbase ab = a.GetLeveledActorBase()
-	if ab != none
-		if stringutil.GetLength(ab.GetName()) > stringutil.GetLength(Name1)
-			Name1 = ab.GetName()
-		endIf
-	endIf
-	Int lName1 = stringutil.GetLength(Name1)
-	Int lName2 = stringutil.GetLength(Name2)
-	if lName1 > lName2
-		return stringutil.Substring(Name1, lName2, 0)
-	elseIf lName1 < lName2
-		return stringutil.Substring(Name2, lName1, 0)
-	endIf
-	return ""
-endFunction
-
-function Order_Wait()
-
-	_order = 0
-	PlayerLastSeen = utility.GetCurrentGameTime()
-	self.RefreshAI()
-	self.GotoState("Wait")
-endFunction
-
-function Order_GoHome()
-
-	_order = 11
-	ChildSettings.SetHouseAlias()
-	self.RefreshAI()
-	self.GotoState("None")
-endFunction
-
-function RefreshActorValue(String ActorValue, Float BaseValue)
-
-	if BaseValue < 0.000000
-		BaseValue = self.GetBaseActorValue(ActorValue)
-	endIf
-	Float pav = parent.GetActorValue(ActorValue)
-	Float cav = storageutil.GetFloatValue(self as form, "FW.Child.Stat" + ActorValue, pav)
-	if pav != cav
-		self.SetActorValue(ActorValue, cav)
-		parent.SetActorValue(ActorValue, cav)
-	endIf
-endFunction
-
-String function GetLastName()
-
-	String LastName = ""
-	Int xflag = storageutil.GetIntValue(self as form, "FW.Child.Flag", 0)
-	if self.Mother == game.GetPlayer() || self.Father == game.GetPlayer()
-		return " Dovahkiir"
-	endIf
-	if math.LogicalAnd(xflag, 32) == 32
-		LastName = self.GetActorsLastName(self.Father)
-	endIf
-	if LastName == ""
-		LastName = self.GetActorsLastName(self.Mother)
-	endIf
-	return LastName
-endFunction
-
-function SetParent(Actor akMother, Actor akFather)
-
-	storageutil.SetFloatValue(self as form, "FW.Child.LastUpdate", utility.GetCurrentGameTime())
-	self.Father = akFather
-	self.Mother = akMother
-	if self.Mother == game.GetPlayer() || self.Father == game.GetPlayer()
-		ChildSettings.AddPlayerChild(self)
-	endIf
-endFunction
-
-Float function GetExperience()
-
-	return self.GetAV("Experience")
-endFunction
-
-function Order_SetMeetPlace()
-
-	ChildSettings.SetMeetPoint(none)
-	if _order == 12
-		self.RefreshAI()
-	endIf
-endFunction
-
-function InitChild()
-
-	_Father = storageutil.GetFormValue(self as form, "FW.Child.Father", none) as Actor
-	_Mother = storageutil.GetFormValue(self as form, "FW.Child.Mother", none) as Actor
-	Int flag = storageutil.GetIntValue(self as form, "FW.Child.Flag", 0)
-	bIsVampire = math.LogicalAnd(flag, 1) == 1
-	if math.LogicalAnd(flag, 4) == 4
-		iSex = 1
-	else
-		iSex = 0
-	endIf
-	self.Name = storageutil.GetStringValue(self as form, "FW.Child.Name", "")
-	if (math.LogicalAnd(flag, 2) == 2 || self.Mother == none) && self.Father != none
-		HairColor = _Father.GetLeveledActorBase().GetHairColor()
-	elseIf self.Mother != none
-		HairColor = _Mother.GetLeveledActorBase().GetHairColor()
-	endIf
-	if _Mother != none
-		self.SetRelationshipRank(_Mother, ChildSettings.ParentRelationShipLevel)
-		_Mother.SetRelationshipRank(self as Actor, ChildSettings.ParentRelationShipLevel)
-		if self.Mother == game.GetPlayer()
-			ChildSettings.AddPlayerChild(self)
-			self.SetFactionOwner(ChildSettings.PlayerFaction)
-		endIf
-	endIf
-	if _Father != none
-		self.SetRelationshipRank(_Father, ChildSettings.ParentRelationShipLevel)
-		_Father.SetRelationshipRank(self as Actor, ChildSettings.ParentRelationShipLevel)
-		if self.Father == game.GetPlayer()
-			ChildSettings.AddPlayerChild(self)
-			self.SetFactionOwner(ChildSettings.PlayerFaction)
-		endIf
-	endIf
-	self.Order = storageutil.GetIntValue(self as form, "FW.Child.Order", 0)
-	self.RefreshFactions()
-	if bGivePerkRunning == false
-		self.GivePerks()
-	endIf
-	self.RefreshAI()
-	self.UpdateSize()
-endFunction
-
-function Order_Follow(Actor ActorToFollow)
-
-	if ActorToFollow == none
-		ActorToFollow = game.GetPlayer()
-	endIf
-	if ActorToFollow == game.GetPlayer()
-		_order = 30
-	else
-		ChildSettings.SetOtherParentAlias(none, true)
-		_order = 10
-	endIf
-	Follow = ActorToFollow
-	self.RefreshAI()
-	self.GotoState("Follow")
-endFunction
-
-function ForceAV(String asValueName, Float afNewValue)
-
-	self.ForceActorValue(asValueName, afNewValue)
-endFunction
-
-function SetAV(String asValueName, Float afValue)
-
-	self.SetActorValue(asValueName, afValue)
-endFunction
-
-function DebugFactions()
-
-	faction[] f = self.GetFactions(-10, 20)
-	faction[] fp = game.GetPlayer().GetFactions(-10, 20)
-	faction[] fm = _Mother.GetFactions(-10, 20)
-	faction[] ff = _Mother.GetFactions(-10, 20)
-	Int c = f.length
-	debug.Trace("DebugFactions() " + self.GetDisplayName(), 0)
-	while c > 0
-		c -= 1
-		String logStr = "- [" + f[c].GetFormID() as String + "] " + f[c].GetName() + " " + self.GetFactionRank(f[c]) as String + ": "
-		logStr += "[Infamy: " + f[c].GetInfamy() as String + ";" + f[c].GetInfamyNonViolent() as String + ";" + f[c].GetInfamyViolent() as String + "]"
-		logStr += "[PlayerReact: " + f[c].GetReaction(ChildSettings.PlayerFaction) as String + "]"
-		debug.Notification(logStr)
-		debug.Trace("- [" + f[c].GetFormID() as String + "] " + f[c].GetName() + " " + self.GetFactionRank(f[c]) as String + ":", 0)
-		debug.Trace("  - Infamy: " + f[c].GetInfamy() as String + ";" + f[c].GetInfamyNonViolent() as String + ";" + f[c].GetInfamyViolent() as String, 0)
-		debug.Trace("  - PlayerReact: " + f[c].GetReaction(ChildSettings.PlayerFaction) as String, 0)
-		debug.Trace("  - Player Factions:", 0)
-		Int cp = fp.length
-		while cp > 0
-			cp -= 1
-			debug.Trace("  - - [" + fp[cp].GetFormID() as String + "] " + fp[cp].GetName() + ": " + f[c].GetReaction(fp[cp]) as String + " / " + fp[cp].GetReaction(f[c]) as String, 0)
-		endWhile
-		debug.Trace("  - Mother Factions:", 0)
-		Int cm = fm.length
-		while cm > 0
-			cm -= 1
-			debug.Trace("  - - [" + fm[cm].GetFormID() as String + "] " + fm[cm].GetName() + ": " + f[c].GetReaction(fm[cm]) as String + " / " + fm[cm].GetReaction(f[c]) as String, 0)
-		endWhile
-		debug.Trace("  - Father Factions:", 0)
-		Int cf = ff.length
-		while cf > 0
-			cf -= 1
-			debug.Trace("  - - [" + ff[cf].GetFormID() as String + "] " + ff[cf].GetName() + ": " + f[c].GetReaction(ff[cf]) as String + " / " + ff[cf].GetReaction(f[c]) as String, 0)
-		endWhile
-	endWhile
-endFunction
-
-function OnActivate(objectreference akActionRef)
-
-	Actor a = akActionRef as Actor
-	if a.GetType() == 62 && self.GetType() == 62
-		if self.IsBleedingOut() == true
-			if a.IsInCombat() == false
-				self.RestoreActorValue("Health", 9999.00)
-				self.DamageActorValue("Health", self.GetActorValue("Health") - 10.0000)
-			endIf
-		endIf
-		if a == _Father || a == _Mother
-			self.SetRelationshipRank(a, ChildSettings.ParentRelationShipLevel)
-			a.SetRelationshipRank(self as Actor, ChildSettings.ParentRelationShipLevel)
-		else
-			self.SetRelationshipRank(a, 0)
-		endIf
-		self.EvaluatePackage()
-	endIf
-	if storageutil.FormListHas(none, "FW.Babys", self as form) == false
-		storageutil.FormListAdd(none, "FW.Babys", self as form, true)
-	endIf
+float DoFavourStart = 0.0
+float FollowPositionX=0.0
+float FollowPositionY=0.0
+float dontSleepStart=0.0
+
+function Upgrade(int oldVersion, int newVersion)
+	if oldVersion<9
+		RemoveFromFaction(Game.GetFormFromFile(0x5C84E, "Skyrim.esm") as faction)
+		;RemoveFromFaction(Game.GetFormFromFile(0x5C84E, "Skyrim.esm") as faction)
+	endif
 endFunction
 
 FWChildActorBase function GetChildActorBase()
-
-	return self.GetBaseObject() as FWChildActorBase
+	return GetBaseObject() as FWChildActorBase
 endFunction
 
-String function GetName()
+function OpenSkillMenu()
+	ChildSettings.OpenSkillMenu(self)
+endfunction
 
+int function GetSex()
+	return iSex
+endFunction
+
+function RefreshFactions()
+	; Get Mother Factions
+	if self.GetType() != 62
+		return
+	elseif !ChildSettings
+		return
+	elseif !ChildSettings.Factions_To_Transfer
+		return
+	endif
+	
+	if Mother
+		Faction[] fa = Mother.GetFactions(-10,20)
+		int i = FWUtility.MinInt(fa.length, 25)
+		while i>0
+			i-=1
+			if fa[i]
+				if ChildSettings.Factions_To_Transfer.HasForm(fa[i])
+					int r1 = Mother.GetFactionRank(fa[i])
+					int r2 = GetFactionRank(fa[i])
+					int FaRank = FWUtility.MaxInt(r1, r2)
+					SetFactionRank(fa[i],FaRank)
+				endif
+			endif
+		endwhile
+	endif
+	
+	; Get Father Factions
+	if Father
+		Faction[] fa = Father.GetFactions(-10,20)
+		int i = FWUtility.MinInt(fa.length, 25)
+		while i>0
+			i-=1
+			if fa[i]
+				if ChildSettings.Factions_To_Transfer.HasForm(fa[i])
+					int r1 = Father.GetFactionRank(fa[i])
+					int r2 = GetFactionRank(fa[i])
+					int FaRank = FWUtility.MaxInt(r1, r2)
+					SetFactionRank(fa[i],FaRank)
+				endif
+			endif
+		endwhile
+	endif
+endFunction
+
+function DebugFactions()
+	faction[] f = GetFactions(-10,20)
+	faction[] fp = Game.GetPlayer().GetFactions(-10,20)
+	faction[] fm = _Mother.GetFactions(-10,20)
+	faction[] ff = _Mother.GetFactions(-10,20)
+	int c = f.length
+	Debug.Trace("DebugFactions() " + GetDisplayName())
+	while c>0
+		c-=1
+		string logStr = "- [" + f[c].GetFormID() + "] " + f[c].GetName() + " " + GetFactionRank(f[c]) + ": "
+		logStr += "[Infamy: " + f[c].GetInfamy() + ";" + f[c].GetInfamyNonViolent() + ";" + f[c].GetInfamyViolent() + "]"
+		logStr += "[PlayerReact: " + f[c].GetReaction(ChildSettings.PlayerFaction) + "]"
+		Debug.Notification(logStr)
+		
+		Debug.Trace("- [" + f[c].GetFormID() + "] " + f[c].GetName() + " " + GetFactionRank(f[c]) + ":")
+		Debug.Trace("  - Infamy: " + f[c].GetInfamy() + ";" + f[c].GetInfamyNonViolent() + ";" + f[c].GetInfamyViolent())
+		Debug.Trace("  - PlayerReact: " + f[c].GetReaction(ChildSettings.PlayerFaction))
+		Debug.Trace("  - Player Factions:")
+		
+		int cp = fp.Length
+		while cp>0
+			cp-=1
+			Debug.Trace("  - - [" + fp[cp].GetFormID() + "] " + fp[cp].GetName() + ": " + f[c].GetReaction(fp[cp]) + " / " + fp[cp].GetReaction(f[c]))
+		endWhile
+		
+		Debug.Trace("  - Mother Factions:")
+		int cm = fm.Length
+		while cm>0
+			cm-=1
+			Debug.Trace("  - - [" + fm[cm].GetFormID() + "] " + fm[cm].GetName() + ": " + f[c].GetReaction(fm[cm]) + " / " + fm[cm].GetReaction(f[c]))
+		endWhile
+		
+		Debug.Trace("  - Father Factions:")
+		int cf = ff.Length
+		while cf>0
+			cf-=1
+			Debug.Trace("  - - [" + ff[cf].GetFormID() + "] " + ff[cf].GetName() + ": " + f[c].GetReaction(ff[cf]) + " / " + ff[cf].GetReaction(f[c]))
+		endWhile
+	endwhile
+endFunction
+
+function SetSex(int Sex)
+	int xflag = StorageUtil.GetIntValue(self, "FW.Child.Flag", 0)
+	if (Math.LogicalAnd(xflag,4) == 4) && Sex==0
+		StorageUtil.SetIntValue(self, "FW.Child.Flag", Math.LogicalXor(xflag,4) )
+	elseif (Math.LogicalAnd(xflag,4) == 0) && Sex==1
+		StorageUtil.SetIntValue(self, "FW.Child.Flag", Math.LogicalOr(xflag,4) )
+	endif
+	if Sex==1
+		iSex=1
+	else
+		iSex=0
+	endif
+endfunction
+
+ColorForm Function GetHairColor()
+	return HairColor
+EndFunction
+
+Function SetHairColor(ColorForm newColor)
+	HairColor = newColor
+	self.GetActorBase().SetHairColor(newColor)
+	self.QueueNiNodeUpdate()
+EndFunction
+
+String Function GetName()
 	return _Name
+EndFunction
+
+Function SetName(string newName)
+	if newName==""
+		return
+	endif
+	_Name = newName
+	string LastName = GetLastName()
+	parent.SetName(newName)
+	SetDisplayName(newName+LastName,true)
+	StorageUtil.SetStringValue(self,"FW.Child.Name",newName)
+EndFunction
+
+string Function GetLastName()
+	string LastName = ""
+	int xflag = StorageUtil.GetIntValue(self, "FW.Child.Flag", 0)
+	
+	if Mother==Game.GetPlayer() || Father==Game.GetPlayer()
+		return " Dovahkiir"
+	endif
+	
+	if (Math.LogicalAnd(xflag,32) == 32)
+		LastName = GetActorsLastName(Father)
+	endif
+	
+	if LastName==""
+		LastName = GetActorsLastName(Mother)
+	endif
+	return LastName
 endFunction
 
-function CheckForLevelUp()
+race property ChildRace hidden
+	race function get()
+		return StorageUtil.GetFormValue(self, "FW.Child.Race" ) as race
+	endFunction
+	
+	function set(race value)
+		StorageUtil.SetFormValue(self, "FW.Child.Race", value )
+	endFunction
+endProperty
 
-	Int LevelUpCount = 0
-	Int level = self.GetLevel()
-	Int PlayerLevel = game.GetPlayer().GetLevel()
-	Float exp = self.GetExp()
-	Bool bRunning = true
-	Int max = 30
-	while bRunning
-		Float expForLevel = ChildSettings.GetExperience(level)
-		if exp < expForLevel
-			bRunning = false
-		endIf
-		if level >= fwchildsettings.ChildMaxLevel()
-			bRunning = false
-		endIf
-		if level > PlayerLevel
-			bRunning = false
-		endIf
-		if bRunning == true
-			exp -= expForLevel
-			level += 1
-			LevelUpCount += 1
-		endIf
-		if max <= 0
-			bRunning = false
-		endIf
-		max -= 1
-	endWhile
-	if LevelUpCount > 0
-		storageutil.SetFloatValue(self as form, "FW.Child.StatExperience", exp)
-		self.SetLevel(level)
-		if bIsLearning == false
-			self.CheckInventory()
-		endIf
-	endIf
+string function GetActorsLastName(actor a)
+	if a==none
+		return ""
+	endif
+	string Name1 = a.GetName()
+	string Name2 = a.GetDisplayName()
+	ActorBase ab = a.GetLeveledActorBase()
+	if ab!=none
+		if StringUtil.GetLength(ab.GetName())>StringUtil.GetLength(Name1)
+			Name1 = ab.GetName()
+		endif
+	endif
+	int lName1 = StringUtil.GetLength(Name1)
+	int lName2 = StringUtil.GetLength(Name2)
+	if lName1 > lName2
+		return StringUtil.Substring(Name1,lName2)
+	elseif lName1 < lName2
+		return StringUtil.Substring(Name2,lName1)
+	endif
+	return ""
 endFunction
 
-Bool function IsSpecialAV(String av)
+bool bOnLoadRunning=false
+Event OnLoad()
+	OnPlayerLoadGame()
+endEvent
 
-	if av == "Comprehension"
+event OnInit()
+	OnPlayerLoadGame()
+endEvent
+
+Event OnPlayerLoadGame()
+	if bOnLoadRunning==true
+		return
+	endif
+	bOnLoadRunning = true
+	if _Father!=none || _Mother!=none
+		InitChild()
+	elseif bGivePerkRunning==false
+		GivePerks()
+	endif
+	SetActorValue(ChildSettings.OrderAV(), StorageUtil.GetIntValue(self, "FW.Child.Order", 31))
+	RegisterForUpdateGameTime(5)
+	OnUpdateGameTime()
+	RegisterForUpdate(10)
+	bOnLoadRunning = false
+	
+	if _Name=="" || _Name==ChildSettings.Manager.Contents.BabyBlankName
+		;FWSystemConfig cfg = Game.GetFormFromFile(0x1828, "BeeingFemale.esm") as FWSystemConfig
+		;SetName(cfg.System.getRandomChildName(GetSex()))
+		SetName(FWSystem.getRandomChildName(GetSex()))
+	endif
+EndEvent
+
+function InitChild()
+	_Father = StorageUtil.GetFormValue(self,"FW.Child.Father",none) as Actor
+	_Mother = StorageUtil.GetFormValue(self,"FW.Child.Mother",none) as Actor
+	int flag = StorageUtil.GetIntValue(self, "FW.Child.Flag", 0)
+	bIsVampire = Math.LogicalAnd(flag,1) == 1
+	if Math.LogicalAnd(flag,4) == 4
+		iSex=1
+	else
+		iSex=0
+	endif
+	Name = StorageUtil.GetStringValue(self,"FW.Child.Name","")
+	if (Math.LogicalAnd(flag,2)==2 || Mother==none) && Father!=none
+		HairColor = _Father.GetLeveledActorBase().GetHairColor()
+	elseif Mother!=none
+		HairColor = _Mother.GetLeveledActorBase().GetHairColor()
+		endif
+
+	if _Mother!=none
+		SetRelationshipRank(_Mother, ChildSettings.ParentRelationShipLevel)
+		_Mother.SetRelationshipRank(self, ChildSettings.ParentRelationShipLevel)
+		
+		if Mother == Game.GetPlayer()
+			ChildSettings.AddPlayerChild(self)
+			self.SetFactionOwner(ChildSettings.PlayerFaction)
+		endif
+	endif
+	if _Father!=none
+		SetRelationshipRank(_Father, ChildSettings.ParentRelationShipLevel)
+		_Father.SetRelationshipRank(self, ChildSettings.ParentRelationShipLevel)
+		
+		if Father == Game.GetPlayer()
+			ChildSettings.AddPlayerChild(self)
+			self.SetFactionOwner(ChildSettings.PlayerFaction)
+		endif
+	endif
+	
+	;if _Mother!=none && _Father!=none
+	;	if _Mother!=Game.GetPlayer() && _Father!=Game.GetPlayer()
+	;		_Mother.SetRelationshipRank(_Father, ChildSettings.ParentRelationShipLevel)
+	;		_Father.SetRelationshipRank(_Mother, ChildSettings.ParentRelationShipLevel)
+	;	endif
+	;endif
+	
+	Order = StorageUtil.GetIntValue(self,"FW.Child.Order", 0)
+	
+	;self.SetActorOwner(Mother.GetLeveledActorBase())
+	RefreshFactions()
+	if bGivePerkRunning==false
+		GivePerks()
+	endif
+	RefreshAI()
+	UpdateSize()
+endFunction
+
+function SetParent(actor akMother, actor akFather)
+	;StorageUtil.SetFormValue(self,"FW.Child.Father",akFather)
+	;StorageUtil.SetFormValue(self,"FW.Child.Mother",akMother)
+	StorageUtil.SetFloatValue(self,"FW.Child.LastUpdate",Utility.GetCurrentGameTime())
+	Father=akFather
+	Mother=akMother
+	if Mother == Game.GetPlayer() || Father == Game.GetPlayer()
+		ChildSettings.AddPlayerChild(self)
+	endif
+endFunction
+
+Event OnDeath(Actor akKiller)
+	StorageUtil.SetFloatValue(self,"FW.Child.LastUpdate",Utility.GetCurrentGameTime())
+endEvent
+
+Event OnUpdateGameTime()
+	if self.GetType() == 62
+		if IsDead() == false
+			StorageUtil.SetFloatValue(self,"FW.Child.LastUpdate",Utility.GetCurrentGameTime())
+			UpdateSize()
+			UpdateStats()
+			RefreshFactions()
+		endif
+	endif
+endEvent
+
+event OnUpdate()
+	
+endEvent
+
+function UpdateSize()
+	if self.GetType() == 62
+		If Age >= _SizeDuration
+			SetScale(1.0)
+		elseif Age < 0.0
+			SetScale(_SmallSizeScale)
+		else
+			SetScale((((1.0 - _SmallSizeScale) / _SizeDuration) * Age) + _SmallSizeScale)
+		endIf
+	endif
+endFunction
+
+function UpdateStats()
+	RefreshActorValue("CarryWeight", 30)
+endFunction
+
+function RefreshActorValue(string ActorValue, float BaseValue = -1.0)
+	if BaseValue<0
+		BaseValue = GetBaseActorValue(ActorValue)
+	endif
+	float pav = parent.GetActorValue(ActorValue)
+	float cav = StorageUtil.GetFloatValue(self,"FW.Child.Stat"+ActorValue, pav)
+	if pav!=cav
+		SetActorValue(ActorValue, cav)
+		parent.SetActorValue(ActorValue, cav)
+	endif
+endfunction
+
+function SetStateValue(string StateName, float BaseValue = 0.3)
+	float val1 = BaseValue
+	float val2 = BaseValue
+	if Mother!=none
+		val1 = Mother.GetAV(StateName)
+	endif
+	if Father!=none
+		val2 = Father.GetAV(StateName)
+	endif
+	float newVal = (val1 + val2) / 2
+	SetAV(StateName,newVal)
+endFunction
+
+bool Function HasFamilyRelationship(Actor akOther = None)
+	if akOther==_Mother || akOther==_Father
 		return true
-	elseIf av == "Destruction"
+	else
+		return parent.HasFamilyRelationship(akOther)
+	endif
+endFunction
+
+int Function GetRelationshipRank(Actor akOther)
+	If akOther==_Father || akOther==_Mother
+		if parent.GetRelationshipRank(akOther)!=ChildSettings.ParentRelationShipLevel
+			SetRelationshipRank(akOther,ChildSettings.ParentRelationShipLevel)
+		endif
+		if akOther.GetRelationshipRank(self)!=ChildSettings.ParentRelationShipLevel
+			akOther.SetRelationshipRank(self,ChildSettings.ParentRelationShipLevel)
+		endif
+		return 2
+	else
+		return parent.GetRelationshipRank(akOther)
+	endif
+endFunction
+
+bool Function HasParentRelationship(Actor akOther)
+	if akOther==Mother || akOther == Father
+		return True
+	Else
+		return parent.HasParentRelationship(akOther)
+	endif
+endFunction
+
+
+bool Function IsNearActor(actor akTarget, float Distance)
+	Cell targetCell = self.GetParentCell()
+	Cell playerCell = akTarget.GetParentCell()
+	
+	if (targetCell != playerCell)
+		if (targetCell && targetCell.IsInterior() || playerCell && playerCell.IsInterior())
+			return false
+		else
+			if (akTarget.GetDistance(self) > Distance)
+				return false
+			else
+				return true
+			endif
+		endif
+	else
 		return true
-	elseIf av == "Illusion"
-		return true
-	elseIf av == "Conjuration"
-		return true
-	elseIf av == "Magicka"
-		return true
-	elseIf av == "CarryWeight"
-		return true
-	elseIf av == "Alteration"
-		return true
-	elseIf av == "Block"
-		return true
-	elseIf av == "Restoration"
-		return true
-	elseIf av == "OneHanded"
-		return true
-	elseIf av == "TwoHanded"
-		return true
-	elseIf av == "Marksman"
-		return true
-	elseIf av == "Health"
-		return true
-	elseIf av == "Sneak"
-		return true
-	elseIf av == "Experience"
-		return true
-	elseIf av == "SkillPoints"
-		return true
-	elseIf av == "PerkPoints"
-		return true
+	endif
+endFunction
+
+
+; List of orders
+function Order_ShowInventory()
+	OpenInventory()
+endFunction
+
+; Wait and do nothing
+function Order_Wait()
+	_order = 0
+	PlayerLastSeen = Utility.GetCurrentGameTime()
+	;SetExpressionOverride(8, 50)
+	;SetFactionRank(ChildSettings.Faction_Job, 0)
+	RefreshAI()
+	GoToState("Wait")
+endFunction
+
+; Wait and play
+function Order_WaitAndPlay()
+	_order = 1
+	PlayerLastSeen = Utility.GetCurrentGameTime()
+	;SetExpressionOverride(10, 70)
+	;SetFactionRank(ChildSettings.Faction_Job, 1)
+	RefreshAI()
+	GoToState("Wait")
+endFunction
+
+; Follow / Follow other parent
+function Order_Follow(actor ActorToFollow = none)
+	if ActorToFollow==none
+		ActorToFollow=Game.GetPlayer()
 	endIf
+	If ActorToFollow==Game.GetPlayer()
+		_order = 30
+		;SetFactionRank(ChildSettings.Faction_Job, 2)
+		;SetAV("WaitingForPlayer",0)
+		;SetPlayerTeammate()
+	else
+		ChildSettings.SetOtherParentAlias()
+		_order = 10
+		;SetFactionRank(ChildSettings.Faction_Job, 4)
+	endif
+	Follow = ActorToFollow
+	;SetExpressionOverride(10, 70)
+	RefreshAI()
+	GoToState("Follow")
+endfunction
+
+function Order_FollowAndPlay(actor ActorToFollow = none)
+	if ActorToFollow==none
+		ActorToFollow=Game.GetPlayer()
+	endIf
+	If ActorToFollow==Game.GetPlayer()
+		_order = 31
+		;SetFactionRank(ChildSettings.Faction_Job, 3)
+		SetPlayerTeammate()
+	else
+		ChildSettings.SetOtherParentAlias(none, false)
+		_order = 10
+		;SetFactionRank(ChildSettings.Faction_Job, 4)
+	endif
+	Follow = ActorToFollow
+	;SetExpressionOverride(10, 90)
+	RefreshAI()
+	GoToState("Follow")
+endfunction
+
+function Order_FollowAndPlayOther()
+	if _Mother==Game.GetPlayer() && _Father!=none
+		Order_FollowAndPlay(_Father)
+	elseif _Mother!=none
+		Order_FollowAndPlay(_Mother)
+	endif
+endFunction
+
+function Order_DoFavour()
+	DoFavourStart = Utility.GetCurrentRealTime()
+	;SetExpressionOverride(11, 90)
+	SetDoingFavor(true)
+endFunction
+
+function Order_LeaveMeAlone()
+	_order = 99
+	;SetExpressionOverride(14, 100)
+	;SetFactionRank(ChildSettings.Faction_Job, 6)
+	RefreshAI()
+	DeleteChild()
+endFunction
+
+function Order_GoHome()
+	_order = 11
+	ChildSettings.SetHouseAlias()
+	;SetExpressionOverride(11, 50)
+	RefreshAI()
+	GoToState(none)
+endFunction
+
+function Order_GoToOtherParent()
+	Order_FollowAndPlayOther()
+	RefreshAI()
+	GoToState(none)
+endFunction
+
+function Order_DontSleepNow()
+	dontSleepStart= Utility.GetCurrentGameTime()
+	SetFactionRank(ChildSettings.Faction_MaySleep,0)
+	RefreshAI()
+endFunction
+
+bool function Order_ActivateShild()
 	return false
 endFunction
 
-function SetExp(Float newExp)
-
-	self.SetExperience(newExp)
+function Order_MeetPlace()
+	_order = 12
+	PlayerLastSeen = Utility.GetCurrentGameTime()
+	;SetExpressionOverride(8, 50)
+	;SetFactionRank(ChildSettings.Faction_Job, 0)
+	RefreshAI()
+	GoToState("Wait")
 endFunction
 
-Float function GetBaseAV(String asValueName)
-
-	return self.GetBaseActorValue(asValueName)
+function Order_SetMeetPlace()
+	ChildSettings.SetMeetPoint()
+	if _order==12
+		RefreshAI()
+	endif
 endFunction
 
-function ModAV(String asValueName, Float afAmount)
-
-	self.ModActorValue(asValueName, afAmount)
+; Only heal the actor when his percent health value is below 'Percent' (percent = 0.0 - 1.0)
+bool function Order_Heal(actor ActorToHeal, float Percent = 1.0)
+	if ActorToHeal.GetAV("Health") / ActorToHeal.GetAV("MaxHealth")<Percent && ActorToHeal.GetDistance(self) < 500
+		; Try to heal
+		
+	endif
+	return false
 endFunction
 
-Float function GetActorValue(String asValueName)
-
-	if asValueName != "Comprehension"
-		return storageutil.GetFloatValue(self as form, "FW.Child.Stat" + asValueName, 0.000000)
-	elseIf asValueName != "SkillPoints"
-		return storageutil.GetFloatValue(self as form, "FW.Child.Stat" + asValueName, 0.000000)
-	elseIf asValueName != "PerkPoints"
-		return storageutil.GetFloatValue(self as form, "FW.Child.Stat" + asValueName, 0.000000)
-	endIf
-	if asValueName != "Comprehension" && asValueName != "SkillPoints" && asValueName != "PerkPoints" && asValueName != "Experience"
-		return parent.GetActorValue(asValueName)
-	endIf
+function Order_Dismount()
+	Dismount()
 endFunction
 
-Float function GetActorValuePercentage(String asValueName)
-
-	if asValueName == "Comprehension"
-		return self.GetActorValue(asValueName) / 100.000
-	elseIf asValueName == "SkillPoints"
-		return self.GetActorValue(asValueName) / (self.GetLevel() * 5) as Float
-	elseIf asValueName == "PerkPoints"
-		return self.GetActorValue(asValueName) / self.GetLevel() as Float
-	elseIf asValueName == "Experience"
-		return self.GetActorValue(asValueName) / ChildSettings.GetExperience(self.GetLevel())
-	endIf
-	if asValueName != "Comprehension" && asValueName != "SkillPoints" && asValueName != "PerkPoints"
-		return parent.GetActorValuePercentage(asValueName)
-	endIf
+function DeleteChild()
+	UnregisterForUpdate()
+	RegisterForUpdate(3)
+	RemoveFromAllFactions()
+	AllowPCDialogue(false)
+	goToState("MarkForDelete")
 endFunction
 
-Int function calculatePerkPoints()
+function RefreshAI()
+	if _order<30 || _order>=50
+		SetActorValue("WaitingForPlayer",1)
+		SetPlayerTeammate(false)
+	else
+		SetActorValue("WaitingForPlayer",0)
+		SetPlayerTeammate(true)
+	endif
+	
+	bool isPlayerChild = false
+	if _Mother!=none
+		if _Mother==Game.GetPlayer()
+			isPlayerChild = true
+		endif
+	endif
+	if _Father!=none
+		if _Father==Game.GetPlayer()
+			isPlayerChild = true
+		endif
+	endif
+	if isPlayerChild && (_order==1 || _order==31 || (_order >=10 && _order<30))
+		;SetActorValue("Variable06", 0)
+		int rnd = Utility.RandomInt(0,10)
+		;if rnd==0
+		;	SetActorValue("Variable07", 10) ; Ask for Allowance
+		;elseif rnd==1
+		;	SetActorValue("Variable07", 11) ; Give Gift to Player
+		;elseif rnd==2
+		;	SetActorValue("Variable07", 12) ; Ask for a Present
+		;elseif rnd==3
+		;	SetActorValue("Variable07", 13) ; Suggest a Game
+		;endif
+	else
+		;SetActorValue("Variable06", 0)
+		;SetActorValue("Variable07", 8)
+	endif
+	SetActorValue(ChildSettings.OrderAV(), _order)
+	StorageUtil.SetIntValue(self,"FW.Child.Order", _order)
+	EnableAI(false)
+	EvaluatePackage()
+	EnableAI(true)
+endFunction
 
-	self.GivePerks()
-	Int i = 0
-	Int BasePoints = self.GetLevel() - 1
-	while i < 128
-		String p = ChildSettings.ChildPerkFile[i]
-		if p != "" && ChildSettings.ChildPerkEnabled[i] == true
-			Int pos = storageutil.StringListFind(self as form, "FW.Child.Perks", p)
-			if pos >= 0
-				Int currentRank = storageutil.IntListGet(self as form, "FW.Child.PerksLevel", pos)
-				BasePoints -= currentRank
-			endIf
-		endIf
-		i += 1
+bool bInventoryChangedWheelLearning = false
+Event OnItemAdded(Form akBaseItem, int aiItemCount, ObjectReference akItemReference, ObjectReference akSourceContainer)
+	book iBook = akBaseItem as Book
+	if iBook!=none && bIsLearning==false
+		bIsLearning=true
+		Utility.Wait(1)
+		CheckInventory()
+	elseif iBook!=none
+		bInventoryChangedWheelLearning=true
+	endif
+EndEvent
+
+function CheckInventory()
+	int c = GetNumItems()
+	while c>0
+		; Seems some items has been added, restart inventory check
+		if bInventoryChangedWheelLearning==true
+			c = GetNumItems()
+			bInventoryChangedWheelLearning = false
+		endif
+		c-=1
+		book b = GetNthForm(c) as book
+		if(b != none)
+			learnSpell(b)
+		endif
 	endWhile
-	return BasePoints
-endFunction
+	bIsLearning=false
+endfunction
 
-Float function GetAV(String asValueName)
-
-	return self.GetActorValue(asValueName)
-endFunction
-
-function Order_ShowInventory()
-
-	self.OpenInventory(false)
-endFunction
-
-Bool function learnSpell(book iBook)
-
-	if HasMagicka == false
+bool bIsLearning = false
+bool function learnSpell(book iBook)
+	if HasMagicka==false
 		return false
-	endIf
+	endif
 	bIsLearning = true
-	Bool bLearndSuccess = false
+	bool bLearndSuccess = false
 	spell iBookSpell = iBook.GetSpell()
-	if iBookSpell != none
-		if self.HasSpell(iBookSpell as form) == false && self.IsAllowedSpell(iBookSpell)
-			EffectShader ShaderTarget
-			EffectShader ShaderSelf
-			Float comp = self.GetActorValue("Comprehension")
-			utility.Wait(1.00000)
-			self.AllowPCDialogue(false)
-			if self.IsOnMount() == true
-				self.Dismount()
-				self.SetVehicle(none)
-				utility.Wait(3.00000)
+	if iBookSpell!=none
+		if HasSpell(iBookSpell)==false && IsAllowedSpell(iBookSpell)
+			float comp = GetActorValue("Comprehension")
+			Utility.Wait(1)
+			AllowPCDialogue(false)
+			if IsOnMount() == true
+				Dismount()
+				SetVehicle(none)
+				Utility.Wait(3)
 			endIf
-			self.SetDontMove(true)
-			Float wfp = self.GetActorValue("WaitingForPlayer")
-			Float v03 = self.GetActorValue(ChildSettings.OrderAV())
-			self.SetActorValue("WaitingForPlayer", 1.00000)
-			self.SetActorValue(ChildSettings.OrderAV(), 0.000000)
-			self.EvaluatePackage()
-			Int HighestRating = 0
-			Int i = iBookSpell.GetNumEffects()
-			while i > 0
-				i -= 1
-				magiceffect mFX = iBookSpell.GetNthEffectMagicEffect(i)
+			SetDontMove(true)
+			float wfp = GetActorValue("WaitingForPlayer")
+			float v03 = GetActorValue(ChildSettings.OrderAV())
+			SetActorValue("WaitingForPlayer",1)
+			SetActorValue(ChildSettings.OrderAV(),0)
+			EvaluatePackage()
+			
+			int HighestRating = 0
+			int i = iBookSpell.GetNumEffects()
+			EffectShader ShaderSelf
+			EffectShader ShaderTarget
+			while i>0
+				i-=1
+				MagicEffect mFX = iBookSpell.GetNthEffectMagicEffect(i)
 				if mFX.GetSkillLevel() > HighestRating
 					HighestRating = mFX.GetSkillLevel()
-				endIf
-				if mFX.GetHitShader() != none
-					Int deliv = mFX.GetDeliveryType()
-					if deliv == 0
-						ShaderSelf = mFX.GetHitShader()
-					elseIf deliv == 2 || deliv == 3
-						ShaderTarget = mFX.GetHitShader()
-					endIf
-				endIf
+				endif
+				if mFX.GetHitShader()!=none
+					int deliv = mFX.GetDeliveryType()
+					if deliv==0
+						ShaderSelf=mFX.GetHitShader()
+					elseif deliv==2 || deliv==3
+						ShaderTarget=mFX.GetHitShader()
+					endif
+				endif
 			endWhile
-			Float HR = utility.RandomFloat(HighestRating as Float * 0.800000, HighestRating as Float * 1.20000)
-			if HR > 100.000
-				HR = 100.000
-			endIf
-			debug.SendAnimationEvent(self as objectreference, "ChildReadBook")
-			Float hrDuration = (comp - HighestRating as Float) / 2.00000
-			if hrDuration < 0.000000
-				hrDuration = 0.000000
-			endIf
-			utility.Wait(3.00000 + 50.0000 - comp / 2.00000 + hrDuration)
-			debug.SendAnimationEvent(self as objectreference, "IdleForceDefaultState")
-			utility.Wait(1.00000)
+			float HR = Utility.RandomFloat(HighestRating * 0.8, HighestRating * 1.2)
+			if HR>100
+				HR=100
+			endif
+			
+			Debug.SendAnimationEvent(self,"ChildReadBook")
+			float hrDuration = (comp - HighestRating)/2
+			if hrDuration <0
+				hrDuration = 0
+			endif
+			Utility.Wait(3 + (50 - (comp / 2)) + hrDuration)
+			Debug.SendAnimationEvent(self,"IdleForceDefaultState")
+			Utility.Wait(1)
 			if comp >= HR
 				bLearndSuccess = true
-			endIf
-			if bLearndSuccess
-				self.AddSpell(iBookSpell, true)
-				Int j = iBookSpell.GetNumEffects()
-				while j > 0
-					j -= 1
-					magiceffect me = iBookSpell.GetNthEffectMagicEffect(j)
-					self.AddExp((me.GetSkillLevel() / 2) as Float)
-				endWhile
-				self.EquipSpell(iBookSpell, 1)
-				self.DrawWeapon()
-				utility.Wait(3.00000)
-				debug.SendAnimationEvent(self as objectreference, "ChildCastSpell")
-				utility.Wait(8.00000)
-				if ShaderSelf != none
-					ShaderSelf.Play(self as objectreference, 6.00000)
-				endIf
-				if ShaderTarget != none
-					if self.GetDistance(_Mother as objectreference) < 900.000
-						ShaderTarget.Play(_Mother as objectreference, 4.00000)
-					elseIf self.GetDistance(_Father as objectreference) < 900.000
-						ShaderTarget.Play(_Father as objectreference, 4.00000)
-					endIf
-				endIf
-				utility.Wait(4.00000)
-			endIf
-			self.UnequipSpell(iBookSpell, 1)
-			utility.Wait(1.00000)
-			debug.SendAnimationEvent(self as objectreference, "ChildSweat")
-			utility.Wait(2.00000)
-			debug.SendAnimationEvent(self as objectreference, "IdleForceDefaultState")
-			self.SetActorValue("WaitingForPlayer", wfp)
-			self.SetActorValue(ChildSettings.OrderAV(), v03)
-			self.SetDontMove(false)
-			self.AllowPCDialogue(true)
-			self.EvaluatePackage()
-			self.RemoveItem(iBook as form, 1, false, none)
-			utility.Wait(1.00000)
-		endIf
-	endIf
+			endif
+			
+			if(bLearndSuccess)
+				AddSpell(iBookSpell)
+				int j = iBookSpell.GetNumEffects()
+				while j>0
+					j-=1
+					magiceffect me= iBookSpell.GetNthEffectMagicEffect(j)
+					AddExp(me.GetSkillLevel() / 2)
+				endwhile
+				EquipSpell(iBookSpell,1)
+				DrawWeapon()
+				Utility.Wait(3)
+				Debug.SendAnimationEvent(self,"ChildCastSpell")
+				Utility.Wait(8)
+				if ShaderSelf!=none
+					ShaderSelf.Play(self,6)
+				endif
+				if ShaderTarget!=none
+					if GetDistance(_Mother)<900
+						ShaderTarget.Play(_Mother,4)
+					elseif GetDistance(_Father)<900
+						ShaderTarget.Play(_Father,4)
+					endif
+				endif
+				Utility.Wait(4)
+			endif
+			UnequipSpell(iBookSpell,1)
+			Utility.Wait(1)
+			Debug.SendAnimationEvent(self,"ChildSweat")
+			Utility.Wait(2)
+			Debug.SendAnimationEvent(self,"IdleForceDefaultState")
+			SetActorValue("WaitingForPlayer",wfp)
+			SetActorValue(ChildSettings.OrderAV(), v03)
+			SetDontMove(false)
+			AllowPCDialogue(true)
+			EvaluatePackage()
+			RemoveItem(iBook,1)
+			Utility.Wait(1)
+		endif
+	endif
 	bIsLearning = false
 	return bLearndSuccess
 endFunction
 
-function ModActorValue(String asValueName, Float afAmount)
-
-	if self.IsSpecialAV(asValueName)
-		storageutil.SetFloatValue(self as form, "FW.Child.Stat" + asValueName, self.GetActorValue(asValueName) + afAmount)
-	endIf
-	if asValueName == "Experience" && afAmount > 0.000000
-		self.CheckForLevelUp()
-	endIf
-	if asValueName != "Comprehension" && asValueName != "SkillPoints" && asValueName != "PerkPoints" && asValueName != "Experience"
-		parent.ModActorValue(asValueName, afAmount)
-	endIf
-endFunction
-
-function DeleteStats()
-
-	storageutil.UnsetStringValue(self as form, "FW.Child.Name")
-	storageutil.UnsetIntValue(self as form, "FW.Child.Flag")
-	storageutil.UnsetFloatValue(self as form, "FW.Child.LastUpdate")
-	storageutil.UnsetFormValue(self as form, "FW.Child.Mother")
-	storageutil.UnsetFormValue(self as form, "FW.Child.Father")
-	storageutil.UnsetIntValue(self as form, "FW.Child.Level")
-	storageutil.UnsetFloatValue(self as form, "FW.Child.StatExperience")
-	storageutil.UnsetFloatValue(self as form, "FW.Child.StatComprehension")
-	storageutil.UnsetFloatValue(self as form, "FW.Child.StatDestruction")
-	storageutil.UnsetFloatValue(self as form, "FW.Child.StatIllusion")
-	storageutil.UnsetFloatValue(self as form, "FW.Child.StatConjuration")
-	storageutil.UnsetFloatValue(self as form, "FW.Child.StatMagicka")
-	storageutil.UnsetFloatValue(self as form, "FW.Child.StatRestoration")
-	storageutil.UnsetFloatValue(self as form, "FW.Child.StatAlteration")
-	storageutil.UnsetFloatValue(self as form, "FW.Child.StatBlock")
-	storageutil.UnsetFloatValue(self as form, "FW.Child.StatCarryWeight")
-	storageutil.UnsetFloatValue(self as form, "FW.Child.StatOneHanded")
-	storageutil.UnsetFloatValue(self as form, "FW.Child.StatTwoHanded")
-	storageutil.UnsetFloatValue(self as form, "FW.Child.StatMarksman")
-	storageutil.UnsetFloatValue(self as form, "FW.Child.StatSneak")
-	storageutil.UnsetFloatValue(self as form, "FW.Child.StatHealth")
-	storageutil.UnsetFloatValue(self as form, "FW.Child.StatSkillPoints")
-	storageutil.UnsetFloatValue(self as form, "FW.Child.StatPerkPoints")
-	storageutil.FormListClear(self as form, "FW.Child.Perks")
-	storageutil.IntListClear(self as form, "FW.Child.PerksLevel")
-endFunction
-
-function Order_Dismount()
-
-	self.Dismount()
-endFunction
-
-function SetName(String newName)
-
-	if newName == ""
-		return 
-	endIf
-	_Name = newName
-	String LastName = self.GetLastName()
-	parent.SetName(newName)
-	self.SetDisplayName(newName + LastName, true)
-	storageutil.SetStringValue(self as form, "FW.Child.Name", newName)
-endFunction
-
-function UpdateStats()
-
-	self.RefreshActorValue("CarryWeight", 30.0000)
-endFunction
-
-function Order_FollowAndPlayOther()
-
-	if _Mother == game.GetPlayer() && _Father != none
-		self.Order_FollowAndPlay(_Father)
-	elseIf _Mother != none
-		self.Order_FollowAndPlay(_Mother)
-	endIf
-endFunction
-
-Bool function Order_Heal(Actor ActorToHeal, Float Percent)
-
-	if ActorToHeal.GetAV("Health") / ActorToHeal.GetAV("MaxHealth") < Percent && ActorToHeal.GetDistance(self as objectreference) < 500.000
-		
-	endIf
-	return false
-endFunction
-
-Bool function IsAllowedSpell(spell SpellToLearn)
-
-	if HasMagicka == false
+bool function IsAllowedSpell(spell SpellToLearn)
+	if HasMagicka==false
 		return false
-	endIf
-	if SpellToLearn.GetEffectiveMagickaCost(self as Actor) as Float * 1.40000 > self.GetActorValue("Magicka")
+	endif
+	if(SpellToLearn.GetEffectiveMagickaCost(self) * 1.4 > GetActorValue("Magicka"))
 		return false
-	endIf
-	Int i = SpellToLearn.GetNumEffects()
-	while i > 0
-		i -= 1
-		if SpellToLearn.GetNthEffectMagicEffect(i).GetAssociatedSkill() != ""
-			if self.GetActorValue(SpellToLearn.GetNthEffectMagicEffect(i).GetAssociatedSkill()) < SpellToLearn.GetNthEffectMagicEffect(i).GetSkillLevel() as Float
+	endif
+	int i = SpellToLearn.GetNumEffects()
+	while i>0
+		i-=1
+		;Debug.Notification(i + "'" + SpellToLearn.GetNthEffectMagicEffect(i).GetAssociatedSkill()+ "': " + SpellToLearn.GetNthEffectMagicEffect(i).GetSkillLevel())
+		if(SpellToLearn.GetNthEffectMagicEffect(i).GetAssociatedSkill()!="")
+			if GetActorValue(SpellToLearn.GetNthEffectMagicEffect(i).GetAssociatedSkill()) < SpellToLearn.GetNthEffectMagicEffect(i).GetSkillLevel()
 				return false
-			endIf
-		endIf
-	endWhile
+			endif
+		endif
+	endwhile
 	return true
 endFunction
 
-function SetSex(Int Sex)
 
-	Int xflag = storageutil.GetIntValue(self as form, "FW.Child.Flag", 0)
-	if math.LogicalAnd(xflag, 4) == 4 && self.Sex == 0
-		storageutil.SetIntValue(self as form, "FW.Child.Flag", math.LogicalXor(xflag, 4))
-	elseIf math.LogicalAnd(xflag, 4) == 0 && self.Sex == 1
-		storageutil.SetIntValue(self as form, "FW.Child.Flag", math.LogicalOr(xflag, 4))
-	endIf
-	if self.Sex == 1
-		iSex = 1
+
+; Actor Values
+int Function GetLevel()
+	return StorageUtil.GetIntValue(self, "FW.Child.Level", 1)
+endFunction
+function SetLevel(int newLevel)
+
+	ChildSettings.LevelUpFX.Cast(self,self)
+	FWSystem System = Game.GetFormFromFile(0xD62, FWUtility.ModFile("BeeingFemale")) as FWSystem
+	System.Message(FWUtility.MultiStringReplace(System.Content.ChildLevelUp, Name, newLevel),System.MSG_Low)
+	
+	if(newLevel > FWChildSettings.ChildMaxLevel())
+		StorageUtil.SetIntValue(self, "FW.Child.Level", FWChildSettings.ChildMaxLevel())
+	elseif(newLevel <1)
+		StorageUtil.SetIntValue(self, "FW.Child.Level", 1)
 	else
-		iSex = 0
+		StorageUtil.SetIntValue(self, "FW.Child.Level", newLevel)
+	endif
+endFunction
+function AddLevel(int Amount = 1)
+	if(Amount>0)
+		int newLevel = GetLevel() + Amount
+		if(newLevel > FWChildSettings.ChildMaxLevel())
+			newLevel = FWChildSettings.ChildMaxLevel()
+		endif
+		StorageUtil.SetIntValue(self, "FW.Child.Level", newLevel)
+	endif
+endFunction
+
+float function GetExperience()
+	return GetAV("Experience")
+endFunction
+function SetExperience(float newExp)
+	SetAV("Experience", newExp)
+endfunction
+function AddExperience(float Amount)
+	if GetLevel()< Game.GetPlayer().GetLevel()
+		ModAV("Experience", Amount)
+	endif
+endFunction
+; Alias for Expereance
+float function GetExp()
+	return GetExperience()
+endFunction
+function SetExp(float newExp)
+	SetExperience(newExp)
+endfunction
+function AddExp(float Amount)
+	AddExperience(Amount)
+endFunction
+
+Function ForceActorValue(string asValueName, float afNewValue)
+	if IsSpecialAV(asValueName)
+		StorageUtil.SetFloatValue(self, "FW.Child.Stat"+asValueName, afNewValue)
+	endif
+	if asValueName!="Comprehension" && asValueName!="SkillPoints" && asValueName!="PerkPoints" && asValueName!="Experience"
+		parent.ForceActorValue(asValueName, afNewValue)
+	endif
+endFunction
+
+float Function GetActorValue(string asValueName)
+	if asValueName!="Comprehension"
+		return StorageUtil.GetFloatValue(self, "FW.Child.Stat"+asValueName, 0)
+	elseif asValueName!="SkillPoints"
+		return StorageUtil.GetFloatValue(self, "FW.Child.Stat"+asValueName, 0)
+	elseif asValueName!="PerkPoints"
+		return StorageUtil.GetFloatValue(self, "FW.Child.Stat"+asValueName, 0)
+	;elseif IsSpecialAV(asValueName)
+		;return StorageUtil.GetFloatValue(self, "FW.Child.Stat"+asValueName, parent.GetBaseActorValue(asValueName))
+	endif
+	if asValueName!="Comprehension" && asValueName!="SkillPoints" && asValueName!="PerkPoints" && asValueName!="Experience"
+		return parent.GetActorValue(asValueName)
+	endif
+endFunction
+
+float Function GetActorValuePercentage(string asValueName)
+	if asValueName=="Comprehension"
+		return GetActorValue(asValueName) / 100
+	elseif asValueName=="SkillPoints"
+		return GetActorValue(asValueName) / (GetLevel() * 5)
+	elseif asValueName=="PerkPoints"
+		return GetActorValue(asValueName) / GetLevel()
+	elseif asValueName=="Experience"
+		return GetActorValue(asValueName) / ChildSettings.getExperience(GetLevel())
+	;elseif IsSpecialAV(asValueName)
+		;return StorageUtil.GetFloatValue(self, "FW.Child.Stat"+asValueName, parent.GetBaseActorValue(asValueName)) / 100
+	endIf
+	if asValueName!="Comprehension" && asValueName!="SkillPoints" && asValueName!="PerkPoints"
+		return parent.GetActorValuePercentage(asValueName)
+	endif
+endFunction
+
+Function ModActorValue(string asValueName, float afAmount)
+	if IsSpecialAV(asValueName)
+		StorageUtil.SetFloatValue(self, "FW.Child.Stat"+asValueName, GetActorValue(asValueName) + afAmount)
+	endif
+	if(asValueName == "Experience" && afAmount>0)
+		CheckForLevelUp()
+	endIf
+	if asValueName!="Comprehension" && asValueName!="SkillPoints" && asValueName!="PerkPoints" && asValueName!="Experience"
+		parent.ModActorValue(asValueName, afAmount)
+	endif
+endFunction
+
+Function SetActorValue(string asValueName, float afValue)
+	if IsSpecialAV(asValueName)
+		StorageUtil.SetFloatValue(self, "FW.Child.Stat"+asValueName, afValue)
+	endif
+	if asValueName!="Comprehension" && asValueName!="SkillPoints" && asValueName!="PerkPoints" && asValueName!="Experience"
+		parent.SetActorValue(asValueName, afValue)
+	endif
+	if(asValueName == "Experience")
+		CheckForLevelUp()
 	endIf
 endFunction
 
-function OnItemAdded(form akBaseItem, Int aiItemCount, objectreference akItemReference, objectreference akSourceContainer)
-
-	book iBook = akBaseItem as book
-	if iBook != none && bIsLearning == false
-		bIsLearning = true
-		utility.Wait(1.00000)
-		self.CheckInventory()
-	elseIf iBook != none
-		bInventoryChangedWheelLearning = true
-	endIf
+float Function GetBaseActorValue(string asValueName)
+	if asValueName=="Comprehension"
+		return 15
+	elseif asValueName=="SkillPoints"
+		return 0
+	elseif asValueName=="PerkPoints"
+		return 0
+	;elseif asValueName=="Magicka"
+	;	return 30
+	;elseif asValueName=="CarryWeight"
+	;	return 20
+	;elseif asValueName=="Health"
+	;	return 80
+	elseif asValueName=="Experience"
+		return 0
+	endif
+	return parent.GetBaseActorValue(asValueName)
 endFunction
 
-function AddExp(Float Amount)
+; Actor Value Alias
+Function ForceAV(string asValueName, float afNewValue)
+  ForceActorValue(asValueName, afNewValue)
+EndFunction
+float Function GetAV(string asValueName)
+  return GetActorValue(asValueName)
+EndFunction
+float Function GetAVPercentage(string asValueName)
+  return GetActorValuePercentage(asValueName)
+EndFunction
+Function ModAV(string asValueName, float afAmount)
+  ModActorValue(asValueName, afAmount)
+EndFunction
+Function SetAV(string asValueName, float afValue)
+  SetActorValue(asValueName, afValue)
+EndFunction
+float Function GetBaseAV(string asValueName)
+  return GetBaseActorValue(asValueName)
+EndFunction
 
-	self.AddExperience(Amount)
+int function calculateSkillPoints()
+	float BasePoints = 126
+	float CurPoints = 0.0
+
+	CurPoints += StorageUtil.GetFloatValue(self, "FW.Child.StatComprehension", GetAV("Comprehension"))
+	CurPoints += StorageUtil.GetFloatValue(self, "FW.Child.StatDestruction", GetAV("Destruction"))
+	CurPoints += StorageUtil.GetFloatValue(self, "FW.Child.StatIllusion", GetAV("Illusion"))
+	CurPoints += StorageUtil.GetFloatValue(self, "FW.Child.StatConjuration", GetAV("Conjuration"))
+	CurPoints += StorageUtil.GetFloatValue(self, "FW.Child.StatRestoration", GetAV("Restoration"))
+	CurPoints += StorageUtil.GetFloatValue(self, "FW.Child.StatAlteration", GetAV("Alteration"))
+	CurPoints += StorageUtil.GetFloatValue(self, "FW.Child.StatBlock", GetAV("Block"))
+	CurPoints += StorageUtil.GetFloatValue(self, "FW.Child.StatOneHanded", GetAV("OneHanded"))
+	CurPoints += StorageUtil.GetFloatValue(self, "FW.Child.StatTwoHanded", GetAV("TwoHanded"))
+	CurPoints += StorageUtil.GetFloatValue(self, "FW.Child.StatMarksman", GetAV("Marksman"))
+	CurPoints += StorageUtil.GetFloatValue(self, "FW.Child.StatSneak", GetAV("Sneak"))
+	
+	CurPoints += StorageUtil.GetFloatValue(self, "FW.Child.StatMagicka", GetAV("Magicka")) / 5
+	CurPoints += StorageUtil.GetFloatValue(self, "FW.Child.StatCarryWeight", GetAV("CarryWeight")) / 5
+	CurPoints += StorageUtil.GetFloatValue(self, "FW.Child.StatHealth", GetAV("Health")) / 5
+	
+	return ((GetLevel() - 1) * ChildSettings.SkillpointsPerLevel) - (CurPoints - BasePoints) as int
 endFunction
 
-Bool function Order_ActivateShild()
+int function calculatePerkPoints()
+	; First, give all Perks back
+	GivePerks()
+	
+	; Now calculate perks
+	;int basePoints = GetLevel() - 1
+	;int i = ChildSettings.ChildPerkFile.length
+	;while i>0
+	;	i-=1
+	;	string p = ChildSettings.ChildPerkFile[i]
+	;	if p!=""
+	;		int j=ChildSettings.ChildPerkRank[i]
+	;		while j>0
+	;			j-=1
+	;			string modName = FWUtility.ModFile(FWUtility.getIniCString("ChildPerk", p, "Rank"+j,"ModName",""))
+	;			int formID = FWUtility.getIniCInt("ChildPerk", p, "Rank"+j,"FormID",0)
+	;			if modName!="" && formID>1
+	;				spell s = Game.GetFormFromFile(formID,modName) as spell
+	;				if s!=none
+	;					if HasSpell(s)
+	;						basePoints-=j+1
+	;						j=0
+	;					endif
+	;				endif
+	;			endif
+	;		endWhile
+	;	endif
+	;endWhile
+	int i = 0
+	int basePoints = GetLevel() - 1
+	while i<128
+		string p = ChildSettings.ChildPerkFile[i]
+		if p!="" && ChildSettings.ChildPerkEnabled[i]==true
+			int pos = StorageUtil.StringListFind(self,"FW.Child.Perks",p)
+			if pos>=0
+				int currentRank = StorageUtil.IntListGet(self, "FW.Child.PerksLevel", pos)
+				basePoints-=currentRank
+			endif
+		endif
+		i+=1
+	endwhile
+	return basePoints
+endFunction
 
+bool bGivePerkRunning=false
+function GivePerks()
+	;int sc = StorageUtil.FormListCount(self,"FW.Child.Perks")
+	;while sc>0
+	;	sc-=1
+	;	spell s = StorageUtil.FormListGet(self,"FW.Child.Perks",sc) as spell
+	;	if s!=none
+	;		parent.AddSpell(s)
+	;	else
+	;		StorageUtil.FormListRemoveAt(self,"FW.Child.Perks",sc)
+	;	endif
+	;endWhile
+	
+	;int i = ChildSettings.ChildPerk.length
+	;while i>0
+	;	i-=1
+	;	leveledspell p = ChildSettings.ChildPerk[i]
+	;	handlePerk(p)
+	;endWhile
+	if bGivePerkRunning==true
+		return
+	endif
+	bGivePerkRunning = true
+	int i = ChildSettings.ChildPerkFile.length
+	while i>0
+		i-=1
+		handlePerk(i)
+	endWhile
+	bGivePerkRunning = false
+endfunction
+
+function handlePerk(int p)
+	if GetType()==0
+		return
+	endif
+	if ChildSettings == none
+		return
+	endif
+	if ChildSettings.GetType()==0
+		return
+	endif
+	if ChildSettings.ChildPerkFile.length<=0
+		return
+	endif
+	
+	if p>=0
+		if ChildSettings.ChildPerkFile[p]==""
+			return
+		endif
+		int pos = StorageUtil.StringListFind(self, "FW.Child.Perks", ChildSettings.ChildPerkFile[p])
+		if pos>=0
+			bool bUseAllSpells = ChildSettings.ChildPerkBool[p];p.GetChanceNone()==1
+			int level = StorageUtil.IntListGet(self, "FW.Child.PerksLevel", pos)
+			int num = ChildSettings.ChildPerkRank[p];p.GetNumForms()
+			int rankID=0
+			while rankID<num
+				rankID+=1
+				string modName = FWUtility.ModFile(FWUtility.getIniCString("ChildPerk", ChildSettings.ChildPerkFile[p], "Rank"+rankID,"ModName"))
+				int formID = FWUtility.getIniCInt("ChildPerk", ChildSettings.ChildPerkFile[p], "Rank"+rankID,"FormID")
+				if modName!="" && formID>1
+					form frm = Game.GetFormFromFile(formID,modName)
+					if frm!=none
+						spell s = frm as spell
+						Faction f = frm as Faction
+						armor a = frm as armor
+						Shout sh = frm as shout
+						if s!=none
+							if HasSpell(s)==false && (rankID==level || (rankID<Level && bUseAllSpells))
+								AddSpell(s)
+							elseif HasSpell(s)==true
+								if (rankID>Level || (rankID<level && !bUseAllSpells))
+									RemoveSpell(s)
+								else
+									; Make sure the effects are active!
+									int j = s.GetNumEffects()
+									while j>0
+										j-=1
+										magiceffect me = s.GetNthEffectMagicEffect(j)
+										if HasMagicEffect(me)==false
+											j=0
+											RemoveSpell(s)
+											AddSpell(s)
+										endif
+									endwhile
+								endif
+							endif
+						elseif f!=none
+							if (rankID==level || (rankID<Level && bUseAllSpells))
+								AddToFaction(f)
+							elseif (rankID>Level || (rankID<level && !bUseAllSpells))
+								RemoveFromFaction(f)
+							endif
+						elseif a!=none
+							if (rankID==level || (rankID<Level && bUseAllSpells))
+								if(GetItemCount(a)==0)
+									AddItem(a)
+								endif
+							elseif (rankID>Level || (rankID<level && !bUseAllSpells))
+								if(GetItemCount(a)>0)
+									RemoveItem(a)
+								endif
+							endif
+						elseif sh!=none
+							if (rankID==level || (rankID<Level && bUseAllSpells))
+								if HasSpell(sh)==false
+									AddShout(sh)
+								endif
+							elseif (rankID>Level || (rankID<level && !bUseAllSpells))
+								if HasSpell(sh)==true
+									RemoveShout(sh)
+								endif
+							endif
+						else
+							if(frm==none)
+								Debug.Trace("Perk not Found: "+ChildSettings.ChildPerkFile[p]+"["+rankID+"]::No Form - "+modName+" "+formID)
+							else
+								Debug.Trace("Perk not Found: "+ChildSettings.ChildPerkFile[p]+"["+rankID+"]::"+frm.GetName())
+							endif
+						endif
+					else
+						Debug.Trace("Perk not Found: "+ChildSettings.ChildPerkFile[p]+"["+rankID+"]::No Form - "+modName+" "+formID)
+					endif
+				endif
+			endWhile
+		elseif p>=0 ; Here were some problems (spaming bug; p = none) - don't know the reason so i've just added this elseif
+			int num = ChildSettings.ChildPerkRank[p];p.GetNumForms()
+			string pF = ChildSettings.ChildPerkFile[p]
+			int rankID=0
+			while rankID < num
+				rankID+=1
+				string mf = FWUtility.getIniCString("ChildPerk", pF, "Rank"+rankID,"ModName")
+				string mN = FWUtility.ModFile(mF)
+				int formID = FWUtility.getIniCInt("ChildPerk", pF, "Rank"+rankID,"FormID")
+				if mN!="" && formID>1
+					form frm = Game.GetFormFromFile(formID,mN)
+					if frm!=none
+						spell s = frm as spell
+						Faction f = frm as Faction
+						armor a = frm as armor
+						Shout sh = frm as shout
+						if s!=none
+							if HasSpell(s)
+								RemoveSpell(s)
+							endif
+						elseif f!=none
+							RemoveFromFaction(f)
+						elseif a!=none
+							if(GetItemCount(a)>0)
+								RemoveItem(a)
+							endif
+						elseif sh!=none
+							if HasSpell(sh)==true
+								RemoveShout(sh)
+							endif
+						endif
+					endif
+				endif
+			endWhile
+		endif
+	endif
+endfunction
+
+bool function IsSpecialAV(string av)
+	if av=="Comprehension"
+		return true
+	elseif av=="Destruction"
+		return true
+	elseif av=="Illusion"
+		return true
+	elseif av=="Conjuration"
+		return true
+	elseif av=="Magicka"
+		return true
+	elseif av=="CarryWeight"
+		return true
+	elseif av=="Alteration"
+		return true
+	elseif av=="Block"
+		return true
+	elseif av=="Restoration"
+		return true
+	elseif av=="OneHanded"
+		return true
+	elseif av=="TwoHanded"
+		return true
+	elseif av=="Marksman"
+		return true
+	elseif av=="Health"
+		return true
+	elseif av=="Sneak"
+		return true
+	elseif av=="Experience"
+		return true
+		
+	elseif av=="SkillPoints"
+		return true
+	elseif av=="PerkPoints"
+		return true
+	endif
 	return false
 endFunction
 
-function OnDeath(Actor akKiller)
-
-	storageutil.SetFloatValue(self as form, "FW.Child.LastUpdate", utility.GetCurrentGameTime())
+function CheckForLevelUp()
+	;Debug.Trace("CheckForLevelUp")
+	int LevelUpCount=0
+	int Level = GetLevel()
+	int PlayerLevel = Game.GetPlayer().GetLevel()
+	float exp = getExp()
+	bool bRunning = true
+	int max = 30
+	while bRunning
+		float expForLevel = ChildSettings.getExperience(Level)
+		if exp < expForLevel
+			bRunning = false
+		endif
+		if Level >= FWChildSettings.ChildMaxLevel()
+			bRunning = false
+		endif
+		if Level>PlayerLevel
+			bRunning = false
+		endif
+		if bRunning == true
+			exp -= expForLevel
+			Level+=1
+			LevelUpCount+=1
+		endif
+		if max <=0
+			bRunning = false
+		endif
+		max-=1
+		;Debug.Trace("Had level up")
+	endWhile
+	if LevelUpCount>0
+		StorageUtil.SetFloatValue(self, "FW.Child.StatExperience", exp)
+		;Debug.Notification(GetName()+" had a Level-Up (" + Level + ")")
+		SetLevel(Level)
+		if bIsLearning==false
+			CheckInventory()
+		endif
+	endif
 endFunction
 
-function Order_MeetPlace()
+;function Delete()
+;	DeleteStats()
+;	parent.Delete()
+;endFunction
 
-	_order = 12
-	PlayerLastSeen = utility.GetCurrentGameTime()
-	self.RefreshAI()
-	self.GotoState("Wait")
-endFunction
+function DeleteStats()
+	StorageUtil.UnsetStringValue(self,"FW.Child.Name")
+	StorageUtil.UnsetIntValue(self,"FW.Child.Flag")
+	StorageUtil.UnsetFloatValue(self,"FW.Child.LastUpdate")
+	StorageUtil.UnsetFormValue(self,"FW.Child.Mother")
+	StorageUtil.UnsetFormValue(self,"FW.Child.Father")
+	StorageUtil.UnsetIntValue(self,"FW.Child.Level")
+	StorageUtil.UnsetFloatValue(self,"FW.Child.StatExperience")
+			
+	StorageUtil.UnsetFloatValue(self,"FW.Child.StatComprehension")
+	StorageUtil.UnsetFloatValue(self,"FW.Child.StatDestruction")
+	StorageUtil.UnsetFloatValue(self,"FW.Child.StatIllusion")
+	StorageUtil.UnsetFloatValue(self,"FW.Child.StatConjuration")
+	StorageUtil.UnsetFloatValue(self,"FW.Child.StatMagicka")
+	
+	StorageUtil.UnsetFloatValue(self,"FW.Child.StatRestoration")
+	StorageUtil.UnsetFloatValue(self,"FW.Child.StatAlteration")
+	StorageUtil.UnsetFloatValue(self,"FW.Child.StatBlock")
+	StorageUtil.UnsetFloatValue(self,"FW.Child.StatCarryWeight")
+	
+	StorageUtil.UnsetFloatValue(self,"FW.Child.StatOneHanded")
+	StorageUtil.UnsetFloatValue(self,"FW.Child.StatTwoHanded")
+	StorageUtil.UnsetFloatValue(self,"FW.Child.StatMarksman")
+	StorageUtil.UnsetFloatValue(self,"FW.Child.StatSneak")
+	StorageUtil.UnsetFloatValue(self,"FW.Child.StatHealth")
+	
+	StorageUtil.UnsetFloatValue(self,"FW.Child.StatSkillPoints")
+	StorageUtil.UnsetFloatValue(self,"FW.Child.StatPerkPoints")
+	
+	StorageUtil.FormListClear(self, "FW.Child.Perks")
+	StorageUtil.IntListClear(self, "FW.Child.PerksLevel")
+endfunction
 
-function Order_WaitAndPlay()
-
-	_order = 1
-	PlayerLastSeen = utility.GetCurrentGameTime()
-	self.RefreshAI()
-	self.GotoState("Wait")
-endFunction
-
-Bool function HasParentRelationship(Actor akOther)
-
-	if akOther == self.Mother || akOther == self.Father
-		return true
-	else
-		return parent.HasParentRelationship(akOther)
-	endIf
-endFunction
-
-ColorForm function GetHairColor()
-
-	return HairColor
-endFunction
-
-function SetLevel(Int newLevel)
-
-	ChildSettings.LevelUpFX.Cast(self as objectreference, self as objectreference)
-	fwsystem System = game.GetFormFromFile(3426, fwutility.ModFile("BeeingFemale")) as fwsystem
-	System.Message(fwutility.MultiStringReplace(System.Content.ChildLevelUp, self.Name, newLevel as String, "", "", "", ""), System.MSG_Low, 0)
-	if newLevel > fwchildsettings.ChildMaxLevel()
-		storageutil.SetIntValue(self as form, "FW.Child.Level", fwchildsettings.ChildMaxLevel())
-	elseIf newLevel < 1
-		storageutil.SetIntValue(self as form, "FW.Child.Level", 1)
-	else
-		storageutil.SetIntValue(self as form, "FW.Child.Level", newLevel)
-	endIf
-endFunction
-
-Float function GetExp()
-
-	return self.GetExperience()
-endFunction
-
-function OnPlayerLoadGame()
-
-	if bOnLoadRunning == true
-		return 
-	endIf
-	bOnLoadRunning = true
-	if _Father != none || _Mother != none
-		self.InitChild()
-	elseIf bGivePerkRunning == false
-		self.GivePerks()
-	endIf
-	self.SetActorValue(ChildSettings.OrderAV(), storageutil.GetIntValue(self as form, "FW.Child.Order", 31) as Float)
-	self.RegisterForUpdateGameTime(5.00000)
-	self.OnUpdateGameTime()
-	self.RegisterForUpdate(10.0000)
-	bOnLoadRunning = false
-	if _Name == "" || _Name == ChildSettings.Manager.Contents.BabyBlankName
-		self.SetName(fwsystem.getRandomChildName(self.GetSex()))
-	endIf
-endFunction
-
-function UpdateSize()
-
-	if self.GetType() == 62
-		if self.Age >= _SizeDuration
-			self.SetScale(1.00000)
-		elseIf self.Age < 0.000000
-			self.SetScale(_SmallSizeScale)
-		else
-			self.SetScale((1.00000 - _SmallSizeScale) / _SizeDuration * self.Age + _SmallSizeScale)
-		endIf
-	endIf
-endFunction
-
-Int function GetSex()
-
-	return iSex
-endFunction
-
-function OnUpdate()
-
-	; Empty function
-endFunction
-
-function OpenSkillMenu()
-
-	ChildSettings.OpenSkillMenu(self)
-endFunction
-
-function RefreshAI()
-
-	if _order < 30 || _order >= 50
-		self.SetActorValue("WaitingForPlayer", 1.00000)
-		self.SetPlayerTeammate(false, true)
-	else
-		self.SetActorValue("WaitingForPlayer", 0.000000)
-		self.SetPlayerTeammate(true, true)
-	endIf
-	Bool isPlayerChild = false
-	if _Mother != none
-		if _Mother == game.GetPlayer()
-			isPlayerChild = true
-		endIf
-	endIf
-	if _Father != none
-		if _Father == game.GetPlayer()
-			isPlayerChild = true
-		endIf
-	endIf
-	if isPlayerChild && (_order == 1 || _order == 31 || _order >= 10 && _order < 30)
-		Int rnd = utility.RandomInt(0, 10)
-	endIf
-	self.SetActorValue(ChildSettings.OrderAV(), _order as Float)
-	storageutil.SetIntValue(self as form, "FW.Child.Order", _order)
-	self.EnableAI(false)
-	self.EvaluatePackage()
-	self.EnableAI(true)
-endFunction
-
-function Order_DoFavour()
-
-	DoFavourStart = utility.GetCurrentRealTime()
-	self.SetDoingFavor(true)
-endFunction
-
-function Order_LeaveMeAlone()
-
-	_order = 99
-	self.RefreshAI()
-	self.DeleteChild()
-endFunction
-
-Int function GetLevel()
-
-	return storageutil.GetIntValue(self as form, "FW.Child.Level", 1)
-endFunction
-
-Float function GetAVPercentage(String asValueName)
-
-	return self.GetActorValuePercentage(asValueName)
-endFunction
-
-;-- State -------------------------------------------
-state MarkForDelete
-
-	function OnUpdate()
-
-		if self.IsOnMount()
-			self.Dismount()
-		endIf
-		if self
-			if self.Is3DLoaded()
-				if self.HasLos(game.GetPlayer() as objectreference) == false && self.IsNearActor(game.GetPlayer(), 2000.00) == false
-					self.UnregisterForUpdate()
-					self.UnregisterForUpdateGameTime()
-					self.Disable(true)
-					self.DeleteStats()
-					storageutil.FormListRemove(none, "FW.Babys", self as form, false)
-					self.Delete()
-				endIf
-			else
-				self.UnregisterForUpdate()
-				self.UnregisterForUpdateGameTime()
-				self.Disable(true)
-				self.DeleteStats()
-				storageutil.FormListRemove(none, "FW.Babys", self as form, false)
-				self.Delete()
-			endIf
-		else
-			self.DeleteStats()
-			self.Delete()
-		endIf
-	endFunction
-endState
-
-;-- State -------------------------------------------
-state Wait
-endState
-
-;-- State -------------------------------------------
 state Follow
+
+EndState
+
+state MarkForDelete
+	event OnUpdate()
+		if IsOnMount()
+			Dismount()
+		endif
+		if self
+			if Is3DLoaded()
+				if HasLos(Game.GetPlayer()) == false && IsNearActor(Game.GetPlayer(),2000)==false
+					UnregisterForUpdate()
+					UnregisterForUpdateGameTime()
+					Disable(true)
+					DeleteStats()
+					StorageUtil.FormListRemove(none, "FW.Babys", self)
+					Delete()
+				endif
+			else
+				UnregisterForUpdate()
+				UnregisterForUpdateGameTime()
+				Disable(true)
+				DeleteStats()
+				StorageUtil.FormListRemove(none, "FW.Babys", self)
+				Delete()
+			endif
+		else
+			DeleteStats()
+			Delete()
+		endif
+	endEvent
 endState
+
+state Wait
+	;event OnUpdate()
+	;	if self
+	;		if parent.Is3DLoaded()
+	;			if HasLos(Game.GetPlayer())
+	;				PlayerLastSeen = Utility.GetCurrentGameTime()
+	;			endif
+	;		endif
+	;	endif
+	;endEvent
+endState
+
+Event OnActivate(ObjectReference akActionRef)
+	actor a = akActionRef as Actor
+	if a.GetType()==62 && self.GetType()==62
+		if IsBleedingOut()==true
+			if a.IsInCombat() == false
+				RestoreActorValue("Health", 9999)
+				DamageActorValue("Health", GetActorValue("Health") - 10)
+			endif
+		endif
+		if a==_Father || a==_Mother
+			SetRelationshipRank(a,ChildSettings.ParentRelationShipLevel)
+			a.SetRelationshipRank(self,ChildSettings.ParentRelationShipLevel)
+		else
+			SetRelationshipRank(a,0)
+		endif
+		
+		;DebugFactions()
+		EvaluatePackage()
+	endif
+	
+	; Make sure the child is in the baby list
+	if( StorageUtil.FormListHas(none, "FW.Babys", self)== false)
+		StorageUtil.FormListAdd(none, "FW.Babys", self)
+	endif
+endEvent

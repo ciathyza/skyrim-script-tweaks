@@ -1,110 +1,94 @@
-;/ Decompiled by Champollion V1.0.1
-Source   : BFA_AbilityEffectPMSSexHurt.psc
-Modified : 2016-12-06 03:52:12
-Compiled : 2017-01-15 06:28:41
-User     : admin
-Computer : PATRICK
-/;
-scriptName BFA_AbilityEffectPMSSexHurt extends activemagiceffect
+﻿Scriptname BFA_AbilityEffectPMSSexHurt extends activemagiceffect  
 
-;-- Properties --------------------------------------
-fwsystem property System auto
-sexlabframework property SexLab auto
+FWSystem property System Auto
+SexLabFramework Property SexLab Auto
 
-;-- Variables ---------------------------------------
-Float DamageScale
+float iSexHurt = 0.0
+bool IsPlayer
+float DamageScale
 actor PlayerRef
-Bool IsPlayer
-Float iSexHurt = 0.000000
 
-;-- Functions ---------------------------------------
-
-; Skipped compiler generated GotoState
-
-function OnEffectFinish(actor akTarget, actor akCaster)
-
-	; Empty function
-endFunction
-
-function OnUpdate()
-
-	if PlayerRef as Bool && IsPlayer as Bool && iSexHurt > 0.000000 && self.isFormValid()
-		System.DoDamage(PlayerRef, iSexHurt, 2, 0.000000)
-	endIf
-	self.RegisterForSingleUpdate(2.00000)
-endFunction
-
-Bool function isFormValid()
-
-	return PlayerRef as form != none && PlayerRef.GetLeveledActorBase() != none
-endFunction
-
-function SexLabStageExit(String hookName, String argString, Float argNum, form sender)
-
-	iSexHurt = 0.000000
-endFunction
-
-function onSexLabOrgasm(String hookName, String argString, Float argNum, form sender)
-
-	if PlayerRef as Bool && self.isFormValid()
-		sslthreadcontroller ssl_controller = SexLab.HookController(argString)
-		if ssl_controller == none
-			return 
-		endIf
-		sslbaseanimation animation = ssl_controller.animation
-		Int NumberOfActors = animation.PositionCount
-		if animation.HasTag("Vaginal") && NumberOfActors > 1 && ssl_controller.Positions.find(PlayerRef, 0) >= 0
-			if IsPlayer
-				PlayerRef.DamageActorValue("Health", PlayerRef.GetBaseActorValue("Health") / 100.000 * 10.0000 * DamageScale)
-			endIf
-			iSexHurt = 2.00000
-			if animation.HasTag("Rough")
-				iSexHurt += 2.50000
-			endIf
-			if animation.HasTag("Aggressive")
-				iSexHurt += 2.80000
-			endIf
-		endIf
-	endIf
-endFunction
-
-function SexLabStageEnter(String hookName, String argString, Float argNum, form sender)
-
-	if PlayerRef as Bool && self.isFormValid()
-		sslthreadcontroller ssl_controller = SexLab.HookController(argString)
-		if ssl_controller == none
-			return 
-		endIf
-		sslbaseanimation animation = ssl_controller.animation
-		Int NumberOfActors = animation.PositionCount
-		if animation.HasTag("Vaginal") && NumberOfActors > 1 && ssl_controller.Positions.find(PlayerRef, 0) >= 0
-			if IsPlayer
-				PlayerRef.DamageActorValue("Health", PlayerRef.GetBaseActorValue("Health") / 100.000 * 10.0000 * DamageScale)
-			endIf
-			iSexHurt = 1.10000
-			if animation.HasTag("Rough")
-				iSexHurt += 1.20000
-			endIf
-			if animation.HasTag("Aggressive")
-				iSexHurt += 1.30000
-			endIf
-		endIf
-	endIf
-endFunction
-
-function OnEffectStart(actor target, actor caster)
-
+Event OnEffectStart(Actor target, Actor caster)
 	PlayerRef = target
-	if PlayerRef
-		IsPlayer = PlayerRef == game.GetPlayer()
-		self.RegisterForModEvent("OrgasmStart", "onSexLabOrgasm")
-		self.RegisterForModEvent("StageStart", "SexLabStageEnter")
-		self.RegisterForModEvent("PositionChange", "SexLabStageEnter")
-		self.RegisterForModEvent("EndThread", "SexLabStageExit")
-		self.RegisterForSingleUpdate(2.00000)
-	else
-		self.Dispel()
-	endIf
-endFunction
+	
+	If PlayerRef
+		IsPlayer = (PlayerRef == Game.GetPlayer())
+		
+		RegisterForModEvent("OrgasmStart", "onSexLabOrgasm")
+		RegisterForModEvent("StageStart", "SexLabStageEnter")
+		RegisterForModEvent("PositionChange", "SexLabStageEnter")
+		RegisterForModEvent("EndThread", "SexLabStageExit")
+		RegisterForSingleUpdate(2)
+	Else
+		Dispel()
+	EndIf
+endEvent
 
-; Skipped compiler generated GetState
+Event OnEffectFinish(Actor akTarget, Actor akCaster)
+	;UnregisterForUpdate()
+	;UnRegisterForModEvent("OrgasmStart")
+	;UnRegisterForModEvent("StageStart")
+	;UnRegisterForModEvent("PositionChange")
+	;UnRegisterForModEvent("EndThread")
+EndEvent
+
+Event onSexLabOrgasm(string hookName, string argString, float argNum, form sender)
+	If PlayerRef && isFormValid() ;***Edit by Bane
+		sslThreadController ssl_controller = SexLab.HookController(argString) ;***Edit by Bane
+		if ssl_controller==none
+			return
+		endif
+		sslBaseAnimation animation = ssl_controller.Animation
+		Int NumberOfActors = animation.PositionCount
+		If animation.HasTag("Vaginal") && (NumberOfActors > 1) && (ssl_controller.Positions.Find(PlayerRef) >= 0)
+			If IsPlayer
+				PlayerRef.DamageActorValue("Health", ((PlayerRef.GetBaseActorValue("Health") / 100) * 10) * DamageScale);
+			EndIf
+			iSexHurt = 2.0
+			if animation.HasTag("Rough")
+				iSexHurt += 2.5
+			endIf
+			if animation.HasTag("Aggressive")
+				iSexHurt += 2.8
+			endIf
+		EndIf
+	EndIf
+EndEvent
+
+Event SexLabStageEnter(string hookName, string argString, float argNum, form sender)
+	If PlayerRef && isFormValid() ;***Edit by Bane
+		sslThreadController ssl_controller = SexLab.HookController(argString) ;***Edit by Bane
+		if ssl_controller==none
+			return
+		endif
+		sslBaseAnimation animation = ssl_controller.Animation
+		Int NumberOfActors = animation.PositionCount
+		If animation.HasTag("Vaginal") && (NumberOfActors > 1) && (ssl_controller.Positions.Find(PlayerRef) >= 0)
+			If IsPlayer
+				PlayerRef.DamageActorValue("Health", ((PlayerRef.GetBaseActorValue("Health") / 100) * 10) * DamageScale);
+			EndIf
+			iSexHurt = 1.1
+			if animation.HasTag("Rough")
+				iSexHurt += 1.2
+			endIf
+			if animation.HasTag("Aggressive")
+				iSexHurt += 1.3
+			endIf
+		EndIf
+	EndIf
+EndEvent
+
+Event SexLabStageExit(string hookName, string argString, float argNum, form sender)
+	iSexHurt = 0
+EndEvent
+
+Event OnUpdate()
+	if PlayerRef && IsPlayer && (iSexHurt > 0) && isFormValid() ;***Edit by Bane
+		System.DoDamage(PlayerRef,iSexHurt,2) ; Do PMS Damage
+	endIf
+	RegisterForSingleUpdate(2)
+endEvent
+
+bool Function isFormValid() ;***Added by Bane
+	return (PlayerRef as form) != none && (PlayerRef.GetLeveledActorBase() as ActorBase) != none
+endfunction

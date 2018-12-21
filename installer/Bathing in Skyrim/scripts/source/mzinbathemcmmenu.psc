@@ -2,9 +2,11 @@ ScriptName mzinBatheMCMMenu Extends SKI_ConfigBase
 
 import FISSFactory
 
+; -------------------------------------------------------------------------------------------------
+; Properties
+; -------------------------------------------------------------------------------------------------
 
-Int Property BathingInSkyrimVersion = 11 AutoReadOnly
-
+Int                       Property BathingInSkyrimVersion = 11            AutoReadOnly
 Actor                     Property Player                                 Auto
 FormList                  Property BathingAnimationLoopCountList          Auto
 FormList                  Property BathingAnimationLoopCountListFollowers Auto
@@ -42,11 +44,13 @@ mzinBatheQuest            Property BatheQuest                             Auto
 Spell                     Property GetDirtyOverTimeReactivatorCloakSpell  Auto
 
 ; deprecated
-
 FormList       Property LegacySpellList         Auto
 GlobalVariable Property BathingAnimationEnabled Auto
 
-; local variables
+
+; -------------------------------------------------------------------------------------------------
+; Local Variables
+; -------------------------------------------------------------------------------------------------
 
 Bool[]   TrackedActorsToggleValuesArray
 Bool[]   UndressArmorSlotArray
@@ -55,13 +59,18 @@ String[] BathingAnimationStyleArray
 String[] GetSoapyStyleArray
 String[] ShoweringAnimationStyleArray
 
-; constants
+
+; -------------------------------------------------------------------------------------------------
+; Constants
+; -------------------------------------------------------------------------------------------------
 
 String DisplayFormatDecimal    = "{2}"
 String DisplayFormatPercentage = "{1}%"
 
 
-; ---------- MCM Internal Variables ----------
+; -------------------------------------------------------------------------------------------------
+; MCM Internal Variables
+; -------------------------------------------------------------------------------------------------
 
 ; menu - Settings
 Int BatheKeyMapID
@@ -109,13 +118,10 @@ Int[] UndressArmorSlotToggleIDsFollowers
 ; menu - Tracked NPCs
 Int[] TrackedActorsToggleIDs
 
-; --------------------------------------------
 
-
-Int Function GetVersion()
-	Return BathingInSkyrimVersion
-EndFunction
-
+; -------------------------------------------------------------------------------------------------
+; MCM Events
+; -------------------------------------------------------------------------------------------------
 
 Event OnConfigInit()
 	; pages
@@ -233,115 +239,667 @@ Event OnPageReset(String Page)
 EndEvent
 
 
+Event OnOptionDefault(Int OptionID)
+	If CurrentPage == "$BIS_PAGE_SETTINGS"
+		HandleOnOptionDefaultSettingsPage(OptionID)
+	ElseIf CurrentPage == "$BIS_PAGE_ANIMATIONS"
+		HandleOnOptionDefaultAnimationsPage(OptionID)
+	ElseIf CurrentPage == "$BIS_PAGE_ANIMATIONS_FOLLOWERS"
+		HandleOnOptionDefaultAnimationsPageFollowers(OptionID)
+	ElseIf CurrentPage == "$BIS_PAGE_TRACKED_ACTORS"
+		HandleOnOptionDefaultTrackedActorsPage(OptionID)
+	EndIf
+EndEvent
+
+
+Event OnOptionHighlight(Int OptionID)
+	If CurrentPage == "$BIS_PAGE_SETTINGS"
+		HandleOnOptionHighlightSettingsPage(OptionID)
+	ElseIf CurrentPage == "$BIS_PAGE_ANIMATIONS"
+		HandleOnOptionHighlightAnimationsPage(OptionID)
+	ElseIf CurrentPage == "$BIS_PAGE_ANIMATIONS_FOLLOWERS"
+		HandleOnOptionHighlightAnimationsPageFollowers(OptionID)
+	ElseIf CurrentPage == "$BIS_PAGE_TRACKED_ACTORS"
+		HandleOnOptionHighlightTrackedActorsPage(OptionID)
+	EndIf	
+EndEvent
+
+
+Event OnOptionKeyMapChange(Int OptionID, Int KeyCode, String ConflictControl, String ConflictName)
+	Bool Continue = True
+	If ConflictControl != ""			
+		String ConflictMessage = "This key is already mapped to:\n" + ConflictControl
+		If ConflictName != ""
+			 ConflictMessage += "\n(" + ConflictName + ")"
+		EndIf
+		ConflictMessage += "\n\nAre you sure you want to continue?"
+		Continue = ShowMessage(ConflictMessage, True)			
+	EndIf
+	If Continue == True
+		If OptionID == CheckStatusKeyMapID
+			CheckStatusKeyCode.Value = KeyCode
+		ElseIf OptionID == BatheKeyMapID
+			BatheKeyCode.Value = KeyCode
+		ElseIf OptionID == ShowerKeyMapID
+			ShowerKeyCode.Value = KeyCode
+		EndIf
+		BatheQuest.RegisterHotKeys()
+		SetKeymapOptionValue(OptionID, KeyCode)
+	EndIf
+EndEvent
+
+
+Event OnOptionSelect(Int OptionID)
+	If CurrentPage == "$BIS_PAGE_SETTINGS"
+		HandleOnOptionSelectSettingsPage(OptionID)
+	ElseIf CurrentPage == "$BIS_PAGE_ANIMATIONS"
+		HandleOnOptionSelectAnimationsPage(OptionID)
+	ElseIf CurrentPage == "$BIS_PAGE_ANIMATIONS_FOLLOWERS"
+		HandleOnOptionSelectAnimationsPageFollowers(OptionID)
+	ElseIf CurrentPage == "$BIS_PAGE_TRACKED_ACTORS"
+		HandleOnOptionSelectTrackedActorsPage(OptionID)
+	EndIf
+EndEvent
+
+
+Event OnOptionMenuOpen(Int OptionID)
+	If CurrentPage == "$BIS_PAGE_ANIMATIONS"
+		HandleOnOptionMenuOpenAnimationsPage(OptionID)
+	ElseIf CurrentPage == "$BIS_PAGE_ANIMATIONS_FOLLOWERS"
+		HandleOnOptionMenuOpenAnimationsPageFollowers(OptionID)
+	EndIf
+EndEvent
+
+
+Event OnOptionMenuAccept(Int OptionID, Int MenuItemIndex)
+	If CurrentPage == "$BIS_PAGE_ANIMATIONS"
+		HandleOnOptionMenuAcceptAnimationsPage(OptionID, MenuItemIndex)
+	ElseIf CurrentPage == "$BIS_PAGE_ANIMATIONS_FOLLOWERS"
+		HandleOnOptionMenuAcceptAnimationsPageFollowers(OptionID, MenuItemIndex)
+	EndIf
+EndEvent
+
+
+Event OnOptionSliderOpen(Int OptionID)
+	If CurrentPage == "$BIS_PAGE_SETTINGS"
+		HandleOnOptionSliderOpenSettingsPage(OptionID)
+	ElseIf CurrentPage == "$BIS_PAGE_ANIMATIONS"
+		HandleOnOptionSliderOpenAnimationsPage(OptionID)
+	ElseIf CurrentPage == "$BIS_PAGE_ANIMATIONS_FOLLOWERS"
+		HandleOnOptionSliderOpenAnimationsPageFollowers(OptionID)
+	EndIf		
+EndEvent
+
+
+Event OnOptionSliderAccept(Int OptionID, Float OptionValue)
+	If CurrentPage == "$BIS_PAGE_SETTINGS"
+		HandleOnOptionSliderAcceptSettingsPage(OptionID, OptionValue)
+	ElseIf CurrentPage == "$BIS_PAGE_ANIMATIONS"
+		HandleOnOptionSliderAcceptAnimationsPage(OptionID, OptionValue)
+	ElseIf CurrentPage == "$BIS_PAGE_ANIMATIONS_FOLLOWERS"
+		HandleOnOptionSliderAcceptAnimationsPageFollowers(OptionID, OptionValue)
+	EndIf	
+EndEvent
+
+
 Event OnConfigClose()
 EndEvent
 
 
-; fiss functions
-Function SaveSettings()
-	FISSInterface FISS = FISSFactory.GetFISS()
-	If FISS == None
-		ShowMessage("$BIS_ERROR_NO_FISS")
-		Return
-	EndIf
-	If ShowMessage("$BIS_MSG_ASK_SAVE", True) == False
-		Return
-	EndIf
-	FISS.BeginSave("Bathing in Skyrim.xml", "Bathing in Skyrim")
-	FISS.SaveInt("BathingInSkyrimEnabled", BathingInSkyrimEnabled.GetValue() As Int)
-	FISS.SaveInt("DialogTopicEnabled", DialogTopicEnabled.GetValue() As Int)
-	FISS.SaveInt("WaterRestrictionEnabled", WaterRestrictionEnabled.GetValue() As Int)
-	FISS.SaveInt("GetSoapyStyle", GetSoapyStyle.GetValue() As Int)
-	FISS.SaveInt("GetSoapyStyleFollowers", GetSoapyStyleFollowers.GetValue() As Int)
-	FISS.SaveInt("CheckStatusKeyCode", CheckStatusKeyCode.GetValue() As Int)
-	FISS.SaveInt("BatheKeyCode", BatheKeyCode.GetValue() As Int)
-	FISS.SaveInt("ShowerKeyCode", ShowerKeyCode.GetValue() As Int)
-	FISS.SaveInt("BathingAnimationStyle", BathingAnimationStyle.GetValue() As Int)
-	FISS.SaveInt("BathingAnimationStyleFollowers", BathingAnimationStyleFollowers.GetValue() As Int)
-	FISS.SaveInt("ShoweringAnimationStyle", ShoweringAnimationStyle.GetValue() As Int)
-	FISS.SaveInt("ShoweringAnimationStyleFollowers", ShoweringAnimationStyleFollowers.GetValue() As Int)
-	FISS.SaveInt("GetDressedAfterBathingEnabled", GetDressedAfterBathingEnabled.GetValue() As Int)
-	FISS.SaveInt("GetDressedAfterBathingEnabledFollowers", GetDressedAfterBathingEnabledFollowers.GetValue() As Int)
-	FISS.SaveInt("BathingIgnoredArmorSlotsMask", BathingIgnoredArmorSlotsMask.GetValue() As Int)
-	FISS.SaveInt("BathingIgnoredArmorSlotsMaskFollowers", BathingIgnoredArmorSlotsMaskFollowers.GetValue() As Int)
-	FISS.SaveFloat("DirtinessUpdateInterval", DirtinessUpdateInterval.GetValue() As Float)
-	FISS.SaveFloat("DirtinessPercentage", DirtinessPercentage.GetValue() As Float)
-	FISS.SaveFloat("DirtinessPerHourSettlement", DirtinessPerHourSettlement.GetValue() As Float)
-	FISS.SaveFloat("DirtinessPerHourDungeon", DirtinessPerHourDungeon.GetValue() As Float)
-	FISS.SaveFloat("DirtinessPerHourWilderness", DirtinessPerHourWilderness.GetValue() As Float)
-	FISS.SaveFloat("DirtinessThreshold0", (DirtinessThresholdList.GetAt(0) As GlobalVariable).GetValue() As Float)
-	FISS.SaveFloat("DirtinessThreshold1", (DirtinessThresholdList.GetAt(1) As GlobalVariable).GetValue() As Float)
-	FISS.SaveFloat("DirtinessThreshold2", (DirtinessThresholdList.GetAt(2) As GlobalVariable).GetValue() As Float)
-	FISS.SaveInt("BathingAnimationLoopCount0", (BathingAnimationLoopCountList.GetAt(0) As GlobalVariable).GetValue() As Int)
-	FISS.SaveInt("BathingAnimationLoopCount1", (BathingAnimationLoopCountList.GetAt(1) As GlobalVariable).GetValue() As Int)
-	FISS.SaveInt("BathingAnimationLoopCount2", (BathingAnimationLoopCountList.GetAt(2) As GlobalVariable).GetValue() As Int)
-	FISS.SaveInt("BathingAnimationLoopCount3", (BathingAnimationLoopCountList.GetAt(3) As GlobalVariable).GetValue() As Int)
-	FISS.SaveInt("BathingAnimationLoopCountFollowers0", (BathingAnimationLoopCountListFollowers.GetAt(0) As GlobalVariable).GetValue() As Int)
-	FISS.SaveInt("BathingAnimationLoopCountFollowers1", (BathingAnimationLoopCountListFollowers.GetAt(1) As GlobalVariable).GetValue() As Int)
-	FISS.SaveInt("BathingAnimationLoopCountFollowers2", (BathingAnimationLoopCountListFollowers.GetAt(2) As GlobalVariable).GetValue() As Int)
-	FISS.SaveInt("BathingAnimationLoopCountFollowers3", (BathingAnimationLoopCountListFollowers.GetAt(3) As GlobalVariable).GetValue() As Int)
-	String Result = FISS.EndSave()
-	If Result != ""
-		Debug.Trace(Result)
-	EndIf
-	ShowMessage("$BIS_MSG_COMPLETED_SAVE", False)
-	ForcePageReset()
+; -------------------------------------------------------------------------------------------------
+; Handlers
+; -------------------------------------------------------------------------------------------------
+
+Function HandleOnOptionDefaultAnimationsPage(Int OptionID)
+	If OptionID == BathingAnimationStyleMenuID
+		BathingAnimationStyle.SetValue(4)
+		SetMenuOptionValue(OptionID, BathingAnimationStyleArray[BathingAnimationStyle.GetValue() As Int])
+	ElseIf OptionID == ShoweringAnimationStyleMenuID
+		ShoweringAnimationStyle.SetValue(2)
+		SetMenuOptionValue(OptionID, ShoweringAnimationStyleArray[ShoweringAnimationStyle.GetValue() As Int])
+	ElseIf OptionID == GetSoapyStyleMenuID
+		GetSoapyStyle.SetValue(2)
+		SetMenuOptionValue(OptionID, GetSoapyStyleArray[GetSoapyStyle.GetValue() As Int])
+	ElseIf OptionID == BathingAnimationLoopsTier0SliderID
+		(BathingAnimationLoopCountList.GetAt(0) As GlobalVariable).SetValue(1)
+		SetSliderOptionValue(OptionID, (BathingAnimationLoopCountList.GetAt(0) As GlobalVariable).GetValue(), "{0}")
+	ElseIf OptionID == BathingAnimationLoopsTier1SliderID
+		(BathingAnimationLoopCountList.GetAt(1) As GlobalVariable).SetValue(1)
+		SetSliderOptionValue(OptionID, (BathingAnimationLoopCountList.GetAt(1) As GlobalVariable).GetValue(), "{0}")
+	ElseIf OptionID == BathingAnimationLoopsTier2SliderID
+		(BathingAnimationLoopCountList.GetAt(2) As GlobalVariable).SetValue(1)
+		SetSliderOptionValue(OptionID, (BathingAnimationLoopCountList.GetAt(2) As GlobalVariable).GetValue(), "{0}")
+	ElseIf OptionID == BathingAnimationLoopsTier3SliderID
+		(BathingAnimationLoopCountList.GetAt(3) As GlobalVariable).SetValue(1)
+		SetSliderOptionValue(OptionID, (BathingAnimationLoopCountList.GetAt(3) As GlobalVariable).GetValue(), "{0}")
+	ElseIf OptionID == GetDressedAfterBathingEnabledToggleID
+		GetDressedAfterBathingEnabled.SetValue(1)
+		SetToggleOptionValue(OptionID, GetDressedAfterBathingEnabled.GetValue() As Bool)
+	Else 
+		Int UndressArmorSlotIndex = UndressArmorSlotToggleIDs.Find(OptionID)
+		If UndressArmorSlotIndex >= 0
+			If UndressArmorSlotIndex <= 13 ; undress 30-43 by default
+				IgnoreArmorSlot(BathingIgnoredArmorSlotsMask, UndressArmorSlotIndex + 30, False)
+				SetToggleOptionValue(OptionID, True)
+			Else ; ignore 44-62 by default
+				IgnoreArmorSlot(BathingIgnoredArmorSlotsMask, UndressArmorSlotIndex + 30, True)
+				SetToggleOptionValue(OptionID, False)
+			EndIf
+		EndIf
+	EndIf	
 EndFunction
 
 
-Function LoadSettings()
-	FISSInterface FISS = FISSFactory.GetFISS()
-	If FISS == None
-		ShowMessage("$BIS_ERROR_NO_FISS")
-		Return
-	EndIf
-	If ShowMessage("$BIS_MSG_ASK_LOAD", True) == False
-		Return
-	EndIf
-	FISS.BeginLoad("Bathing in Skyrim.xml")
-	BathingInSkyrimEnabled.SetValue(FISS.LoadInt("BathingInSkyrimEnabled"))
-	DialogTopicEnabled.SetValue(FISS.LoadInt("DialogTopicEnabled"))
-	WaterRestrictionEnabled.SetValue(FISS.LoadInt("WaterRestrictionEnabled"))
-	GetSoapyStyle.SetValue(FISS.LoadInt("GetSoapyStyle"))
-	GetSoapyStyleFollowers.SetValue(FISS.LoadInt("GetSoapyStyleFollowers"))
-	CheckStatusKeyCode.SetValue(FISS.LoadInt("CheckStatusKeyCode"))
-	BatheKeyCode.SetValue(FISS.LoadInt("BatheKeyCode"))
-	ShowerKeyCode.SetValue(FISS.LoadInt("ShowerKeyCode"))
-	BathingAnimationStyle.SetValue(FISS.LoadInt("BathingAnimationStyle"))
-	BathingAnimationStyleFollowers.SetValue(FISS.LoadInt("BathingAnimationStyleFollowers"))
-	ShoweringAnimationStyle.SetValue(FISS.LoadInt("ShoweringAnimationStyle"))
-	ShoweringAnimationStyleFollowers.SetValue(FISS.LoadInt("ShoweringAnimationStyleFollowers"))
-	GetDressedAfterBathingEnabled.SetValue(FISS.LoadInt("GetDressedAfterBathingEnabled"))
-	GetDressedAfterBathingEnabledFollowers.SetValue(FISS.LoadInt("GetDressedAfterBathingEnabledFollowers"))
-	BathingIgnoredArmorSlotsMask.SetValue(FISS.LoadInt("BathingIgnoredArmorSlotsMask"))
-	BathingIgnoredArmorSlotsMaskFollowers.SetValue(FISS.LoadInt("BathingIgnoredArmorSlotsMaskFollowers"))
-	DirtinessUpdateInterval.SetValue(FISS.LoadFloat("DirtinessUpdateInterval"))
-	DirtinessPercentage.SetValue(FISS.LoadFloat("DirtinessPercentage"))
-	DirtinessPerHourSettlement.SetValue(FISS.LoadFloat("DirtinessPerHourSettlement"))
-	DirtinessPerHourDungeon.SetValue(FISS.LoadFloat("DirtinessPerHourDungeon"))
-	DirtinessPerHourWilderness.SetValue(FISS.LoadFloat("DirtinessPerHourWilderness"))
-	(DirtinessThresholdList.GetAt(0) As GlobalVariable).SetValue(FISS.LoadFloat("DirtinessThreshold0"))
-	(DirtinessThresholdList.GetAt(1) As GlobalVariable).SetValue(FISS.LoadFloat("DirtinessThreshold1"))
-	(DirtinessThresholdList.GetAt(2) As GlobalVariable).SetValue(FISS.LoadFloat("DirtinessThreshold2"))
-	(BathingAnimationLoopCountList.GetAt(0) As GlobalVariable).SetValue(FISS.LoadInt("BathingAnimationLoopCount0"))
-	(BathingAnimationLoopCountList.GetAt(1) As GlobalVariable).SetValue(FISS.LoadInt("BathingAnimationLoopCount1"))
-	(BathingAnimationLoopCountList.GetAt(2) As GlobalVariable).SetValue(FISS.LoadInt("BathingAnimationLoopCount2"))
-	(BathingAnimationLoopCountList.GetAt(3) As GlobalVariable).SetValue(FISS.LoadInt("BathingAnimationLoopCount3"))
-	(BathingAnimationLoopCountListFollowers.GetAt(0) As GlobalVariable).SetValue(FISS.LoadInt("BathingAnimationLoopCountFollowers0"))
-	(BathingAnimationLoopCountListFollowers.GetAt(1) As GlobalVariable).SetValue(FISS.LoadInt("BathingAnimationLoopCountFollowers1"))
-	(BathingAnimationLoopCountListFollowers.GetAt(2) As GlobalVariable).SetValue(FISS.LoadInt("BathingAnimationLoopCountFollowers2"))
-	(BathingAnimationLoopCountListFollowers.GetAt(3) As GlobalVariable).SetValue(FISS.LoadInt("BathingAnimationLoopCountFollowers3"))
-	String Result = FISS.EndLoad()
-	If Result != ""
-		Debug.Trace(Result)
-	EndIf
-	BatheQuest.UpdateDangerousWater()
-	ShowMessage("$BIS_MSG_COMPLETED_LOAD", False)
-	ForcePageReset()
+Function HandleOnOptionDefaultAnimationsPageFollowers(Int OptionID)	
+	If OptionID == BathingAnimationStyleMenuIDFollowers
+		BathingAnimationStyleFollowers.SetValue(4)
+		SetMenuOptionValue(OptionID, BathingAnimationStyleArray[BathingAnimationStyleFollowers.GetValue() As Int])
+	ElseIf OptionID == ShoweringAnimationStyleMenuIDFollowers
+		ShoweringAnimationStyleFollowers.SetValue(2)
+		SetMenuOptionValue(OptionID, BathingAnimationStyleArray[BathingAnimationStyleFollowers.GetValue() As Int])
+	ElseIf OptionID == GetSoapyStyleMenuIDFollowers
+		GetSoapyStyleFollowers.SetValue(2)
+		SetMenuOptionValue(OptionID, GetSoapyStyleArray[GetSoapyStyleFollowers.GetValue() As Int])
+	ElseIf OptionID == BathingAnimationLoopsTier0SliderIDFollowers
+		(BathingAnimationLoopCountListFollowers.GetAt(0) As GlobalVariable).SetValue(1)
+		SetSliderOptionValue(OptionID, (BathingAnimationLoopCountListFollowers.GetAt(0) As GlobalVariable).GetValue(), "{0}")
+	ElseIf OptionID == BathingAnimationLoopsTier1SliderIDFollowers
+		(BathingAnimationLoopCountListFollowers.GetAt(1) As GlobalVariable).SetValue(1)
+		SetSliderOptionValue(OptionID, (BathingAnimationLoopCountListFollowers.GetAt(1) As GlobalVariable).GetValue(), "{0}")
+	ElseIf OptionID == BathingAnimationLoopsTier2SliderIDFollowers
+		(BathingAnimationLoopCountListFollowers.GetAt(2) As GlobalVariable).SetValue(1)
+		SetSliderOptionValue(OptionID, (BathingAnimationLoopCountListFollowers.GetAt(2) As GlobalVariable).GetValue(), "{0}")
+	ElseIf OptionID == BathingAnimationLoopsTier3SliderIDFollowers
+		(BathingAnimationLoopCountListFollowers.GetAt(3) As GlobalVariable).SetValue(1)
+		SetSliderOptionValue(OptionID, (BathingAnimationLoopCountListFollowers.GetAt(3) As GlobalVariable).GetValue(), "{0}")
+	ElseIf OptionID == GetDressedAfterBathingEnabledToggleIDFollowers
+		GetDressedAfterBathingEnabledFollowers.SetValue(1)
+		SetToggleOptionValue(OptionID, GetDressedAfterBathingEnabledFollowers.GetValue() As Bool)
+	Else 
+		Int UndressArmorSlotIndex = UndressArmorSlotToggleIDsFollowers.Find(OptionID)
+		If UndressArmorSlotIndex >= 0
+			If UndressArmorSlotIndex <= 13 ; undress 30-43 by default
+				IgnoreArmorSlot(BathingIgnoredArmorSlotsMaskFollowers, UndressArmorSlotIndex + 30, False)
+				SetToggleOptionValue(OptionID, True)
+			Else ; ignore 44-62 by default
+				IgnoreArmorSlot(BathingIgnoredArmorSlotsMaskFollowers, UndressArmorSlotIndex + 30, True)
+				SetToggleOptionValue(OptionID, False)
+			EndIf
+		EndIf
+	EndIf	
 EndFunction
 
 
-; display pages
+Function HandleOnOptionDefaultSettingsPage(Int OptionID)
+	If OptionID == BathingInSkyrimEnableToggleID
+		BathingInSkyrimEnabled.SetValue(1)
+		SetToggleOptionValue(OptionID, BathingInSkyrimEnabled.GetValue() As Bool)
+		EnableBathingInSkyrim()
+	ElseIf OptionID == DialogTopicEnableToggleID
+		DialogTopicEnabled.SetValue(1)
+		SetToggleOptionValue(OptionID, DialogTopicEnabled.GetValue() As Bool)
+	ElseIf OptionID == WaterRestrictionEnableToggleID
+		WaterRestrictionEnabled.SetValue(1)
+		SetToggleOptionValue(OptionID, WaterRestrictionEnabled.GetValue() As Bool)
+		BatheQuest.UpdateDangerousWater()
+	ElseIf OptionID == UpdateIntervalSliderID
+		DirtinessUpdateInterval.SetValue(1.0)
+		SetSliderOptionValue(OptionID, DirtinessUpdateInterval.GetValue(), DisplayFormatDecimal)
+	ElseIf OptionID == DirtinessPerHourSettlementSliderID
+		DirtinessPerHourSettlement.SetValue(0.01)
+		SetSliderOptionValue(OptionID, DirtinessPerHourSettlement.GetValue() * 100, DisplayFormatPercentage)
+	ElseIf OptionID == DirtinessPerHourDungeonSliderID
+		DirtinessPerHourDungeon.SetValue(0.025)
+		SetSliderOptionValue(OptionID, DirtinessPerHourDungeon.GetValue() * 100, DisplayFormatPercentage)
+	ElseIf OptionID == DirtinessPerHourWildernessSliderID
+		DirtinessPerHourWilderness.SetValue(0.015)
+		SetSliderOptionValue(OptionID, DirtinessPerHourWilderness.GetValue() * 100, DisplayFormatPercentage)
+	ElseIf OptionID == DirtinessThresholdTier1SliderID
+		(DirtinessThresholdList.GetAt(0) As GlobalVariable).SetValue(0.20)
+		SetSliderOptionValue(OptionID, (DirtinessThresholdList.GetAt(0) As GlobalVariable).GetValue() * 100, DisplayFormatPercentage)
+	ElseIf OptionID == DirtinessThresholdTier2SliderID
+		(DirtinessThresholdList.GetAt(1) As GlobalVariable).SetValue(0.60)
+		SetSliderOptionValue(OptionID, (DirtinessThresholdList.GetAt(1) As GlobalVariable).GetValue() * 100, DisplayFormatPercentage)
+	ElseIf OptionID == DirtinessThresholdTier3SliderID
+		(DirtinessThresholdList.GetAt(2) As GlobalVariable).SetValue(0.98)
+		SetSliderOptionValue(OptionID, (DirtinessThresholdList.GetAt(2) As GlobalVariable).GetValue() * 100, DisplayFormatPercentage)			
+	EndIf
+EndFunction
+
+
+Function HandleOnOptionDefaultTrackedActorsPage(Int OptionID)
+EndFunction
+
+
+Function HandleOnOptionHighlightAnimationsPage(Int OptionID)
+	If OptionID == BathingAnimationStyleMenuID
+		SetInfoText("$BIS_DESC_BATHING_ANIM_STYLE")
+	ElseIf OptionID == ShoweringAnimationStyleMenuID
+		SetInfoText("$BIS_DESC_SHOWERING_ANIM_STYLE")
+	ElseIf OptionID == GetSoapyStyleMenuID
+		SetInfoText("$BIS_DESC_SOAP_STYLE")
+	ElseIf OptionId == BathingAnimationLoopsTier0SliderID
+		SetInfoText("$BIS_DESC_ANIM_LOOP_TIER0")
+	ElseIf OptionId == BathingAnimationLoopsTier1SliderID
+		SetInfoText("$BIS_DESC_ANIM_LOOP_TIER1")
+	ElseIf OptionId == BathingAnimationLoopsTier2SliderID
+		SetInfoText("$BIS_DESC_ANIM_LOOP_TIER2")
+	ElseIf OptionId == BathingAnimationLoopsTier3SliderID
+		SetInfoText("$BIS_DESC_ANIM_LOOP_TIER3")
+	ElseIf OptionID == GetDressedAfterBathingEnabledToggleID
+		SetInfoText("$BIS_DESC_GET_DRESSED")
+	Else
+		SetInfoText("$BIS_DESC_GET_NAKED")
+	EndIf
+EndFunction
+
+
+Function HandleOnOptionHighlightAnimationsPageFollowers(Int OptionID)
+	If OptionID == BathingAnimationStyleMenuIDFollowers
+		SetInfoText("$BIS_DESC_BATHING_ANIM_STYLE")
+	ElseIf OptionID == ShoweringAnimationStyleMenuIDFollowers
+		SetInfoText("$BIS_DESC_SHOWERING_ANIM_STYLE")
+	ElseIf OptionID == GetSoapyStyleMenuIDFollowers
+		SetInfoText("$BIS_DESC_SOAP_STYLE")
+	ElseIf OptionId == BathingAnimationLoopsTier0SliderIDFollowers
+		SetInfoText("$BIS_DESC_ANIM_LOOP_TIER0")
+	ElseIf OptionId == BathingAnimationLoopsTier1SliderIDFollowers
+		SetInfoText("$BIS_DESC_ANIM_LOOP_TIER1")
+	ElseIf OptionId == BathingAnimationLoopsTier2SliderIDFollowers
+		SetInfoText("$BIS_DESC_ANIM_LOOP_TIER2")
+	ElseIf OptionId == BathingAnimationLoopsTier3SliderIDFollowers
+		SetInfoText("$BIS_DESC_ANIM_LOOP_TIER3")
+	ElseIf OptionID == GetDressedAfterBathingEnabledToggleIDFollowers
+		SetInfoText("$BIS_DESC_GET_DRESSED")
+	Else
+		SetInfoText("$BIS_DESC_GET_NAKED")
+	EndIf
+EndFunction
+
+
+Function HandleOnOptionHighlightSettingsPage(Int OptionID)
+	If OptionID == BathingInSkyrimEnableToggleID
+		SetInfoText("$BIS_DESC_ENABLE_MOD")
+	ElseIf OptionID == DialogTopicEnableToggleID
+		SetInfoText("$BIS_DESC_ENABLE_DIALOG_TOPIC")
+	ElseIf OptionID == WaterRestrictionEnableToggleID
+		SetInfoText("$BIS_DESC_WATER_RESTRICT")
+	ElseIf OptionID == UpdateIntervalSliderID
+		SetInfoText("$BIS_DESC_UPDATE_INTERVAL")
+	ElseIf OptionID == CheckStatusKeyMapID
+		SetInfoText("$BIS_DESC_STATUS_HOTKEY")
+	ElseIf OptionID == BatheKeyMapID
+		SetInfoText("$BIS_DESC_BATHE_HOTKEY")
+	ElseIf OptionID == ShowerKeyMapID
+		SetInfoText("$BIS_DESC_SHOWER_HOTKEY")
+	ElseIf OptionID == SaveSettingsID
+		SetInfoText("$BIS_DESC_SAVE_SETTINGS")
+	ElseIf OptionID == LoadSettingsID
+		SetInfoText("$BIS_DESC_LOAD_SETTINGS")
+	ElseIf OptionID == DirtinessPerHourSettlementSliderID
+		SetInfoText("$BIS_DESC_RATE_IN_SETTLEMENT")
+	ElseIf OptionID == DirtinessPerHourDungeonSliderID
+		SetInfoText("$BIS_DESC_RATE_IN_DUNGEON")
+	ElseIf OptionID == DirtinessPerHourWildernessSliderID
+		SetInfoText("$BIS_DESC_RATE_IN_WILDERNESS")
+	ElseIf OptionId == DirtinessThresholdTier1SliderID
+		SetInfoText("$BIS_DESC_THRESHOLD_1")
+	ElseIf OptionId == DirtinessThresholdTier2SliderID
+		SetInfoText("$BIS_DESC_THRESHOLD_2")
+	ElseIf OptionId == DirtinessThresholdTier3SliderID
+		SetInfoText("$BIS_DESC_THRESHOLD_3")
+	EndIf
+EndFunction
+
+
+Function HandleOnOptionHighlightTrackedActorsPage(Int OptionID)
+	Int Index = TrackedActorsToggleIDs.Find(OptionID)	
+	If Index >= 0
+		If TrackedActorsToggleValuesArray[Index] == False
+			SetInfoText("$BIS_DESC_STOP_TRACKING_ACTOR")
+		EndIf
+	EndIf
+EndFunction
+
+
+Function HandleOnOptionSelectAnimationsPage(Int OptionID)
+	If OptionID == GetDressedAfterBathingEnabledToggleID
+		GetDressedAfterBathingEnabled.SetValue((!GetDressedAfterBathingEnabled.GetValue() As Bool) As Int)
+		SetToggleOptionValue(OptionID, GetDressedAfterBathingEnabled.GetValue() As Bool)
+	Else
+		Int UndressArmorSlotIndex = UndressArmorSlotToggleIDs.Find(OptionID)
+		If UndressArmorSlotIndex >= 0
+			UndressArmorSlotArray[UndressArmorSlotIndex] = !UndressArmorSlotArray[UndressArmorSlotIndex]
+			IgnoreArmorSlot(BathingIgnoredArmorSlotsMask, UndressArmorSlotIndex + 30, !UndressArmorSlotArray[UndressArmorSlotIndex])
+			SetToggleOptionValue(OptionID, UndressArmorSlotArray[UndressArmorSlotIndex])
+		EndIf
+	EndIf
+EndFunction
+
+
+Function HandleOnOptionSelectAnimationsPageFollowers(Int OptionID)
+	If OptionID == GetDressedAfterBathingEnabledToggleIDFollowers
+		GetDressedAfterBathingEnabledFollowers.SetValue((!GetDressedAfterBathingEnabledFollowers.GetValue() As Bool) As Int)
+		SetToggleOptionValue(OptionID, GetDressedAfterBathingEnabledFollowers.GetValue() As Bool)
+	Else
+		Int UndressArmorSlotIndex = UndressArmorSlotToggleIDsFollowers.Find(OptionID)
+		If UndressArmorSlotIndex >= 0
+			UndressArmorSlotArrayFollowers[UndressArmorSlotIndex] = !UndressArmorSlotArrayFollowers[UndressArmorSlotIndex]
+			IgnoreArmorSlot(BathingIgnoredArmorSlotsMaskFollowers, UndressArmorSlotIndex + 30, !UndressArmorSlotArrayFollowers[UndressArmorSlotIndex])
+			SetToggleOptionValue(OptionID, UndressArmorSlotArrayFollowers[UndressArmorSlotIndex])
+		EndIf
+	EndIf
+EndFunction
+
+
+Function HandleOnOptionSelectSettingsPage(Int OptionID)
+	If OptionID == BathingInSkyrimEnableToggleID
+		If BathingInSkyrimEnabled.GetValue() As Bool == True && ShowMessage("$BIS_MSG_ASK_DISABLE", True) == True
+			BathingInSkyrimEnabled.SetValue(False As Int)
+			DisableBathingInSkyrim()
+		Else
+			BathingInSkyrimEnabled.SetValue(True As Int)
+			EnableBathingInSkyrim()
+		EndIf
+		SetToggleOptionValue(OptionID, BathingInSkyrimEnabled.GetValue() As Bool)
+	ElseIf OptionID == DialogTopicEnableToggleID
+		DialogTopicEnabled.SetValue((!DialogTopicEnabled.GetValue() As Bool) As Int)
+		SetToggleOptionValue(OptionID, DialogTopicEnabled.GetValue() As Bool)
+	ElseIf OptionID == WaterRestrictionEnableToggleID
+		WaterRestrictionEnabled.SetValue((!WaterRestrictionEnabled.GetValue() As Bool) As Int)
+		SetToggleOptionValue(OptionID, WaterRestrictionEnabled.GetValue() As Bool)
+		BatheQuest.UpdateDangerousWater()
+	ElseIf OptionID == SaveSettingsID
+		SaveSettings()
+	ElseIf OptionID == LoadSettingsID
+		LoadSettings()
+	EndIf	
+EndFunction
+
+
+Function HandleOnOptionSelectTrackedActorsPage(Int OptionID)
+	Int Index = TrackedActorsToggleIDs.Find(OptionID)
+	If Index >= 0
+		If ShowMessage("$BIS_MSG_ASK_STOP_TRACK", True) == True
+			Actor DirtyActor = DirtyActors.GetAt(Index) As Actor
+			RemoveSpells(DirtyActor, GetDirtyOverTimeSpellList)
+			RemoveSpells(DirtyActor, DirtinessSpellList)
+			RemoveSpells(DirtyActor, SoapBonusSpellList)
+			RemoveSpells(DirtyActor, LegacySpellList)
+			DirtyActors.RemoveAddedForm(DirtyActor)
+			ForcePageReset()
+		EndIf
+	EndIf
+EndFunction
+
+
+Function HandleOnOptionMenuAcceptAnimationsPage(Int OptionID, Int MenuItemIndex)
+	If OptionID == BathingAnimationStyleMenuID
+		If MenuItemIndex >= 0 && MenuItemIndex < BathingAnimationStyleArray.Length
+			SetMenuOptionValue(OptionID, BathingAnimationStyleArray[MenuItemIndex])
+			BathingAnimationStyle.SetValue(MenuItemIndex)
+		EndIf
+	ElseIf OptionID == ShoweringAnimationStyleMenuID
+		If MenuItemIndex >= 0 && MenuItemIndex < ShoweringAnimationStyleArray.Length
+			SetMenuOptionValue(OptionID, ShoweringAnimationStyleArray[MenuItemIndex])
+			ShoweringAnimationStyle.SetValue(MenuItemIndex)
+		EndIf
+	ElseIf OptionID == GetSoapyStyleMenuID
+		If MenuItemIndex >= 0 && MenuItemIndex < GetSoapyStyleArray.Length
+			SetMenuOptionValue(OptionID, GetSoapyStyleArray[MenuItemIndex])
+			GetSoapyStyle.SetValue(MenuItemIndex)
+		EndIf
+	EndIf
+EndFunction
+
+
+Function HandleOnOptionMenuAcceptAnimationsPageFollowers(Int OptionID, Int MenuItemIndex)
+	If OptionID == BathingAnimationStyleMenuIDFollowers
+		If MenuItemIndex >= 0 && MenuItemIndex < BathingAnimationStyleArray.Length
+			SetMenuOptionValue(OptionID, BathingAnimationStyleArray[MenuItemIndex])
+			BathingAnimationStyleFollowers.SetValue(MenuItemIndex)
+		EndIf
+	ElseIf OptionID == ShoweringAnimationStyleMenuIDFollowers
+		If MenuItemIndex >= 0 && MenuItemIndex < ShoweringAnimationStyleArray.Length
+			SetMenuOptionValue(OptionID, ShoweringAnimationStyleArray[MenuItemIndex])
+			ShoweringAnimationStyleFollowers.SetValue(MenuItemIndex)
+		EndIf
+	ElseIf OptionID == GetSoapyStyleMenuIDFollowers
+		If MenuItemIndex >= 0 && MenuItemIndex < GetSoapyStyleArray.Length
+			SetMenuOptionValue(OptionID, GetSoapyStyleArray[MenuItemIndex])
+			GetSoapyStyleFollowers.SetValue(MenuItemIndex)
+		EndIf
+	EndIf
+EndFunction
+
+
+Function HandleOnOptionMenuOpenAnimationsPage(Int OptionID)
+	If OptionID == BathingAnimationStyleMenuID
+		SetMenuDialogOptions(BathingAnimationStyleArray)
+		SetMenuDialogStartIndex(BathingAnimationStyle.GetValue() As Int)
+		SetMenuDialogDefaultIndex(1)
+	ElseIf OptionID == ShoweringAnimationStyleMenuID
+		SetMenuDialogOptions(ShoweringAnimationStyleArray)
+		SetMenuDialogStartIndex(ShoweringAnimationStyle.GetValue() As Int)
+		SetMenuDialogDefaultIndex(1)
+	ElseIf OptionID == GetSoapyStyleMenuID
+		SetMenuDialogOptions(GetSoapyStyleArray)
+		SetMenuDialogStartIndex(GetSoapyStyle.GetValue() As Int)
+		SetMenuDialogDefaultIndex(1)
+	EndIf
+EndFunction
+
+
+Function HandleOnOptionMenuOpenAnimationsPageFollowers(Int OptionID)
+	If OptionID == BathingAnimationStyleMenuIDFollowers
+		SetMenuDialogOptions(BathingAnimationStyleArray)
+		SetMenuDialogStartIndex(BathingAnimationStyleFollowers.GetValue() As Int)
+		SetMenuDialogDefaultIndex(1)
+	ElseIf OptionID == ShoweringAnimationStyleMenuIDFollowers
+		SetMenuDialogOptions(ShoweringAnimationStyleArray)
+		SetMenuDialogStartIndex(ShoweringAnimationStyleFollowers.GetValue() As Int)
+		SetMenuDialogDefaultIndex(1)
+	ElseIf OptionID == GetSoapyStyleMenuIDFollowers
+		SetMenuDialogOptions(GetSoapyStyleArray)
+		SetMenuDialogStartIndex(GetSoapyStyleFollowers.GetValue() As Int)
+		SetMenuDialogDefaultIndex(1)
+	EndIf
+EndFunction
+
+
+Function HandleOnOptionSliderAcceptAnimationsPage(Int OptionID, Float OptionValue)
+	Float SliderValue = OptionValue
+	If OptionID == BathingAnimationLoopsTier0SliderID
+		(BathingAnimationLoopCountList.GetAt(0) As GlobalVariable).SetValue(SliderValue)
+	ElseIf OptionID == BathingAnimationLoopsTier1SliderID
+		(BathingAnimationLoopCountList.GetAt(1) As GlobalVariable).SetValue(SliderValue)
+	ElseIf OptionID == BathingAnimationLoopsTier2SliderID
+		(BathingAnimationLoopCountList.GetAt(2) As GlobalVariable).SetValue(SliderValue)
+	ElseIf OptionID == BathingAnimationLoopsTier3SliderID
+		(BathingAnimationLoopCountList.GetAt(3) As GlobalVariable).SetValue(SliderValue)
+	EndIf
+		
+	SetSliderOptionValue(OptionID, SliderValue, "{0}")	
+EndFunction
+
+
+Function HandleOnOptionSliderAcceptAnimationsPageFollowers(Int OptionID, Float OptionValue)
+	Float SliderValue = OptionValue
+
+	If OptionID == BathingAnimationLoopsTier0SliderIDFollowers
+		(BathingAnimationLoopCountListFollowers.GetAt(0) As GlobalVariable).SetValue(SliderValue)
+	ElseIf OptionID == BathingAnimationLoopsTier1SliderIDFollowers
+		(BathingAnimationLoopCountListFollowers.GetAt(1) As GlobalVariable).SetValue(SliderValue)
+	ElseIf OptionID == BathingAnimationLoopsTier2SliderIDFollowers
+		(BathingAnimationLoopCountListFollowers.GetAt(2) As GlobalVariable).SetValue(SliderValue)
+	ElseIf OptionID == BathingAnimationLoopsTier3SliderIDFollowers
+		(BathingAnimationLoopCountListFollowers.GetAt(3) As GlobalVariable).SetValue(SliderValue)
+	EndIf
+	SetSliderOptionValue(OptionID, SliderValue, "{0}")	
+EndFunction
+
+
+Function HandleOnOptionSliderAcceptSettingsPage(Int OptionID, Float OptionValue)
+	Float SliderValue = OptionValue
+	String DisplayFormat = DisplayFormatPercentage
+	If OptionID == UpdateIntervalSliderID
+		DisplayFormat = DisplayFormatDecimal
+		DirtinessUpdateInterval.SetValue(SliderValue)
+	ElseIf OptionID == DirtinessPerHourSettlementSliderID
+		DisplayFormat = DisplayFormatPercentage
+		SliderValue = OptionValue / 100.0
+		DirtinessPerHourSettlement.SetValue(SliderValue)
+	ElseIf OptionID == DirtinessPerHourDungeonSliderID
+		DisplayFormat = DisplayFormatPercentage
+		SliderValue = OptionValue / 100.0
+		DirtinessPerHourDungeon.SetValue(SliderValue)
+		DisplayFormat = DisplayFormatPercentage
+	ElseIf OptionID == DirtinessPerHourWildernessSliderID
+		SliderValue = OptionValue / 100.0	
+		DirtinessPerHourWilderness.SetValue(SliderValue)
+	ElseIf OptionID == DirtinessThresholdTier1SliderID
+		DisplayFormat = DisplayFormatPercentage
+		SliderValue = OptionValue / 100.0
+		; clamp threshold
+		If SliderValue > (DirtinessThresholdList.GetAt(1) As GlobalVariable).GetValue()
+			SliderValue = (DirtinessThresholdList.GetAt(1) As GlobalVariable).GetValue()
+		EndIf
+		(DirtinessThresholdList.GetAt(0) As GlobalVariable).SetValue(SliderValue)
+	ElseIf OptionID == DirtinessThresholdTier2SliderID
+		DisplayFormat = DisplayFormatPercentage
+		SliderValue = OptionValue / 100.0
+		; clamp threshold
+		If SliderValue > (DirtinessThresholdList.GetAt(2) As GlobalVariable).GetValue()
+			SliderValue = (DirtinessThresholdList.GetAt(2) As GlobalVariable).GetValue()
+		ElseIf SliderValue < (DirtinessThresholdList.GetAt(0) As GlobalVariable).GetValue()
+			SliderValue = (DirtinessThresholdList.GetAt(0) As GlobalVariable).GetValue()
+		EndIf
+		(DirtinessThresholdList.GetAt(1) As GlobalVariable).SetValue(SliderValue)
+	ElseIf OptionID == DirtinessThresholdTier3SliderID
+		DisplayFormat = DisplayFormatPercentage
+		SliderValue = OptionValue / 100.0
+		; clamp threshold
+		If SliderValue < (DirtinessThresholdList.GetAt(1) As GlobalVariable).GetValue()
+			SliderValue = (DirtinessThresholdList.GetAt(1) As GlobalVariable).GetValue()
+		EndIf
+		(DirtinessThresholdList.GetAt(2) As GlobalVariable).SetValue(SliderValue)
+	EndIf
+	SetSliderOptionValue(OptionID, OptionValue, DisplayFormat)
+EndFunction
+
+
+Function HandleOnOptionSliderOpenAnimationsPage(Int OptionID)
+	; set slider range and increment
+	SetSliderDialogRange(1.0, 10.0)
+	SetSliderDialogInterval(1.0)
+	; get slider values
+	Float SliderValue = 0.0
+	If OptionID == BathingAnimationLoopsTier0SliderID
+		SetSliderDialogDefaultValue(1.0)
+		SliderValue = (BathingAnimationLoopCountList.GetAt(0) As GlobalVariable).GetValue() As Int
+	ElseIf OptionID == BathingAnimationLoopsTier1SliderID
+		SetSliderDialogDefaultValue(1.0)
+		SliderValue = (BathingAnimationLoopCountList.GetAt(1) As GlobalVariable).GetValue() As Int
+	ElseIf OptionID == BathingAnimationLoopsTier2SliderID
+		SetSliderDialogDefaultValue(1.0)
+		SliderValue = (BathingAnimationLoopCountList.GetAt(2) As GlobalVariable).GetValue() As Int
+	ElseIf OptionID == BathingAnimationLoopsTier3SliderID
+		SetSliderDialogDefaultValue(1.0)
+		SliderValue = (BathingAnimationLoopCountList.GetAt(3) As GlobalVariable).GetValue() As Int
+	EndIf
+	; set slider value
+	SetSliderDialogStartValue(SliderValue)
+	SetSliderOptionValue(OptionID, SliderValue, "{0}")
+EndFunction
+
+
+Function HandleOnOptionSliderOpenAnimationsPageFollowers(Int OptionID)
+	; set slider range and increment
+	SetSliderDialogRange(1.0, 10.0)
+	SetSliderDialogInterval(1.0)
+	; get slider values
+	Float SliderValue = 0.0
+	If OptionID == BathingAnimationLoopsTier0SliderIDFollowers
+		SetSliderDialogDefaultValue(1.0)
+		SliderValue = (BathingAnimationLoopCountListFollowers.GetAt(0) As GlobalVariable).GetValue() As Int
+	ElseIf OptionID == BathingAnimationLoopsTier1SliderIDFollowers
+		SetSliderDialogDefaultValue(1.0)
+		SliderValue = (BathingAnimationLoopCountListFollowers.GetAt(1) As GlobalVariable).GetValue() As Int
+	ElseIf OptionID == BathingAnimationLoopsTier2SliderIDFollowers
+		SetSliderDialogDefaultValue(1.0)
+		SliderValue = (BathingAnimationLoopCountListFollowers.GetAt(2) As GlobalVariable).GetValue() As Int
+	ElseIf OptionID == BathingAnimationLoopsTier3SliderIDFollowers
+		SetSliderDialogDefaultValue(1.0)
+		SliderValue = (BathingAnimationLoopCountListFollowers.GetAt(3) As GlobalVariable).GetValue() As Int
+	EndIf
+	; set slider value
+	SetSliderDialogStartValue(SliderValue)
+	SetSliderOptionValue(OptionID, SliderValue, "{0}")
+EndFunction
+
+
+Function HandleOnOptionSliderOpenSettingsPage(Int OptionID)
+	Float SliderValue = 0.0
+	String DisplayFormat = DisplayFormatPercentage
+	; get slider value
+	If OptionID == UpdateIntervalSliderID
+		DisplayFormat = DisplayFormatDecimal
+		SetSliderDialogRange(0.25, 5.0)
+		SetSliderDialogInterval(0.25)
+		SetSliderDialogDefaultValue(1.0)
+		SliderValue = (DirtinessUpdateInterval.GetValue())
+	ElseIf OptionID == DirtinessPerHourSettlementSliderID
+		DisplayFormat = DisplayFormatPercentage
+		SetSliderDialogRange(0.0, 100.0)
+		SetSliderDialogInterval(0.5)
+		SetSliderDialogDefaultValue(1.0)
+		SliderValue = (DirtinessPerHourSettlement.GetValue() * 100.0)
+	ElseIf OptionID == DirtinessPerHourDungeonSliderID
+		DisplayFormat = DisplayFormatPercentage
+		SetSliderDialogRange(0.0, 100.0)
+		SetSliderDialogInterval(0.5)
+		SetSliderDialogDefaultValue(2.5)
+		SliderValue = (DirtinessPerHourDungeon.GetValue() * 100.0)
+	ElseIf OptionID == DirtinessPerHourWildernessSliderID
+		DisplayFormat = DisplayFormatPercentage
+		SetSliderDialogRange(0.0, 100.0)
+		SetSliderDialogInterval(0.5)
+		SetSliderDialogDefaultValue(1.5)
+		SliderValue = (DirtinessPerHourWilderness.GetValue() * 100.0)
+	ElseIf OptionID == DirtinessThresholdTier1SliderID
+		DisplayFormat = DisplayFormatPercentage
+		SetSliderDialogRange(0.0, 100.0)
+		SetSliderDialogInterval(0.5)
+		SetSliderDialogDefaultValue(20.0)
+		SliderValue = ((DirtinessThresholdList.GetAt(0) As GlobalVariable).GetValue() * 100.0)
+	ElseIf OptionID == DirtinessThresholdTier2SliderID
+		DisplayFormat = DisplayFormatPercentage
+		SetSliderDialogRange(0.0, 100.0)
+		SetSliderDialogInterval(0.5)
+		SetSliderDialogDefaultValue(60.0)
+		SliderValue = ((DirtinessThresholdList.GetAt(1) As GlobalVariable).GetValue() * 100.0)
+	ElseIf OptionID == DirtinessThresholdTier3SliderID
+		DisplayFormat = DisplayFormatPercentage
+		SetSliderDialogRange(0.0, 100.0)
+		SetSliderDialogInterval(0.5)
+		SetSliderDialogDefaultValue(98.0)
+		SliderValue = ((DirtinessThresholdList.GetAt(2) As GlobalVariable).GetValue() * 100.0)
+	EndIf
+	; set slider value
+	SetSliderDialogStartValue(SliderValue)
+	SetSliderOptionValue(OptionID, SliderValue, DisplayFormat)
+EndFunction
+
+
+; -------------------------------------------------------------------------------------------------
+; Functions
+; -------------------------------------------------------------------------------------------------
+
+Int Function GetVersion()
+	Return BathingInSkyrimVersion
+EndFunction
+
+
 Function DisplaySplashPage()
 	UnloadCustomContent()
 	LoadCustomContent("Bathing in Skyrim.dds", 56, 63)
@@ -519,667 +1077,6 @@ Function DisplayTrackedActorsPage()
 EndFunction
 
 
-; OnOptionDefault
-Event OnOptionDefault(Int OptionID)
-	If CurrentPage == "$BIS_PAGE_SETTINGS"
-		HandleOnOptionDefaultSettingsPage(OptionID)
-	ElseIf CurrentPage == "$BIS_PAGE_ANIMATIONS"
-		HandleOnOptionDefaultAnimationsPage(OptionID)
-	ElseIf CurrentPage == "$BIS_PAGE_ANIMATIONS_FOLLOWERS"
-		HandleOnOptionDefaultAnimationsPageFollowers(OptionID)
-	ElseIf CurrentPage == "$BIS_PAGE_TRACKED_ACTORS"
-		HandleOnOptionDefaultTrackedActorsPage(OptionID)
-	EndIf
-EndEvent
-
-
-Function HandleOnOptionDefaultAnimationsPage(Int OptionID)
-	; menus
-	If OptionID == BathingAnimationStyleMenuID
-		BathingAnimationStyle.SetValue(4)
-		SetMenuOptionValue(OptionID, BathingAnimationStyleArray[BathingAnimationStyle.GetValue() As Int])
-	ElseIf OptionID == ShoweringAnimationStyleMenuID
-		ShoweringAnimationStyle.SetValue(2)
-		SetMenuOptionValue(OptionID, ShoweringAnimationStyleArray[ShoweringAnimationStyle.GetValue() As Int])
-	ElseIf OptionID == GetSoapyStyleMenuID
-		GetSoapyStyle.SetValue(2)
-		SetMenuOptionValue(OptionID, GetSoapyStyleArray[GetSoapyStyle.GetValue() As Int])
-	; sliders
-	ElseIf OptionID == BathingAnimationLoopsTier0SliderID
-		(BathingAnimationLoopCountList.GetAt(0) As GlobalVariable).SetValue(1)
-		SetSliderOptionValue(OptionID, (BathingAnimationLoopCountList.GetAt(0) As GlobalVariable).GetValue(), "{0}")
-	ElseIf OptionID == BathingAnimationLoopsTier1SliderID
-		(BathingAnimationLoopCountList.GetAt(1) As GlobalVariable).SetValue(1)
-		SetSliderOptionValue(OptionID, (BathingAnimationLoopCountList.GetAt(1) As GlobalVariable).GetValue(), "{0}")
-	ElseIf OptionID == BathingAnimationLoopsTier2SliderID
-		(BathingAnimationLoopCountList.GetAt(2) As GlobalVariable).SetValue(1)
-		SetSliderOptionValue(OptionID, (BathingAnimationLoopCountList.GetAt(2) As GlobalVariable).GetValue(), "{0}")
-	ElseIf OptionID == BathingAnimationLoopsTier3SliderID
-		(BathingAnimationLoopCountList.GetAt(3) As GlobalVariable).SetValue(1)
-		SetSliderOptionValue(OptionID, (BathingAnimationLoopCountList.GetAt(3) As GlobalVariable).GetValue(), "{0}")
-	; toggles
-	ElseIf OptionID == GetDressedAfterBathingEnabledToggleID
-		GetDressedAfterBathingEnabled.SetValue(1)
-		SetToggleOptionValue(OptionID, GetDressedAfterBathingEnabled.GetValue() As Bool)
-	Else 
-		Int UndressArmorSlotIndex = UndressArmorSlotToggleIDs.Find(OptionID)
-		If UndressArmorSlotIndex >= 0
-			If UndressArmorSlotIndex <= 13 ; undress 30-43 by default
-				IgnoreArmorSlot(BathingIgnoredArmorSlotsMask, UndressArmorSlotIndex + 30, False)
-				SetToggleOptionValue(OptionID, True)
-			Else ; ignore 44-62 by default
-				IgnoreArmorSlot(BathingIgnoredArmorSlotsMask, UndressArmorSlotIndex + 30, True)
-				SetToggleOptionValue(OptionID, False)
-			EndIf
-		EndIf
-	EndIf	
-EndFunction
-
-
-Function HandleOnOptionDefaultAnimationsPageFollowers(Int OptionID)	
-	; menus
-	If OptionID == BathingAnimationStyleMenuIDFollowers
-		BathingAnimationStyleFollowers.SetValue(4)
-		SetMenuOptionValue(OptionID, BathingAnimationStyleArray[BathingAnimationStyleFollowers.GetValue() As Int])
-	ElseIf OptionID == ShoweringAnimationStyleMenuIDFollowers
-		ShoweringAnimationStyleFollowers.SetValue(2)
-		SetMenuOptionValue(OptionID, BathingAnimationStyleArray[BathingAnimationStyleFollowers.GetValue() As Int])
-	ElseIf OptionID == GetSoapyStyleMenuIDFollowers
-		GetSoapyStyleFollowers.SetValue(2)
-		SetMenuOptionValue(OptionID, GetSoapyStyleArray[GetSoapyStyleFollowers.GetValue() As Int])
-	; sliders
-	ElseIf OptionID == BathingAnimationLoopsTier0SliderIDFollowers
-		(BathingAnimationLoopCountListFollowers.GetAt(0) As GlobalVariable).SetValue(1)
-		SetSliderOptionValue(OptionID, (BathingAnimationLoopCountListFollowers.GetAt(0) As GlobalVariable).GetValue(), "{0}")
-	ElseIf OptionID == BathingAnimationLoopsTier1SliderIDFollowers
-		(BathingAnimationLoopCountListFollowers.GetAt(1) As GlobalVariable).SetValue(1)
-		SetSliderOptionValue(OptionID, (BathingAnimationLoopCountListFollowers.GetAt(1) As GlobalVariable).GetValue(), "{0}")
-	ElseIf OptionID == BathingAnimationLoopsTier2SliderIDFollowers
-		(BathingAnimationLoopCountListFollowers.GetAt(2) As GlobalVariable).SetValue(1)
-		SetSliderOptionValue(OptionID, (BathingAnimationLoopCountListFollowers.GetAt(2) As GlobalVariable).GetValue(), "{0}")
-	ElseIf OptionID == BathingAnimationLoopsTier3SliderIDFollowers
-		(BathingAnimationLoopCountListFollowers.GetAt(3) As GlobalVariable).SetValue(1)
-		SetSliderOptionValue(OptionID, (BathingAnimationLoopCountListFollowers.GetAt(3) As GlobalVariable).GetValue(), "{0}")
-	; toggles
-	ElseIf OptionID == GetDressedAfterBathingEnabledToggleIDFollowers
-		GetDressedAfterBathingEnabledFollowers.SetValue(1)
-		SetToggleOptionValue(OptionID, GetDressedAfterBathingEnabledFollowers.GetValue() As Bool)
-	Else 
-		Int UndressArmorSlotIndex = UndressArmorSlotToggleIDsFollowers.Find(OptionID)
-		If UndressArmorSlotIndex >= 0
-			If UndressArmorSlotIndex <= 13 ; undress 30-43 by default
-				IgnoreArmorSlot(BathingIgnoredArmorSlotsMaskFollowers, UndressArmorSlotIndex + 30, False)
-				SetToggleOptionValue(OptionID, True)
-			Else ; ignore 44-62 by default
-				IgnoreArmorSlot(BathingIgnoredArmorSlotsMaskFollowers, UndressArmorSlotIndex + 30, True)
-				SetToggleOptionValue(OptionID, False)
-			EndIf
-		EndIf
-	EndIf	
-EndFunction
-
-
-Function HandleOnOptionDefaultSettingsPage(Int OptionID)
-	; toggles
-	If OptionID == BathingInSkyrimEnableToggleID
-		BathingInSkyrimEnabled.SetValue(1)
-		SetToggleOptionValue(OptionID, BathingInSkyrimEnabled.GetValue() As Bool)
-		EnableBathingInSkyrim()
-	ElseIf OptionID == DialogTopicEnableToggleID
-		DialogTopicEnabled.SetValue(0)
-		SetToggleOptionValue(OptionID, DialogTopicEnabled.GetValue() As Bool)
-	ElseIf OptionID == WaterRestrictionEnableToggleID
-		WaterRestrictionEnabled.SetValue(1)
-		SetToggleOptionValue(OptionID, WaterRestrictionEnabled.GetValue() As Bool)
-		BatheQuest.UpdateDangerousWater()
-	; sliders
-	ElseIf OptionID == UpdateIntervalSliderID
-		DirtinessUpdateInterval.SetValue(1.0)
-		SetSliderOptionValue(OptionID, DirtinessUpdateInterval.GetValue(), DisplayFormatDecimal)
-	ElseIf OptionID == DirtinessPerHourSettlementSliderID
-		DirtinessPerHourSettlement.SetValue(0.01)
-		SetSliderOptionValue(OptionID, DirtinessPerHourSettlement.GetValue() * 100, DisplayFormatPercentage)
-	ElseIf OptionID == DirtinessPerHourDungeonSliderID
-		DirtinessPerHourDungeon.SetValue(0.025)
-		SetSliderOptionValue(OptionID, DirtinessPerHourDungeon.GetValue() * 100, DisplayFormatPercentage)
-	ElseIf OptionID == DirtinessPerHourWildernessSliderID
-		DirtinessPerHourWilderness.SetValue(0.015)
-		SetSliderOptionValue(OptionID, DirtinessPerHourWilderness.GetValue() * 100, DisplayFormatPercentage)
-	ElseIf OptionID == DirtinessThresholdTier1SliderID
-		(DirtinessThresholdList.GetAt(0) As GlobalVariable).SetValue(0.20)
-		SetSliderOptionValue(OptionID, (DirtinessThresholdList.GetAt(0) As GlobalVariable).GetValue() * 100, DisplayFormatPercentage)
-	ElseIf OptionID == DirtinessThresholdTier2SliderID
-		(DirtinessThresholdList.GetAt(1) As GlobalVariable).SetValue(0.60)
-		SetSliderOptionValue(OptionID, (DirtinessThresholdList.GetAt(1) As GlobalVariable).GetValue() * 100, DisplayFormatPercentage)
-	ElseIf OptionID == DirtinessThresholdTier3SliderID
-		(DirtinessThresholdList.GetAt(2) As GlobalVariable).SetValue(0.98)
-		SetSliderOptionValue(OptionID, (DirtinessThresholdList.GetAt(2) As GlobalVariable).GetValue() * 100, DisplayFormatPercentage)			
-	EndIf
-EndFunction
-
-
-Function HandleOnOptionDefaultTrackedActorsPage(Int OptionID)
-EndFunction
-
-
-; OnOptionHighlight
-Event OnOptionHighlight(Int OptionID)
-	If CurrentPage == "$BIS_PAGE_SETTINGS"
-		HandleOnOptionHighlightSettingsPage(OptionID)
-	ElseIf CurrentPage == "$BIS_PAGE_ANIMATIONS"
-		HandleOnOptionHighlightAnimationsPage(OptionID)
-	ElseIf CurrentPage == "$BIS_PAGE_ANIMATIONS_FOLLOWERS"
-		HandleOnOptionHighlightAnimationsPageFollowers(OptionID)
-	ElseIf CurrentPage == "$BIS_PAGE_TRACKED_ACTORS"
-		HandleOnOptionHighlightTrackedActorsPage(OptionID)
-	EndIf	
-EndEvent
-
-
-Function HandleOnOptionHighlightAnimationsPage(Int OptionID)
-	If OptionID == BathingAnimationStyleMenuID
-		SetInfoText("$BIS_DESC_BATHING_ANIM_STYLE")
-	ElseIf OptionID == ShoweringAnimationStyleMenuID
-		SetInfoText("$BIS_DESC_SHOWERING_ANIM_STYLE")
-	ElseIf OptionID == GetSoapyStyleMenuID
-		SetInfoText("$BIS_DESC_SOAP_STYLE")
-	ElseIf OptionId == BathingAnimationLoopsTier0SliderID
-		SetInfoText("$BIS_DESC_ANIM_LOOP_TIER0")
-	ElseIf OptionId == BathingAnimationLoopsTier1SliderID
-		SetInfoText("$BIS_DESC_ANIM_LOOP_TIER1")
-	ElseIf OptionId == BathingAnimationLoopsTier2SliderID
-		SetInfoText("$BIS_DESC_ANIM_LOOP_TIER2")
-	ElseIf OptionId == BathingAnimationLoopsTier3SliderID
-		SetInfoText("$BIS_DESC_ANIM_LOOP_TIER3")
-	ElseIf OptionID == GetDressedAfterBathingEnabledToggleID
-		SetInfoText("$BIS_DESC_GET_DRESSED")
-	Else
-		SetInfoText("$BIS_DESC_GET_NAKED")
-	EndIf
-EndFunction
-
-
-Function HandleOnOptionHighlightAnimationsPageFollowers(Int OptionID)
-	If OptionID == BathingAnimationStyleMenuIDFollowers
-		SetInfoText("$BIS_DESC_BATHING_ANIM_STYLE")
-	ElseIf OptionID == ShoweringAnimationStyleMenuIDFollowers
-		SetInfoText("$BIS_DESC_SHOWERING_ANIM_STYLE")
-	ElseIf OptionID == GetSoapyStyleMenuIDFollowers
-		SetInfoText("$BIS_DESC_SOAP_STYLE")
-	ElseIf OptionId == BathingAnimationLoopsTier0SliderIDFollowers
-		SetInfoText("$BIS_DESC_ANIM_LOOP_TIER0")
-	ElseIf OptionId == BathingAnimationLoopsTier1SliderIDFollowers
-		SetInfoText("$BIS_DESC_ANIM_LOOP_TIER1")
-	ElseIf OptionId == BathingAnimationLoopsTier2SliderIDFollowers
-		SetInfoText("$BIS_DESC_ANIM_LOOP_TIER2")
-	ElseIf OptionId == BathingAnimationLoopsTier3SliderIDFollowers
-		SetInfoText("$BIS_DESC_ANIM_LOOP_TIER3")
-	ElseIf OptionID == GetDressedAfterBathingEnabledToggleIDFollowers
-		SetInfoText("$BIS_DESC_GET_DRESSED")
-	Else
-		SetInfoText("$BIS_DESC_GET_NAKED")
-	EndIf
-EndFunction
-
-
-Function HandleOnOptionHighlightSettingsPage(Int OptionID)
-	If OptionID == BathingInSkyrimEnableToggleID
-		SetInfoText("$BIS_DESC_ENABLE_MOD")
-	ElseIf OptionID == DialogTopicEnableToggleID
-		SetInfoText("$BIS_DESC_ENABLE_DIALOG_TOPIC")
-	ElseIf OptionID == WaterRestrictionEnableToggleID
-		SetInfoText("$BIS_DESC_WATER_RESTRICT")
-	ElseIf OptionID == UpdateIntervalSliderID
-		SetInfoText("$BIS_DESC_UPDATE_INTERVAL")
-	ElseIf OptionID == CheckStatusKeyMapID
-		SetInfoText("$BIS_DESC_STATUS_HOTKEY")
-	ElseIf OptionID == BatheKeyMapID
-		SetInfoText("$BIS_DESC_BATHE_HOTKEY")
-	ElseIf OptionID == ShowerKeyMapID
-		SetInfoText("$BIS_DESC_SHOWER_HOTKEY")
-	ElseIf OptionID == SaveSettingsID
-		SetInfoText("$BIS_DESC_SAVE_SETTINGS")
-	ElseIf OptionID == LoadSettingsID
-		SetInfoText("$BIS_DESC_LOAD_SETTINGS")
-	ElseIf OptionID == DirtinessPerHourSettlementSliderID
-		SetInfoText("$BIS_DESC_RATE_IN_SETTLEMENT")
-	ElseIf OptionID == DirtinessPerHourDungeonSliderID
-		SetInfoText("$BIS_DESC_RATE_IN_DUNGEON")
-	ElseIf OptionID == DirtinessPerHourWildernessSliderID
-		SetInfoText("$BIS_DESC_RATE_IN_WILDERNESS")
-	ElseIf OptionId == DirtinessThresholdTier1SliderID
-		SetInfoText("$BIS_DESC_THRESHOLD_1")
-	ElseIf OptionId == DirtinessThresholdTier2SliderID
-		SetInfoText("$BIS_DESC_THRESHOLD_2")
-	ElseIf OptionId == DirtinessThresholdTier3SliderID
-		SetInfoText("$BIS_DESC_THRESHOLD_3")
-	EndIf
-EndFunction
-
-
-Function HandleOnOptionHighlightTrackedActorsPage(Int OptionID)
-	Int Index = TrackedActorsToggleIDs.Find(OptionID)	
-	If Index >= 0
-		If TrackedActorsToggleValuesArray[Index] == False
-			SetInfoText("$BIS_DESC_STOP_TRACKING_ACTOR")
-		EndIf
-	EndIf
-EndFunction
-
-
-; OnOptionKeyMapChange
-Event OnOptionKeyMapChange(Int OptionID, Int KeyCode, String ConflictControl, String ConflictName)
-	Bool Continue = True
-	If ConflictControl != ""			
-		String ConflictMessage = "This key is already mapped to:\n" + ConflictControl
-		If ConflictName != ""
-			 ConflictMessage += "\n(" + ConflictName + ")"
-		EndIf
-		ConflictMessage += "\n\nAre you sure you want to continue?"
-		Continue = ShowMessage(ConflictMessage, True)			
-	EndIf
-	If Continue == True
-		If OptionID == CheckStatusKeyMapID
-			CheckStatusKeyCode.Value = KeyCode
-		ElseIf OptionID == BatheKeyMapID
-			BatheKeyCode.Value = KeyCode
-		ElseIf OptionID == ShowerKeyMapID
-			ShowerKeyCode.Value = KeyCode
-		EndIf
-		BatheQuest.RegisterHotKeys()
-		SetKeymapOptionValue(OptionID, KeyCode)
-	EndIf
-EndEvent
-
-
-; OnOptionSelect
-Event OnOptionSelect(Int OptionID)
-	If CurrentPage == "$BIS_PAGE_SETTINGS"
-		HandleOnOptionSelectSettingsPage(OptionID)
-	ElseIf CurrentPage == "$BIS_PAGE_ANIMATIONS"
-		HandleOnOptionSelectAnimationsPage(OptionID)
-	ElseIf CurrentPage == "$BIS_PAGE_ANIMATIONS_FOLLOWERS"
-		HandleOnOptionSelectAnimationsPageFollowers(OptionID)
-	ElseIf CurrentPage == "$BIS_PAGE_TRACKED_ACTORS"
-		HandleOnOptionSelectTrackedActorsPage(OptionID)
-	EndIf
-EndEvent
-
-
-Function HandleOnOptionSelectAnimationsPage(Int OptionID)
-	If OptionID == GetDressedAfterBathingEnabledToggleID
-		GetDressedAfterBathingEnabled.SetValue((!GetDressedAfterBathingEnabled.GetValue() As Bool) As Int)
-		SetToggleOptionValue(OptionID, GetDressedAfterBathingEnabled.GetValue() As Bool)
-	Else
-		Int UndressArmorSlotIndex = UndressArmorSlotToggleIDs.Find(OptionID)
-		If UndressArmorSlotIndex >= 0
-			UndressArmorSlotArray[UndressArmorSlotIndex] = !UndressArmorSlotArray[UndressArmorSlotIndex]
-			IgnoreArmorSlot(BathingIgnoredArmorSlotsMask, UndressArmorSlotIndex + 30, !UndressArmorSlotArray[UndressArmorSlotIndex])
-			SetToggleOptionValue(OptionID, UndressArmorSlotArray[UndressArmorSlotIndex])
-		EndIf
-	EndIf
-EndFunction
-
-
-Function HandleOnOptionSelectAnimationsPageFollowers(Int OptionID)
-	If OptionID == GetDressedAfterBathingEnabledToggleIDFollowers
-		GetDressedAfterBathingEnabledFollowers.SetValue((!GetDressedAfterBathingEnabledFollowers.GetValue() As Bool) As Int)
-		SetToggleOptionValue(OptionID, GetDressedAfterBathingEnabledFollowers.GetValue() As Bool)
-	Else
-		Int UndressArmorSlotIndex = UndressArmorSlotToggleIDsFollowers.Find(OptionID)
-		If UndressArmorSlotIndex >= 0
-			UndressArmorSlotArrayFollowers[UndressArmorSlotIndex] = !UndressArmorSlotArrayFollowers[UndressArmorSlotIndex]
-			IgnoreArmorSlot(BathingIgnoredArmorSlotsMaskFollowers, UndressArmorSlotIndex + 30, !UndressArmorSlotArrayFollowers[UndressArmorSlotIndex])
-			SetToggleOptionValue(OptionID, UndressArmorSlotArrayFollowers[UndressArmorSlotIndex])
-		EndIf
-	EndIf
-EndFunction
-
-
-Function HandleOnOptionSelectSettingsPage(Int OptionID)
-	If OptionID == BathingInSkyrimEnableToggleID
-		If BathingInSkyrimEnabled.GetValue() As Bool == True && ShowMessage("$BIS_MSG_ASK_DISABLE", True) == True
-			BathingInSkyrimEnabled.SetValue(False As Int)
-			DisableBathingInSkyrim()
-		Else
-			BathingInSkyrimEnabled.SetValue(True As Int)
-			EnableBathingInSkyrim()
-		EndIf
-		SetToggleOptionValue(OptionID, BathingInSkyrimEnabled.GetValue() As Bool)
-	ElseIf OptionID == DialogTopicEnableToggleID
-		DialogTopicEnabled.SetValue((!DialogTopicEnabled.GetValue() As Bool) As Int)
-		SetToggleOptionValue(OptionID, DialogTopicEnabled.GetValue() As Bool)
-	ElseIf OptionID == WaterRestrictionEnableToggleID
-		WaterRestrictionEnabled.SetValue((!WaterRestrictionEnabled.GetValue() As Bool) As Int)
-		SetToggleOptionValue(OptionID, WaterRestrictionEnabled.GetValue() As Bool)
-		BatheQuest.UpdateDangerousWater()
-	ElseIf OptionID == SaveSettingsID
-		SaveSettings()
-	ElseIf OptionID == LoadSettingsID
-		LoadSettings()
-	EndIf	
-EndFunction
-
-
-Function HandleOnOptionSelectTrackedActorsPage(Int OptionID)
-	Int Index = TrackedActorsToggleIDs.Find(OptionID)
-	If Index >= 0
-		If ShowMessage("$BIS_MSG_ASK_STOP_TRACK", True) == True
-			Actor DirtyActor = DirtyActors.GetAt(Index) As Actor
-			RemoveSpells(DirtyActor, GetDirtyOverTimeSpellList)
-			RemoveSpells(DirtyActor, DirtinessSpellList)
-			RemoveSpells(DirtyActor, SoapBonusSpellList)
-			RemoveSpells(DirtyActor, LegacySpellList)
-			DirtyActors.RemoveAddedForm(DirtyActor)
-			ForcePageReset()
-		EndIf
-	EndIf
-EndFunction
-
-
-; OnOptionMenuAccept
-Event OnOptionMenuAccept(Int OptionID, Int MenuItemIndex)
-	If CurrentPage == "$BIS_PAGE_ANIMATIONS"
-		HandleOnOptionMenuAcceptAnimationsPage(OptionID, MenuItemIndex)
-	ElseIf CurrentPage == "$BIS_PAGE_ANIMATIONS_FOLLOWERS"
-		HandleOnOptionMenuAcceptAnimationsPageFollowers(OptionID, MenuItemIndex)
-	EndIf
-EndEvent
-
-
-Function HandleOnOptionMenuAcceptAnimationsPage(Int OptionID, Int MenuItemIndex)
-	If OptionID == BathingAnimationStyleMenuID
-		If MenuItemIndex >= 0 && MenuItemIndex < BathingAnimationStyleArray.Length
-			SetMenuOptionValue(OptionID, BathingAnimationStyleArray[MenuItemIndex])
-			BathingAnimationStyle.SetValue(MenuItemIndex)
-		EndIf
-	ElseIf OptionID == ShoweringAnimationStyleMenuID
-		If MenuItemIndex >= 0 && MenuItemIndex < ShoweringAnimationStyleArray.Length
-			SetMenuOptionValue(OptionID, ShoweringAnimationStyleArray[MenuItemIndex])
-			ShoweringAnimationStyle.SetValue(MenuItemIndex)
-		EndIf
-	ElseIf OptionID == GetSoapyStyleMenuID
-		If MenuItemIndex >= 0 && MenuItemIndex < GetSoapyStyleArray.Length
-			SetMenuOptionValue(OptionID, GetSoapyStyleArray[MenuItemIndex])
-			GetSoapyStyle.SetValue(MenuItemIndex)
-		EndIf
-	EndIf
-EndFunction
-
-
-Function HandleOnOptionMenuAcceptAnimationsPageFollowers(Int OptionID, Int MenuItemIndex)
-	If OptionID == BathingAnimationStyleMenuIDFollowers
-		If MenuItemIndex >= 0 && MenuItemIndex < BathingAnimationStyleArray.Length
-			SetMenuOptionValue(OptionID, BathingAnimationStyleArray[MenuItemIndex])
-			BathingAnimationStyleFollowers.SetValue(MenuItemIndex)
-		EndIf
-	ElseIf OptionID == ShoweringAnimationStyleMenuIDFollowers
-		If MenuItemIndex >= 0 && MenuItemIndex < ShoweringAnimationStyleArray.Length
-			SetMenuOptionValue(OptionID, ShoweringAnimationStyleArray[MenuItemIndex])
-			ShoweringAnimationStyleFollowers.SetValue(MenuItemIndex)
-		EndIf
-	ElseIf OptionID == GetSoapyStyleMenuIDFollowers
-		If MenuItemIndex >= 0 && MenuItemIndex < GetSoapyStyleArray.Length
-			SetMenuOptionValue(OptionID, GetSoapyStyleArray[MenuItemIndex])
-			GetSoapyStyleFollowers.SetValue(MenuItemIndex)
-		EndIf
-	EndIf
-EndFunction
-
-
-; OnOptionMenuOpen
-Event OnOptionMenuOpen(Int OptionID)
-	If CurrentPage == "$BIS_PAGE_ANIMATIONS"
-		HandleOnOptionMenuOpenAnimationsPage(OptionID)
-	ElseIf CurrentPage == "$BIS_PAGE_ANIMATIONS_FOLLOWERS"
-		HandleOnOptionMenuOpenAnimationsPageFollowers(OptionID)
-	EndIf
-EndEvent
-
-
-Function HandleOnOptionMenuOpenAnimationsPage(Int OptionID)
-	If OptionID == BathingAnimationStyleMenuID
-		SetMenuDialogOptions(BathingAnimationStyleArray)
-		SetMenuDialogStartIndex(BathingAnimationStyle.GetValue() As Int)
-		SetMenuDialogDefaultIndex(1)
-	ElseIf OptionID == ShoweringAnimationStyleMenuID
-		SetMenuDialogOptions(ShoweringAnimationStyleArray)
-		SetMenuDialogStartIndex(ShoweringAnimationStyle.GetValue() As Int)
-		SetMenuDialogDefaultIndex(1)
-	ElseIf OptionID == GetSoapyStyleMenuID
-		SetMenuDialogOptions(GetSoapyStyleArray)
-		SetMenuDialogStartIndex(GetSoapyStyle.GetValue() As Int)
-		SetMenuDialogDefaultIndex(1)
-	EndIf
-EndFunction
-
-
-Function HandleOnOptionMenuOpenAnimationsPageFollowers(Int OptionID)
-	If OptionID == BathingAnimationStyleMenuIDFollowers
-		SetMenuDialogOptions(BathingAnimationStyleArray)
-		SetMenuDialogStartIndex(BathingAnimationStyleFollowers.GetValue() As Int)
-		SetMenuDialogDefaultIndex(1)
-	ElseIf OptionID == ShoweringAnimationStyleMenuIDFollowers
-		SetMenuDialogOptions(ShoweringAnimationStyleArray)
-		SetMenuDialogStartIndex(ShoweringAnimationStyleFollowers.GetValue() As Int)
-		SetMenuDialogDefaultIndex(1)
-	ElseIf OptionID == GetSoapyStyleMenuIDFollowers
-		SetMenuDialogOptions(GetSoapyStyleArray)
-		SetMenuDialogStartIndex(GetSoapyStyleFollowers.GetValue() As Int)
-		SetMenuDialogDefaultIndex(1)
-	EndIf
-EndFunction
-
-
-; OnOptionSliderAccept
-Event OnOptionSliderAccept(Int OptionID, Float OptionValue)
-	If CurrentPage == "$BIS_PAGE_SETTINGS"
-		HandleOnOptionSliderAcceptSettingsPage(OptionID, OptionValue)
-	ElseIf CurrentPage == "$BIS_PAGE_ANIMATIONS"
-		HandleOnOptionSliderAcceptAnimationsPage(OptionID, OptionValue)
-	ElseIf CurrentPage == "$BIS_PAGE_ANIMATIONS_FOLLOWERS"
-		HandleOnOptionSliderAcceptAnimationsPageFollowers(OptionID, OptionValue)
-	EndIf	
-EndEvent
-
-
-Function HandleOnOptionSliderAcceptAnimationsPage(Int OptionID, Float OptionValue)
-	Float SliderValue = OptionValue
-	If OptionID == BathingAnimationLoopsTier0SliderID
-		(BathingAnimationLoopCountList.GetAt(0) As GlobalVariable).SetValue(SliderValue)
-	ElseIf OptionID == BathingAnimationLoopsTier1SliderID
-		(BathingAnimationLoopCountList.GetAt(1) As GlobalVariable).SetValue(SliderValue)
-	ElseIf OptionID == BathingAnimationLoopsTier2SliderID
-		(BathingAnimationLoopCountList.GetAt(2) As GlobalVariable).SetValue(SliderValue)
-	ElseIf OptionID == BathingAnimationLoopsTier3SliderID
-		(BathingAnimationLoopCountList.GetAt(3) As GlobalVariable).SetValue(SliderValue)
-	EndIf
-		
-	SetSliderOptionValue(OptionID, SliderValue, "{0}")	
-EndFunction
-
-
-Function HandleOnOptionSliderAcceptAnimationsPageFollowers(Int OptionID, Float OptionValue)
-	Float SliderValue = OptionValue
-
-	If OptionID == BathingAnimationLoopsTier0SliderIDFollowers
-		(BathingAnimationLoopCountListFollowers.GetAt(0) As GlobalVariable).SetValue(SliderValue)
-	ElseIf OptionID == BathingAnimationLoopsTier1SliderIDFollowers
-		(BathingAnimationLoopCountListFollowers.GetAt(1) As GlobalVariable).SetValue(SliderValue)
-	ElseIf OptionID == BathingAnimationLoopsTier2SliderIDFollowers
-		(BathingAnimationLoopCountListFollowers.GetAt(2) As GlobalVariable).SetValue(SliderValue)
-	ElseIf OptionID == BathingAnimationLoopsTier3SliderIDFollowers
-		(BathingAnimationLoopCountListFollowers.GetAt(3) As GlobalVariable).SetValue(SliderValue)
-	EndIf
-	SetSliderOptionValue(OptionID, SliderValue, "{0}")	
-EndFunction
-
-
-Function HandleOnOptionSliderAcceptSettingsPage(Int OptionID, Float OptionValue)
-	Float SliderValue = OptionValue
-	String DisplayFormat = DisplayFormatPercentage
-	If OptionID == UpdateIntervalSliderID
-		DisplayFormat = DisplayFormatDecimal
-		DirtinessUpdateInterval.SetValue(SliderValue)
-	ElseIf OptionID == DirtinessPerHourSettlementSliderID
-		DisplayFormat = DisplayFormatPercentage
-		SliderValue = OptionValue / 100.0
-		DirtinessPerHourSettlement.SetValue(SliderValue)
-	ElseIf OptionID == DirtinessPerHourDungeonSliderID
-		DisplayFormat = DisplayFormatPercentage
-		SliderValue = OptionValue / 100.0
-		DirtinessPerHourDungeon.SetValue(SliderValue)
-		DisplayFormat = DisplayFormatPercentage
-	ElseIf OptionID == DirtinessPerHourWildernessSliderID
-		SliderValue = OptionValue / 100.0	
-		DirtinessPerHourWilderness.SetValue(SliderValue)
-	ElseIf OptionID == DirtinessThresholdTier1SliderID
-		DisplayFormat = DisplayFormatPercentage
-		SliderValue = OptionValue / 100.0
-		; clamp threshold
-		If SliderValue > (DirtinessThresholdList.GetAt(1) As GlobalVariable).GetValue()
-			SliderValue = (DirtinessThresholdList.GetAt(1) As GlobalVariable).GetValue()
-		EndIf
-		(DirtinessThresholdList.GetAt(0) As GlobalVariable).SetValue(SliderValue)
-	ElseIf OptionID == DirtinessThresholdTier2SliderID
-		DisplayFormat = DisplayFormatPercentage
-		SliderValue = OptionValue / 100.0
-		; clamp threshold
-		If SliderValue > (DirtinessThresholdList.GetAt(2) As GlobalVariable).GetValue()
-			SliderValue = (DirtinessThresholdList.GetAt(2) As GlobalVariable).GetValue()
-		ElseIf SliderValue < (DirtinessThresholdList.GetAt(0) As GlobalVariable).GetValue()
-			SliderValue = (DirtinessThresholdList.GetAt(0) As GlobalVariable).GetValue()
-		EndIf
-		(DirtinessThresholdList.GetAt(1) As GlobalVariable).SetValue(SliderValue)
-	ElseIf OptionID == DirtinessThresholdTier3SliderID
-		DisplayFormat = DisplayFormatPercentage
-		SliderValue = OptionValue / 100.0
-		; clamp threshold
-		If SliderValue < (DirtinessThresholdList.GetAt(1) As GlobalVariable).GetValue()
-			SliderValue = (DirtinessThresholdList.GetAt(1) As GlobalVariable).GetValue()
-		EndIf
-		(DirtinessThresholdList.GetAt(2) As GlobalVariable).SetValue(SliderValue)
-	EndIf
-	SetSliderOptionValue(OptionID, OptionValue, DisplayFormat)
-EndFunction
-
-
-; OnOptionSliderOpen
-Event OnOptionSliderOpen(Int OptionID)
-	If CurrentPage == "$BIS_PAGE_SETTINGS"
-		HandleOnOptionSliderOpenSettingsPage(OptionID)
-	ElseIf CurrentPage == "$BIS_PAGE_ANIMATIONS"
-		HandleOnOptionSliderOpenAnimationsPage(OptionID)
-	ElseIf CurrentPage == "$BIS_PAGE_ANIMATIONS_FOLLOWERS"
-		HandleOnOptionSliderOpenAnimationsPageFollowers(OptionID)
-	EndIf		
-EndEvent
-
-
-Function HandleOnOptionSliderOpenAnimationsPage(Int OptionID)
-	; set slider range and increment
-	SetSliderDialogRange(1.0, 10.0)
-	SetSliderDialogInterval(1.0)
-	; get slider values
-	Float SliderValue = 0.0
-	If OptionID == BathingAnimationLoopsTier0SliderID
-		SetSliderDialogDefaultValue(1.0)
-		SliderValue = (BathingAnimationLoopCountList.GetAt(0) As GlobalVariable).GetValue() As Int
-	ElseIf OptionID == BathingAnimationLoopsTier1SliderID
-		SetSliderDialogDefaultValue(1.0)
-		SliderValue = (BathingAnimationLoopCountList.GetAt(1) As GlobalVariable).GetValue() As Int
-	ElseIf OptionID == BathingAnimationLoopsTier2SliderID
-		SetSliderDialogDefaultValue(1.0)
-		SliderValue = (BathingAnimationLoopCountList.GetAt(2) As GlobalVariable).GetValue() As Int
-	ElseIf OptionID == BathingAnimationLoopsTier3SliderID
-		SetSliderDialogDefaultValue(1.0)
-		SliderValue = (BathingAnimationLoopCountList.GetAt(3) As GlobalVariable).GetValue() As Int
-	EndIf
-	; set slider value
-	SetSliderDialogStartValue(SliderValue)
-	SetSliderOptionValue(OptionID, SliderValue, "{0}")
-EndFunction
-
-
-Function HandleOnOptionSliderOpenAnimationsPageFollowers(Int OptionID)
-	; set slider range and increment
-	SetSliderDialogRange(1.0, 10.0)
-	SetSliderDialogInterval(1.0)
-	; get slider values
-	Float SliderValue = 0.0
-	If OptionID == BathingAnimationLoopsTier0SliderIDFollowers
-		SetSliderDialogDefaultValue(1.0)
-		SliderValue = (BathingAnimationLoopCountListFollowers.GetAt(0) As GlobalVariable).GetValue() As Int
-	ElseIf OptionID == BathingAnimationLoopsTier1SliderIDFollowers
-		SetSliderDialogDefaultValue(1.0)
-		SliderValue = (BathingAnimationLoopCountListFollowers.GetAt(1) As GlobalVariable).GetValue() As Int
-	ElseIf OptionID == BathingAnimationLoopsTier2SliderIDFollowers
-		SetSliderDialogDefaultValue(1.0)
-		SliderValue = (BathingAnimationLoopCountListFollowers.GetAt(2) As GlobalVariable).GetValue() As Int
-	ElseIf OptionID == BathingAnimationLoopsTier3SliderIDFollowers
-		SetSliderDialogDefaultValue(1.0)
-		SliderValue = (BathingAnimationLoopCountListFollowers.GetAt(3) As GlobalVariable).GetValue() As Int
-	EndIf
-	; set slider value
-	SetSliderDialogStartValue(SliderValue)
-	SetSliderOptionValue(OptionID, SliderValue, "{0}")
-EndFunction
-
-
-Function HandleOnOptionSliderOpenSettingsPage(Int OptionID)
-	Float SliderValue = 0.0
-	String DisplayFormat = DisplayFormatPercentage
-	; get slider value
-	If OptionID == UpdateIntervalSliderID
-		DisplayFormat = DisplayFormatDecimal
-		SetSliderDialogRange(0.25, 5.0)
-		SetSliderDialogInterval(0.25)
-		SetSliderDialogDefaultValue(1.0)
-		SliderValue = (DirtinessUpdateInterval.GetValue())
-	ElseIf OptionID == DirtinessPerHourSettlementSliderID
-		DisplayFormat = DisplayFormatPercentage
-		SetSliderDialogRange(0.0, 100.0)
-		SetSliderDialogInterval(0.5)
-		SetSliderDialogDefaultValue(1.0)
-		SliderValue = (DirtinessPerHourSettlement.GetValue() * 100.0)
-	ElseIf OptionID == DirtinessPerHourDungeonSliderID
-		DisplayFormat = DisplayFormatPercentage
-		SetSliderDialogRange(0.0, 100.0)
-		SetSliderDialogInterval(0.5)
-		SetSliderDialogDefaultValue(2.5)
-		SliderValue = (DirtinessPerHourDungeon.GetValue() * 100.0)
-	ElseIf OptionID == DirtinessPerHourWildernessSliderID
-		DisplayFormat = DisplayFormatPercentage
-		SetSliderDialogRange(0.0, 100.0)
-		SetSliderDialogInterval(0.5)
-		SetSliderDialogDefaultValue(1.5)
-		SliderValue = (DirtinessPerHourWilderness.GetValue() * 100.0)
-	ElseIf OptionID == DirtinessThresholdTier1SliderID
-		DisplayFormat = DisplayFormatPercentage
-		SetSliderDialogRange(0.0, 100.0)
-		SetSliderDialogInterval(0.5)
-		SetSliderDialogDefaultValue(20.0)
-		SliderValue = ((DirtinessThresholdList.GetAt(0) As GlobalVariable).GetValue() * 100.0)
-	ElseIf OptionID == DirtinessThresholdTier2SliderID
-		DisplayFormat = DisplayFormatPercentage
-		SetSliderDialogRange(0.0, 100.0)
-		SetSliderDialogInterval(0.5)
-		SetSliderDialogDefaultValue(60.0)
-		SliderValue = ((DirtinessThresholdList.GetAt(1) As GlobalVariable).GetValue() * 100.0)
-	ElseIf OptionID == DirtinessThresholdTier3SliderID
-		DisplayFormat = DisplayFormatPercentage
-		SetSliderDialogRange(0.0, 100.0)
-		SetSliderDialogInterval(0.5)
-		SetSliderDialogDefaultValue(98.0)
-		SliderValue = ((DirtinessThresholdList.GetAt(2) As GlobalVariable).GetValue() * 100.0)
-	EndIf
-	; set slider value
-	SetSliderDialogStartValue(SliderValue)
-	SetSliderOptionValue(OptionID, SliderValue, DisplayFormat)
-EndFunction
-
-
-; helper functions
 Function EnableBathingInSkyrim()
 	Player.AddSpell(GetDirtyOverTimeSpellList.GetAt(1) As Spell, False)
 	Player.AddSpell(GetDirtyOverTimeReactivatorCloakSpell, False)
@@ -1258,4 +1155,111 @@ Function IgnoreArmorSlot(GlobalVariable IgnoredArmorSlotsMask, Int ArmorSlot, Bo
 		NewBathingIgnoredArmorSlotsMask = Math.LogicalXor(ArmorSlotMask, CurrentBathingIgnoredArmorSlotsMask)
 	EndIf
 	IgnoredArmorSlotsMask.SetValue(NewBathingIgnoredArmorSlotsMask)
+EndFunction
+
+
+; -------------------------------------------------------------------------------------------------
+; FISS Functions
+; -------------------------------------------------------------------------------------------------
+
+Function SaveSettings()
+	FISSInterface FISS = FISSFactory.GetFISS()
+	If FISS == None
+		ShowMessage("$BIS_ERROR_NO_FISS")
+		Return
+	EndIf
+	If ShowMessage("$BIS_MSG_ASK_SAVE", True) == False
+		Return
+	EndIf
+	FISS.BeginSave("Bathing in Skyrim.xml", "Bathing in Skyrim")
+	FISS.SaveInt("BathingInSkyrimEnabled", BathingInSkyrimEnabled.GetValue() As Int)
+	FISS.SaveInt("DialogTopicEnabled", DialogTopicEnabled.GetValue() As Int)
+	FISS.SaveInt("WaterRestrictionEnabled", WaterRestrictionEnabled.GetValue() As Int)
+	FISS.SaveInt("GetSoapyStyle", GetSoapyStyle.GetValue() As Int)
+	FISS.SaveInt("GetSoapyStyleFollowers", GetSoapyStyleFollowers.GetValue() As Int)
+	FISS.SaveInt("CheckStatusKeyCode", CheckStatusKeyCode.GetValue() As Int)
+	FISS.SaveInt("BatheKeyCode", BatheKeyCode.GetValue() As Int)
+	FISS.SaveInt("ShowerKeyCode", ShowerKeyCode.GetValue() As Int)
+	FISS.SaveInt("BathingAnimationStyle", BathingAnimationStyle.GetValue() As Int)
+	FISS.SaveInt("BathingAnimationStyleFollowers", BathingAnimationStyleFollowers.GetValue() As Int)
+	FISS.SaveInt("ShoweringAnimationStyle", ShoweringAnimationStyle.GetValue() As Int)
+	FISS.SaveInt("ShoweringAnimationStyleFollowers", ShoweringAnimationStyleFollowers.GetValue() As Int)
+	FISS.SaveInt("GetDressedAfterBathingEnabled", GetDressedAfterBathingEnabled.GetValue() As Int)
+	FISS.SaveInt("GetDressedAfterBathingEnabledFollowers", GetDressedAfterBathingEnabledFollowers.GetValue() As Int)
+	FISS.SaveInt("BathingIgnoredArmorSlotsMask", BathingIgnoredArmorSlotsMask.GetValue() As Int)
+	FISS.SaveInt("BathingIgnoredArmorSlotsMaskFollowers", BathingIgnoredArmorSlotsMaskFollowers.GetValue() As Int)
+	FISS.SaveFloat("DirtinessUpdateInterval", DirtinessUpdateInterval.GetValue() As Float)
+	FISS.SaveFloat("DirtinessPercentage", DirtinessPercentage.GetValue() As Float)
+	FISS.SaveFloat("DirtinessPerHourSettlement", DirtinessPerHourSettlement.GetValue() As Float)
+	FISS.SaveFloat("DirtinessPerHourDungeon", DirtinessPerHourDungeon.GetValue() As Float)
+	FISS.SaveFloat("DirtinessPerHourWilderness", DirtinessPerHourWilderness.GetValue() As Float)
+	FISS.SaveFloat("DirtinessThreshold0", (DirtinessThresholdList.GetAt(0) As GlobalVariable).GetValue() As Float)
+	FISS.SaveFloat("DirtinessThreshold1", (DirtinessThresholdList.GetAt(1) As GlobalVariable).GetValue() As Float)
+	FISS.SaveFloat("DirtinessThreshold2", (DirtinessThresholdList.GetAt(2) As GlobalVariable).GetValue() As Float)
+	FISS.SaveInt("BathingAnimationLoopCount0", (BathingAnimationLoopCountList.GetAt(0) As GlobalVariable).GetValue() As Int)
+	FISS.SaveInt("BathingAnimationLoopCount1", (BathingAnimationLoopCountList.GetAt(1) As GlobalVariable).GetValue() As Int)
+	FISS.SaveInt("BathingAnimationLoopCount2", (BathingAnimationLoopCountList.GetAt(2) As GlobalVariable).GetValue() As Int)
+	FISS.SaveInt("BathingAnimationLoopCount3", (BathingAnimationLoopCountList.GetAt(3) As GlobalVariable).GetValue() As Int)
+	FISS.SaveInt("BathingAnimationLoopCountFollowers0", (BathingAnimationLoopCountListFollowers.GetAt(0) As GlobalVariable).GetValue() As Int)
+	FISS.SaveInt("BathingAnimationLoopCountFollowers1", (BathingAnimationLoopCountListFollowers.GetAt(1) As GlobalVariable).GetValue() As Int)
+	FISS.SaveInt("BathingAnimationLoopCountFollowers2", (BathingAnimationLoopCountListFollowers.GetAt(2) As GlobalVariable).GetValue() As Int)
+	FISS.SaveInt("BathingAnimationLoopCountFollowers3", (BathingAnimationLoopCountListFollowers.GetAt(3) As GlobalVariable).GetValue() As Int)
+	String Result = FISS.EndSave()
+	If Result != ""
+		Debug.Trace(Result)
+	EndIf
+	ShowMessage("$BIS_MSG_COMPLETED_SAVE", False)
+	ForcePageReset()
+EndFunction
+
+
+Function LoadSettings()
+	FISSInterface FISS = FISSFactory.GetFISS()
+	If FISS == None
+		ShowMessage("$BIS_ERROR_NO_FISS")
+		Return
+	EndIf
+	If ShowMessage("$BIS_MSG_ASK_LOAD", True) == False
+		Return
+	EndIf
+	FISS.BeginLoad("Bathing in Skyrim.xml")
+	BathingInSkyrimEnabled.SetValue(FISS.LoadInt("BathingInSkyrimEnabled"))
+	DialogTopicEnabled.SetValue(FISS.LoadInt("DialogTopicEnabled"))
+	WaterRestrictionEnabled.SetValue(FISS.LoadInt("WaterRestrictionEnabled"))
+	GetSoapyStyle.SetValue(FISS.LoadInt("GetSoapyStyle"))
+	GetSoapyStyleFollowers.SetValue(FISS.LoadInt("GetSoapyStyleFollowers"))
+	CheckStatusKeyCode.SetValue(FISS.LoadInt("CheckStatusKeyCode"))
+	BatheKeyCode.SetValue(FISS.LoadInt("BatheKeyCode"))
+	ShowerKeyCode.SetValue(FISS.LoadInt("ShowerKeyCode"))
+	BathingAnimationStyle.SetValue(FISS.LoadInt("BathingAnimationStyle"))
+	BathingAnimationStyleFollowers.SetValue(FISS.LoadInt("BathingAnimationStyleFollowers"))
+	ShoweringAnimationStyle.SetValue(FISS.LoadInt("ShoweringAnimationStyle"))
+	ShoweringAnimationStyleFollowers.SetValue(FISS.LoadInt("ShoweringAnimationStyleFollowers"))
+	GetDressedAfterBathingEnabled.SetValue(FISS.LoadInt("GetDressedAfterBathingEnabled"))
+	GetDressedAfterBathingEnabledFollowers.SetValue(FISS.LoadInt("GetDressedAfterBathingEnabledFollowers"))
+	BathingIgnoredArmorSlotsMask.SetValue(FISS.LoadInt("BathingIgnoredArmorSlotsMask"))
+	BathingIgnoredArmorSlotsMaskFollowers.SetValue(FISS.LoadInt("BathingIgnoredArmorSlotsMaskFollowers"))
+	DirtinessUpdateInterval.SetValue(FISS.LoadFloat("DirtinessUpdateInterval"))
+	DirtinessPercentage.SetValue(FISS.LoadFloat("DirtinessPercentage"))
+	DirtinessPerHourSettlement.SetValue(FISS.LoadFloat("DirtinessPerHourSettlement"))
+	DirtinessPerHourDungeon.SetValue(FISS.LoadFloat("DirtinessPerHourDungeon"))
+	DirtinessPerHourWilderness.SetValue(FISS.LoadFloat("DirtinessPerHourWilderness"))
+	(DirtinessThresholdList.GetAt(0) As GlobalVariable).SetValue(FISS.LoadFloat("DirtinessThreshold0"))
+	(DirtinessThresholdList.GetAt(1) As GlobalVariable).SetValue(FISS.LoadFloat("DirtinessThreshold1"))
+	(DirtinessThresholdList.GetAt(2) As GlobalVariable).SetValue(FISS.LoadFloat("DirtinessThreshold2"))
+	(BathingAnimationLoopCountList.GetAt(0) As GlobalVariable).SetValue(FISS.LoadInt("BathingAnimationLoopCount0"))
+	(BathingAnimationLoopCountList.GetAt(1) As GlobalVariable).SetValue(FISS.LoadInt("BathingAnimationLoopCount1"))
+	(BathingAnimationLoopCountList.GetAt(2) As GlobalVariable).SetValue(FISS.LoadInt("BathingAnimationLoopCount2"))
+	(BathingAnimationLoopCountList.GetAt(3) As GlobalVariable).SetValue(FISS.LoadInt("BathingAnimationLoopCount3"))
+	(BathingAnimationLoopCountListFollowers.GetAt(0) As GlobalVariable).SetValue(FISS.LoadInt("BathingAnimationLoopCountFollowers0"))
+	(BathingAnimationLoopCountListFollowers.GetAt(1) As GlobalVariable).SetValue(FISS.LoadInt("BathingAnimationLoopCountFollowers1"))
+	(BathingAnimationLoopCountListFollowers.GetAt(2) As GlobalVariable).SetValue(FISS.LoadInt("BathingAnimationLoopCountFollowers2"))
+	(BathingAnimationLoopCountListFollowers.GetAt(3) As GlobalVariable).SetValue(FISS.LoadInt("BathingAnimationLoopCountFollowers3"))
+	String Result = FISS.EndLoad()
+	If Result != ""
+		Debug.Trace(Result)
+	EndIf
+	BatheQuest.UpdateDangerousWater()
+	ShowMessage("$BIS_MSG_COMPLETED_LOAD", False)
+	ForcePageReset()
 EndFunction

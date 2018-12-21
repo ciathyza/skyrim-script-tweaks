@@ -1,388 +1,510 @@
-;/ Decompiled by Champollion V1.0.1
-Source   : FWSaveLoad.psc
-Modified : 2017-01-13 12:05:02
-Compiled : 2017-01-18 08:35:18
-User     : admin
-Computer : PATRICK
-/;
-scriptName FWSaveLoad extends Quest
+﻿Scriptname FWSaveLoad extends Quest  
 
-;-- Properties --------------------------------------
-fwcontroller property Controller auto
-fwtextcontents property Contents auto
-Float property SkipUpdateAfter = 60.0000 auto
-fwsystem property System auto
-Float property SpermDeleteTime = 50.0000 auto
+FWSystem property System auto
+FWController property Controller auto
+FWTextContents property Contents auto
 
-;-- Variables ---------------------------------------
+float property SpermDeleteTime = 50.0 auto ; Delete sperm after x Days
+float property SkipUpdateAfter = 60.0 auto
 
-;-- Functions ---------------------------------------
 
-function Delete(actor Woman) global
 
-	storageutil.UnsetFloatValue(Woman as form, "FW.LastUpdate")
-	storageutil.UnsetFloatValue(Woman as form, "FW.StateEnterTime")
-	storageutil.UnsetIntValue(Woman as form, "FW.CurrentState")
-	storageutil.UnsetIntValue(Woman as form, "FW.Abortus")
-	storageutil.UnsetFloatValue(Woman as form, "FW.AbortusTime")
-	storageutil.UnsetFloatValue(Woman as form, "FW.UnbornHealth")
-	storageutil.UnsetIntValue(Woman as form, "FW.NumChilds")
-	storageutil.FormListClear(Woman as form, "FW.ChildFather")
-	storageutil.FloatListClear(Woman as form, "FW.SpermTime")
-	storageutil.FormListClear(Woman as form, "FW.SpermName")
-	storageutil.FloatListClear(Woman as form, "FW.SpermAmount")
-	storageutil.UnsetIntValue(Woman as form, "FW.Flags")
-	storageutil.UnsetFloatValue(Woman as form, "FW.PainLevel")
-	storageutil.UnsetFloatValue(Woman as form, "FW.Contraception")
-	storageutil.UnsetFloatValue(Woman as form, "FW.ContraceptionTime")
-	storageutil.UnsetIntValue(Woman as form, "FW.NumBirth")
-	storageutil.UnsetIntValue(Woman as form, "FW.NumBabys")
-	storageutil.UnsetFloatValue(Woman as form, "FW.PauseTime")
-	storageutil.FormListRemove(none, "FW.SavedNPCs", Woman as form, false)
-endFunction
+;--------------------------------------------------------------------------------
+; StorageUtil Variables - Woman
+;--------------------------------------------------------------------------------
+; Actor[]	FW.SavedNPCs
+; float 	FW.LastUpdate (= the time this actor was updated the last Timedabilityscript)
+; float 	FW.StateEnterTime
+; float 	FW.Irregulation
+; int		FW.CurrentState
+; int		FW.Abortus
+; float 	FW.AbortusTime
+; float 	FW.UnbornHealth
+; int		FW.NumChilds (= the number of babys the woman is pregnant with)
+; Actor[]	FW.ChildFather
+; float[]	FW.SpermTime
+; Actor[]	FW.SpermName
+; float[]	FW.SpermAmount
+; int		FW.Flags
+; float 	FW.PainLevel
+; float 	FW.Contraception (= 0.0 to 100.0)
+; float 	FW.ContraceptionTime
+; int 		FW.NumBirth (= the number of birth the woman had)
+; int 		FW.NumBabys (= the number of babys the woman has born)
+; float 	FW.PauseTime
+; float 	FW.LastBornChildTime
+; Actor[] 	FW.BornChildFather (= Father of an already born child)
+; float[]	FW.BornChildTime (= Timestamp of an already born child)
+;
+;--------------------------------------------------------------------------------
+; StorageUtil Variables - Child
+;--------------------------------------------------------------------------------
+; Object	FW.Child.SavedChidren
+; Actor 	FW.Child.Mother
+; Actor 	FW.Child.Father
+; int		FW.Child.Flags
+; string	FW.Child.Name
 
-function ResetNpcData(Bool bPlayer) global
 
-	Int i = storageutil.FormListCount(none, "FW.SavedNPCs")
-	actor p = game.GetPlayer()
-	while i > 0
-		i -= 1
-		actor Woman = storageutil.FormListGet(none, "FW.SavedNPCs", i) as actor
-		if Woman != p || bPlayer == true
-			storageutil.UnsetFloatValue(Woman as form, "FW.StateEnterTime")
-			storageutil.UnsetIntValue(Woman as form, "FW.CurrentState")
-			storageutil.UnsetIntValue(Woman as form, "FW.Abortus")
-			storageutil.UnsetFloatValue(Woman as form, "FW.AbortusTime")
-			storageutil.UnsetFloatValue(Woman as form, "FW.UnbornHealth")
-			storageutil.UnsetIntValue(Woman as form, "FW.NumChilds")
-			storageutil.FormListClear(Woman as form, "FW.ChildFather")
-			storageutil.FloatListClear(Woman as form, "FW.SpermTime")
-			storageutil.FormListClear(Woman as form, "FW.SpermName")
-			storageutil.FloatListClear(Woman as form, "FW.SpermAmount")
-			storageutil.UnsetIntValue(Woman as form, "FW.Flags")
-			storageutil.UnsetFloatValue(Woman as form, "FW.PainLevel")
-			storageutil.UnsetFloatValue(Woman as form, "FW.Contraception")
-			storageutil.UnsetFloatValue(Woman as form, "FW.ContraceptionTime")
-			storageutil.UnsetIntValue(Woman as form, "FW.NumBirth")
-			storageutil.UnsetIntValue(Woman as form, "FW.NumBabys")
-			storageutil.UnsetFloatValue(Woman as form, "FW.PauseTime")
-		endIf
-	endWhile
-	storageutil.FormListClear(none, "FW.SavedNPCs")
-	if bPlayer == false
-		storageutil.FormListAdd(none, "FW.SavedNPCs", p as form, true)
-	endIf
-endFunction
 
-function deleteChildren() global
 
-	Int c = storageutil.FormListCount(none, "FW.Babys")
-	while c > 0
-		c -= 1
-		fwchildactor baby1 = storageutil.FormListGet(none, "FW.Babys", c) as fwchildactor
-		fwchilditem baby2 = storageutil.FormListGet(none, "FW.Babys", c) as fwchilditem
-		actor baby3 = storageutil.FormListGet(none, "FW.Babys", c) as actor
-		if baby1 != none
-			baby1.Delete()
-		elseIf baby2 != none
-			baby2.Delete()
-		elseIf baby3 != none
-			baby3.Delete()
-		endIf
-	endWhile
-endFunction
+;--------------------------------------------------------------------------------
+; CurrentState
+;--------------------------------------------------------------------------------
+;   0	Follicular
+;   1	Ovulation
+;   2	Luteal
+;   3	Menstruation
+;   4	Trimester 1
+;   5	Trimester 2
+;   6	Trimester 3
+;   7	LaborPains
+;   8	Replanish
+;--------------------------------------------------------------------------------
+; Abortus
+;   0	None
+;   1	Abortus_imminens // drohender abortus
+;   2	Abortus_incipiens // beginnender Abortus
+;   3	Abortus_incompletus // unvollständiger Abort
+;   4	Abortus_completus // vollständiger Abortus
+;   5	Missed_Abortion // verhaltener Abort
+;   6	Miscarriage // Totgeburt
+;--------------------------------------------------------------------------------
+; Flags
+;--------------------------------------------------------------------------------
+;   1	Can become Pregnant this cycle
+;   2	Can become PMS this cycle
 
-function Upgrade(Int oldVersion, Int newVersion)
 
-	System = game.GetFormFromFile(3427, "BeeingFemale.esm") as fwsystem
-	Contents = game.GetFormFromFile(15921, "BeeingFemale.esm") as fwtextcontents
-	Controller = game.GetFormFromFile(6186, "BeeingFemale.esm") as fwcontroller
-endFunction
-
-Bool function hasWillBecomePregnant(actor Woman)
-
-	Int xstate = storageutil.GetIntValue(Woman as form, "FW.CurrentState", 0)
-	Float GT = utility.GetCurrentGameTime()
-	if xstate >= 4
-		return true
-	endIf
-	Int c = storageutil.FloatListCount(Woman as form, "FW.SpermTime")
-	while c > 0
-		c -= 1
-		if storageutil.FloatListGet(Woman as form, "FW.SpermTime", c) + SpermDeleteTime < GT
-			storageutil.FloatListRemoveAt(Woman as form, "FW.SpermTime", c)
-			storageutil.FormListRemoveAt(Woman as form, "FW.SpermName", c)
-			storageutil.FloatListRemoveAt(Woman as form, "FW.SpermAmount", c)
-		endIf
-	endWhile
-endFunction
-
+; This Function will update the stats of the given woman
 function Update(actor Woman)
-
-	Float startTime = utility.GetCurrentRealTime()
-	if System.GetType() != 77
-		return 
-	endIf
+	float startTime = Utility.GetCurrentRealTime()
+	if System.GetType()!=77
+		return
+	endif
 	if System.ModEnabled.GetType() != 9
-		return 
-	endIf
+		return
+	endif
 	if System.ModEnabled.GetValueInt() != 1
-		return 
-	endIf
-	if storageutil.FormListFind(none, "FW.SavedNPCs", Woman as form) < 0
-		Controller.CreateFemaleActor(Woman, false)
+		return
+	endif
+	if StorageUtil.FormListFind(none,"FW.SavedNPCs",Woman)<0
+		Controller.CreateFemaleActor(Woman)
 	else
-		Float lu = storageutil.GetFloatValue(Woman as form, "FW.LastUpdate", 0.000000)
-		if utility.GetCurrentGameTime() - lu > SkipUpdateAfter
-			Controller.CreateFemaleActor(Woman, true)
-			return 
+		float lu=StorageUtil.GetFloatValue(Woman,"FW.LastUpdate",0.0)
+		if Utility.GetCurrentGameTime() - lu>SkipUpdateAfter
+			; if the last update is above 60 (self.SkipUpdateAfter) Days ago - abort the update - no one will remember - sry, saving performance
+			Controller.CreateFemaleActor(Woman,true)
+			return
+		endif
+		if lu+0.05 > Utility.GetCurrentGameTime()
+			; Last update was just 1.2 Gamehours ago - there is no need to update again
+			return
 		endIf
-		if lu + 0.0500000 > utility.GetCurrentGameTime()
-			return 
-		endIf
-		self.UpdatePerDay(Woman)
-	endIf
-	System.Message("FWSaveLoad::Update(" + Woman.GetLeveledActorBase().GetName() + ") " + (utility.GetCurrentRealTime() - startTime) as String + " sec", System.MSG_Debug, System.MSG_Trace)
+		UpdatePerDay(Woman)
+	endif
+	System.Message("FWSaveLoad::Update("+Woman.GetLeveledActorBase().GetName()+") " + (Utility.GetCurrentRealTime() - startTime) + " sec", System.MSG_Debug, System.MSG_Trace)
 endFunction
 
 function UpdatePerDay(actor Woman)
-
-	Float stateEnterTime = storageutil.GetFloatValue(Woman as form, "FW.StateEnterTime", 0.000000)
-	Int CurrentState = storageutil.GetIntValue(Woman as form, "FW.CurrentState", 0)
-	Float UnbornHealth = storageutil.GetFloatValue(Woman as form, "FW.UnbornHealth", 100.000)
-	Float contraceptionTime = storageutil.GetFloatValue(Woman as form, "FW.ContraceptionTime", 0.000000)
-	Float contraception = storageutil.GetFloatValue(Woman as form, "FW.Contraception", 0.000000)
-	Bool bIsPregnant = CurrentState >= 4
-	Float GT = utility.GetCurrentGameTime()
-	Float cur = storageutil.GetFloatValue(Woman as form, "FW.LastUpdate", 0.000000)
-	Float contraceptionDur = System.GetPillDuration(Woman)
-	Bool bIsPlayer = Woman == game.GetPlayer()
-	Int flag = storageutil.GetIntValue(Woman as form, "FW.Flags", 0)
-	Bool bMayPregnant = math.LogicalAnd(flag, 1) == 1
-	Bool bMayPMS = math.LogicalAnd(flag, 2) == 2
-	Bool bHasContraceptionItems = self._hasContraceptionItems(Woman)
-	Int i = 0
-	Float[] fDur = new Float[9]
-	while i < 9
+	float stateEnterTime = StorageUtil.GetFloatValue(Woman,"FW.StateEnterTime",0) ; 
+	int CurrentState = StorageUtil.GetIntValue(Woman,"FW.CurrentState",0)
+	float UnbornHealth = StorageUtil.GetFloatValue(Woman,"FW.UnbornHealth",100.0)
+	float contraceptionTime = StorageUtil.GetFloatValue(Woman,"FW.ContraceptionTime",0.0)
+	float contraception = StorageUtil.GetFloatValue(Woman,"FW.Contraception",0.0)
+	bool bIsPregnant = CurrentState>=4
+	float GT = Utility.GetCurrentGameTime() ; stores the time to update
+	float cur = StorageUtil.GetFloatValue(Woman,"FW.LastUpdate",0.0) ; Store the current calculated time
+	float CurrentStatePercent ; stores the calculated state percentage 0.00 to 1.00
+	float contraceptionDur = System.GetPillDuration(Woman)
+	bool bIsPlayer = Woman == Game.GetPlayer()
+	int flag = StorageUtil.GetIntValue(Woman,"FW.Flags",0)
+	bool bMayPregnant= (Math.LogicalAnd(flag,1)==1)
+	bool bMayPMS=(Math.LogicalAnd(flag,2)==2)
+	bool bHasContraceptionItems = _hasContraceptionItems(Woman)
+	
+	int i = 0
+	float[] fDur = New float[9]
+	While i < 9
 		fDur[i] = System.getStateDuration(i, Woman)
 		i += 1
 	endWhile
+	
 	while cur < GT
-		while cur - stateEnterTime >= fDur[CurrentState]
-			stateEnterTime += fDur[CurrentState]
-			CurrentState += 1
-			if bIsPregnant && CurrentState > 8 || bIsPregnant == false && CurrentState > 3
-				bIsPregnant = false
+		
+		; Set new State
+		while cur - stateEnterTime>=fDur[CurrentState]
+			stateEnterTime+=fDur[CurrentState]
+			CurrentState+=1
+			if (bIsPregnant && CurrentState>8) || (bIsPregnant==false && CurrentState>3)
+				bIsPregnant=false
 				CurrentState = 0
 				flag = Controller.setAutoFlag(Woman)
-				bMayPregnant = math.LogicalAnd(flag, 1) == 1
-				bMayPMS = math.LogicalAnd(flag, 2) == 2
-			endIf
-		endWhile
-		if bIsPregnant && CurrentState > 7 && Woman.Is3DLoaded() == true
+				bMayPregnant= (Math.LogicalAnd(flag,1)==1)
+				bMayPMS=(Math.LogicalAnd(flag,2)==2)
+			endif
+		endwhile
+		
+		if bIsPregnant && CurrentState>7 && Woman.Is3DLoaded()==true
 			System.InstantBornChilds(Woman)
 		endIf
+		
+		; Non-Pregnant Functions
 		if bIsPregnant == false
-			Float CurrentStatePercent = (cur - stateEnterTime) / fDur[CurrentState] * 100.000
-			if bMayPregnant && CurrentState == 1 && CurrentStatePercent > 50.0000 || CurrentState == 2 && CurrentStatePercent < 20.0000
-				Float tmpcontraception = fwutility.RangedFloat(contraception - (cur - contraceptionTime - contraceptionDur) * 24.0000, 0.000000, System.MaxContraception)
-				if System.Controller.ActiveSpermImpregnationNoContraceptionTimed(Woman, cur, tmpcontraception)
-					bIsPregnant = true
-					CurrentState = 4
-					stateEnterTime = cur
-					if Woman.IsInFaction(System.FollowerFaction)
-						System.Message(fwutility.StringReplace(System.Content.NPCIsPregnant, "{0}", Woman.GetLeveledActorBase().GetName()), System.MSG_Immersive, 0)
-					elseIf Woman != game.GetPlayer()
-						System.Message(fwutility.StringReplace(System.Content.NPCIsPregnant, "{0}", Woman.GetLeveledActorBase().GetName()), System.MSG_High, 0)
-					endIf
-				endIf
-			endIf
-			if bIsPlayer == false && bIsPregnant == false && bHasContraceptionItems
-				if contraceptionTime + System.GetPillDuration(Woman) * 0.850000 < cur
-					Int pill_i = System.Pill_Items.GetSize()
-					while pill_i > 0
-						pill_i -= 1
-						if Woman.GetItemCount(System.Pill_Items.GetAt(pill_i)) > 0 && System.Pill_Items.GetAt(pill_i) as potion != none
-							potion pill = System.Pill_Items.GetAt(pill_i) as potion
-							Int fx_count = pill.GetNumEffects()
-							while fx_count > 0
-								fx_count -= 1
+			CurrentStatePercent = (cur - stateEnterTime) / fDur[CurrentState] * 100
+			
+			; Check for pregnancy
+			if bMayPregnant && (CurrentState==1 && CurrentStatePercent>50) || (CurrentState==2 && CurrentStatePercent<20)
+				float tmpcontraception = FWUtility.RangedFloat(contraception - ((cur - contraceptionTime - contraceptionDur) * 24),0.0,System.MaxContraception)
+				if System.Controller.ActiveSpermImpregnationNoContraceptionTimed(Woman,cur,tmpcontraception)
+					bIsPregnant=true
+					CurrentState=4
+					stateEnterTime=cur
+					
+					if woman.IsInFaction(System.FollowerFaction)
+						System.Message( FWUtility.StringReplace( System.Content.NPCIsPregnant , "{0}",Woman.GetLeveledActorBase().GetName()), System.MSG_Immersive)
+					elseif woman!=Game.GetPlayer()
+						System.Message( FWUtility.StringReplace( System.Content.NPCIsPregnant , "{0}",Woman.GetLeveledActorBase().GetName()), System.MSG_High)
+					endif
+				endif
+			endif
+			
+			; Check Birth control pills
+			if bIsPlayer == false && bIsPregnant==false && bHasContraceptionItems
+				;Debug.Trace(Woman.GetLeveledActorBase().GetName()+" Ask for Pill")
+				; Check if it's time for the next pill and the woman is not pregnant
+				if contraceptionTime + (System.GetPillDuration(Woman) * 0.85) < cur
+					;Debug.Trace(Woman.GetLeveledActorBase().GetName()+" request pill")
+					int pill_i = System.Pill_Items.GetSize()
+					while pill_i>0
+						pill_i-=1
+						if Woman.GetItemCount(System.Pill_Items.GetAt(pill_i))>0 && (System.Pill_Items.GetAt(pill_i) as Potion)!=none
+							;Debug.Trace(Woman.GetLeveledActorBase().GetName()+" got pill item: "+System.Pill_Items.GetAt(pill_i))
+							potion pill = (System.Pill_Items.GetAt(pill_i) as Potion)
+							int fx_count=pill.GetNumEffects()
+							while fx_count>0
+								fx_count-=1
 								if pill.GetNthEffectMagicEffect(fx_count) == System.Pill_Effect
-									Float mag = pill.GetNthEffectMagnitude(fx_count)
-									debug.Trace(Woman.GetLeveledActorBase().GetName() + " added contraception: " + mag as String + "%", 0)
-									contraception = fwutility.MinFloat(System.MaxContraception, mag + contraception)
-									contraceptionTime = cur
-									Woman.RemoveItem(pill as form, 1, true, none)
-									fx_count = 0
-									pill_i = 0
-									bHasContraceptionItems = self._hasContraceptionItems(Woman)
+									float mag=pill.GetNthEffectMagnitude(fx_count)
+									Debug.Trace(Woman.GetLeveledActorBase().GetName()+" added contraception: "+mag+"%")
+									contraception = FWUtility.MinFloat(System.MaxContraception,mag+contraception)
+									contraceptionTime=cur
+									Woman.RemoveItem(pill, 1, true)
+									fx_count=0 ; Exit while
+									pill_i=0 ; Exit parent while
+									bHasContraceptionItems = _hasContraceptionItems(Woman)
 								endIf
 							endWhile
 						endIf
 					endWhile
 				endIf
 			endIf
+			
 		endIf
-		cur += 1.00000
+		
+		cur+=1
+		
 	endWhile
-	Controller.ChangeStateTimed(Woman, stateEnterTime, CurrentState)
-	storageutil.SetFloatValue(Woman as form, "FW.UnbornHealth", UnbornHealth)
-	storageutil.SetFloatValue(Woman as form, "FW.ContraceptionTime", contraceptionTime)
-	storageutil.SetFloatValue(Woman as form, "FW.Contraception", contraception)
-	storageutil.SetFloatValue(Woman as form, "FW.LastUpdate", GT)
+	
+	; Save state
+	Controller.ChangeStateTimed(Woman,stateEnterTime,CurrentState)
+	StorageUtil.SetFloatValue(Woman,"FW.UnbornHealth",UnbornHealth)
+	StorageUtil.SetFloatValue(Woman,"FW.ContraceptionTime",contraceptionTime)
+	StorageUtil.SetFloatValue(Woman,"FW.Contraception",contraception)
+	StorageUtil.SetFloatValue(Woman,"FW.LastUpdate",GT)
+	
 	Controller.UpdateParentFaction(Woman)
-	Int c = storageutil.FloatListCount(Woman as form, "FW.SpermTime")
-	while c > 0
-		c -= 1
-		if storageutil.FloatListGet(Woman as form, "FW.SpermTime", c) + SpermDeleteTime < GT
-			storageutil.FloatListRemoveAt(Woman as form, "FW.SpermTime", c)
-			storageutil.FormListRemoveAt(Woman as form, "FW.SpermName", c)
-			storageutil.FloatListRemoveAt(Woman as form, "FW.SpermAmount", c)
+	
+	; Delete old sperm
+	int c = StorageUtil.FloatListCount(Woman, "FW.SpermTime")
+	while c>0
+		c-=1
+		if StorageUtil.FloatListGet(Woman, "FW.SpermTime", c) + SpermDeleteTime < GT
+			StorageUtil.FloatListRemoveAt(Woman, "FW.SpermTime", c)
+			StorageUtil.FormListRemoveAt(Woman, "FW.SpermName", c)
+			StorageUtil.FloatListRemoveAt(Woman, "FW.SpermAmount", c)
 		endIf
 	endWhile
+	
 endFunction
 
-function __Update_Old(actor Woman)
-
-	if storageutil.FormListFind(none, "FW.SavedNPCs", Woman as form) < 0
-		Controller.CreateFemaleActor(Woman, false)
-	else
-		if storageutil.GetFloatValue(Woman as form, "FW.LastUpdate", 0.000000) + 0.100000 > utility.GetCurrentGameTime()
-			return 
-		endIf
-		storageutil.SetFloatValue(Woman as form, "FW.LastUpdate", utility.GetCurrentGameTime())
-		Bool bUpdate = true
-		Float LastStateEnterTime = storageutil.GetFloatValue(Woman as form, "FW.StateEnterTime", 0.000000)
-		Int CurrentState = storageutil.GetIntValue(Woman as form, "FW.CurrentState", 0)
-		Float UnbornHealth = storageutil.GetFloatValue(Woman as form, "FW.UnbornHealth", 100.000)
-		Int NextState = CurrentState + 1
-		Bool bIsPregnant = CurrentState > 3
-		Bool bIsPlayer = Woman == game.GetPlayer()
-		Float currentTime = utility.GetCurrentGameTime()
-		Float StateTime = currentTime - LastStateEnterTime
-		Bool hasRelevantSperm = true
-		Float[] fMenstruationDuration = new Float[4]
-		Float[] fPregnancyDuration = new Float[5]
-		Float fMaxMenstruationDays = 0.000000
-		Int i = 0
-		while i < 4
-			fMenstruationDuration[i] = System.getStateDuration(i, Woman)
-			fPregnancyDuration[i] = System.getStateDuration(i + 4, Woman)
-			fMaxMenstruationDays += fMenstruationDuration[i]
-			i += 1
-		endWhile
-		fPregnancyDuration[4] = System.getStateDuration(8, Woman)
-		Float impregnationTimeStart = fMenstruationDuration[0] + fMenstruationDuration[1] / 0.500000
-		Float impregnationTimeEnd = fMenstruationDuration[0] + fMenstruationDuration[1] + fMenstruationDuration[2] / 0.500000
-		Float CycleEnterTime = 0.000000
-		Float stateEnterTime = 0.000000
-		Int StateAdded = 0
-		while bUpdate
-			if CurrentState > 8
-				CurrentState = 0
-				bIsPregnant = false
-			endIf
-			if bIsPregnant
-				if StateTime > fPregnancyDuration[CurrentState - 4]
-					StateTime -= fPregnancyDuration[CurrentState - 4]
-					CurrentState += 1
-					StateAdded += 1
-				else
-					bUpdate = false
-				endIf
-			elseIf StateTime > fMenstruationDuration[CurrentState]
-				StateTime -= fMenstruationDuration[CurrentState]
-				CurrentState += 1
-				StateAdded += 1
-				if CurrentState >= 4
-					CurrentState = 0
-				endIf
-			else
-				bUpdate = false
-			endIf
-			stateEnterTime = currentTime - StateTime
-			if bIsPlayer == false
-				debug.Trace(Woman.GetLeveledActorBase().GetName() + " Ask for Pill", 0)
-				if storageutil.GetFloatValue(Woman as form, "FW.ContraceptionTime", 0.000000) + System.GetPillDuration(Woman) - 0.300000 < stateEnterTime && bIsPregnant == false
-					debug.Trace(Woman.GetLeveledActorBase().GetName() + " request pill", 0)
-					Int pill_i = System.Pill_Items.GetSize()
-					while pill_i > 0
-						pill_i -= 1
-						if Woman.GetItemCount(System.Pill_Items.GetAt(pill_i)) > 0 && System.Pill_Items.GetAt(pill_i) as potion != none
-							debug.Trace(Woman.GetLeveledActorBase().GetName() + " got pill item: " + System.Pill_Items.GetAt(pill_i) as String, 0)
-							potion pill = System.Pill_Items.GetAt(pill_i) as potion
-							Int fx_count = pill.GetNumEffects()
-							while fx_count > 0
-								fx_count -= 1
-								if pill.GetNthEffectMagicEffect(fx_count) == System.Pill_Effect
-									Float val = storageutil.GetFloatValue(Woman as form, "FW.Contraception", 0.000000)
-									Float mag = pill.GetNthEffectMagnitude(fx_count)
-									val += mag
-									debug.Trace(Woman.GetLeveledActorBase().GetName() + " added contraception: " + mag as String, 0)
-									storageutil.SetFloatValue(Woman as form, "FW.Contraception", fwutility.MinFloat(100.000, val))
-									storageutil.SetFloatValue(Woman as form, "FW.ContraceptionTime", stateEnterTime)
-									Woman.RemoveItem(pill as form, 1, true, none)
-									fx_count = 0
-									pill_i = 0
-								endIf
-							endWhile
-						endIf
-					endWhile
-				endIf
-			endIf
-			if CurrentState == 2
-				if System.Controller.ActiveSpermImpregnationTimed(Woman, stateEnterTime, false) == true
-					bIsPregnant = true
-					CurrentState = 4
-				endIf
-			elseIf CurrentState == 7
-				CurrentState = 8
-				System.InstantBornChilds(Woman)
-			endIf
-			Int numChilds = storageutil.GetIntValue(Woman as form, "FW.NumChilds", 0)
-			if CurrentState >= 4
-				if numChilds > 0
-					bIsPregnant = true
-				else
-					bIsPregnant = false
-				endIf
-			endIf
-			Int c = storageutil.FloatListCount(Woman as form, "FW.SpermTime")
-			while c > 0
-				c -= 1
-				if storageutil.FloatListGet(Woman as form, "FW.SpermTime", c) + SpermDeleteTime < stateEnterTime || storageutil.FloatListGet(Woman as form, "FW.SpermAmount", c) < 0.100000
-					storageutil.FloatListRemoveAt(Woman as form, "FW.SpermTime", c)
-					storageutil.FormListRemoveAt(Woman as form, "FW.SpermName", c)
-					storageutil.FloatListRemoveAt(Woman as form, "FW.SpermAmount", c)
-				endIf
-			endWhile
-		endWhile
-		String[] Cont = new String[3]
-		Cont[0] = Woman.GetLeveledActorBase().GetName()
-		Cont[1] = StateAdded as String
-		Cont[2] = fwutility.getTimeString(utility.GetCurrentGameTime() - storageutil.GetFloatValue(Woman as form, "FW.StateEnterTime", 0.000000), true, "")
-		System.Message(fwutility.ArrayReplace(Contents.StatesAddedForNPC, Cont), System.MSG_All, 0)
-		storageutil.SetFloatValue(Woman as form, "FW.StateEnterTime", stateEnterTime)
-		storageutil.SetintValue(Woman as form, "FW.CurrentState", CurrentState)
-		if bIsPregnant == false
-			storageutil.SetintValue(Woman as form, "FW.NumChilds", 0)
-			storageutil.SetFloatValue(Woman as form, "FW.UnbornHealth", 0.000000)
-		endIf
-	endIf
-endFunction
-
-Bool function _hasContraceptionItems(actor Woman)
-
-	Int pill_i = System.Pill_Items.GetSize()
-	while pill_i > 0
-		pill_i -= 1
-		if Woman.GetItemCount(System.Pill_Items.GetAt(pill_i)) > 0 && System.Pill_Items.GetAt(pill_i) as potion != none
+; Returns if the woman has some contraception items in her inventory
+bool function _hasContraceptionItems(actor Woman)
+	int pill_i = System.Pill_Items.GetSize()
+	while pill_i>0
+		pill_i-=1
+		if Woman.GetItemCount(System.Pill_Items.GetAt(pill_i))>0 && (System.Pill_Items.GetAt(pill_i) as Potion)!=none
 			return true
 		endIf
 	endWhile
 	return false
 endFunction
 
-; Skipped compiler generated GetState
+bool function hasWillBecomePregnant(actor Woman)
+	int xstate = StorageUtil.GetIntValue(Woman,"FW.CurrentState",0)
+	float GT = Utility.GetCurrentGameTime() ; stores the time to update
+	If xstate>=4
+		return true
+	endIf
+	int c = StorageUtil.FloatListCount(Woman, "FW.SpermTime")
+	while c>0
+		c-=1
+		if StorageUtil.FloatListGet(Woman, "FW.SpermTime", c) + SpermDeleteTime < GT
+			StorageUtil.FloatListRemoveAt(Woman, "FW.SpermTime", c)
+			StorageUtil.FormListRemoveAt(Woman, "FW.SpermName", c)
+			StorageUtil.FloatListRemoveAt(Woman, "FW.SpermAmount", c)
+		endIf
+	endWhile
+endFunction
 
-; Skipped compiler generated GotoState
+
+function __Update_Old(actor Woman)
+	if StorageUtil.FormListFind(none,"FW.SavedNPCs",Woman)<0
+		Controller.CreateFemaleActor(Woman)
+	else
+		; Check if the actor was already updated a few gamehours ago
+		if StorageUtil.GetFloatValue(Woman,"FW.LastUpdate",0.0)+0.1 > Utility.GetCurrentGameTime()
+			return
+		endIf
+		StorageUtil.SetFloatValue(Woman,"FW.LastUpdate",Utility.GetCurrentGameTime())
+		
+		bool bUpdate = true
+		float LastStateEnterTime = StorageUtil.GetFloatValue(Woman,"FW.StateEnterTime",0)
+		int CurrentState = StorageUtil.GetIntValue(Woman,"FW.CurrentState",0)
+		float UnbornHealth = StorageUtil.GetFloatValue(Woman,"FW.UnbornHealth",100.0)
+		int NextState=CurrentState+1
+		bool bIsPregnant = CurrentState>3
+		bool bIsPlayer = Woman == Game.GetPlayer()
+		
+		float currentTime = Utility.GetCurrentGameTime()
+		float StateTime = currentTime - LastStateEnterTime
+		bool hasRelevantSperm = True
+		float[] fMenstruationDuration = New float[4]
+		float[] fPregnancyDuration = New float[5]
+		float fMaxMenstruationDays=0.0
+		int i = 0
+		While i < 4
+			fMenstruationDuration[i] = System.getStateDuration(i, Woman)
+			fPregnancyDuration[i] = System.getStateDuration(i+4, Woman)
+			fMaxMenstruationDays+=fMenstruationDuration[i]
+			i += 1
+		EndWhile
+		fPregnancyDuration[4] = System.getStateDuration(8, Woman)
+		
+		
+		float impregnationTimeStart = fMenstruationDuration[0] + (fMenstruationDuration[1] / 0.5) ; Time from beginning of the Cycle (Follicular) to 50% of ovulation
+		float impregnationTimeEnd = fMenstruationDuration[0] + fMenstruationDuration[1] + (fMenstruationDuration[2] / 0.5) ; Time from beginning of the Cycle (Follicular) to 50% of Luteal
+		
+		float CycleEnterTime=0
+		float StateEnterTime=0.0
+		int StateAdded=0
+		while bUpdate
+			
+			if CurrentState>8
+				CurrentState=0
+				bIsPregnant=false
+			endIf
+			
+			if bIsPregnant
+				If StateTime > fPregnancyDuration[CurrentState - 4]
+					StateTime -= fPregnancyDuration[CurrentState - 4]
+					CurrentState += 1
+					StateAdded+=1
+				Else
+					bUpdate = False
+				EndIf
+			else
+				
+				;If hasRelevantSperm
+				;	hasRelevantSperm = Controller.HasRelevantSpermTimed(Woman,currentTime - StateTime)
+				;EndIf
+				
+				; If no relevant sperm (which could possibly impregnate the NPC) is present at the time,
+				; skip forward for each menstrual cycle the NPC has already completed while not loaded
+				;If (! hasRelevantSperm) && (fMaxMenstruationDays > 0)
+				;	While StateTime > fMaxMenstruationDays
+				;		StateTime -= fMaxMenstruationDays
+				;	EndWhile
+				;EndIf
+			
+				If StateTime > fMenstruationDuration[CurrentState]
+					StateTime -= fMenstruationDuration[CurrentState]
+					CurrentState += 1
+					StateAdded+=1
+					if CurrentState>=4
+						CurrentState=0
+					endIf
+				Else
+					bUpdate = False
+				EndIf
+				
+			endIf
+			
+			StateEnterTime = currentTime - StateTime
+			
+			; Check Birth control pills
+			if bIsPlayer == false
+				Debug.Trace(Woman.GetLeveledActorBase().GetName()+" Ask for Pill")
+				; Check if it's time for the next pill and the woman is not pregnant
+				if StorageUtil.GetFloatValue(Woman,"FW.ContraceptionTime") + System.GetPillDuration(Woman) - 0.3 < StateEnterTime && bIsPregnant==false
+					Debug.Trace(Woman.GetLeveledActorBase().GetName()+" request pill")
+					int pill_i = System.Pill_Items.GetSize()
+					while pill_i>0
+						pill_i-=1
+						if Woman.GetItemCount(System.Pill_Items.GetAt(pill_i))>0 && (System.Pill_Items.GetAt(pill_i) as Potion)!=none
+							Debug.Trace(Woman.GetLeveledActorBase().GetName()+" got pill item: "+System.Pill_Items.GetAt(pill_i))
+							potion pill = (System.Pill_Items.GetAt(pill_i) as Potion)
+							int fx_count=pill.GetNumEffects()
+							while fx_count>0
+								fx_count-=1
+								if pill.GetNthEffectMagicEffect(fx_count) == System.Pill_Effect
+									float val = StorageUtil.GetFloatValue(Woman,"FW.Contraception",0.0)
+									float mag=pill.GetNthEffectMagnitude(fx_count)
+									val += mag
+									Debug.Trace(Woman.GetLeveledActorBase().GetName()+" added contraception: "+mag)
+									StorageUtil.SetFloatValue(Woman,"FW.Contraception",FWUtility.MinFloat(100,val))
+									StorageUtil.SetFloatValue(Woman,"FW.ContraceptionTime",StateEnterTime)
+									Woman.RemoveItem(pill, 1, true)
+									fx_count=0 ; Exit while
+									pill_i=0 ; Exit parent while
+								endIf
+							endWhile
+						endIf
+					endWhile
+				endIf
+			endIf
+			
+			if CurrentState == 2
+				;if System.CheckBecomePregnant(Woman, StateEnterTime)==true
+				if System.Controller.ActiveSpermImpregnationTimed(Woman, StateEnterTime)==true
+					bIsPregnant=true
+					CurrentState=4
+				endif
+			elseif CurrentState == 7
+				CurrentState=8 ; Skip Labor Pains and born the childs
+				System.InstantBornChilds(Woman)
+			endif
+			
+			int numChilds = StorageUtil.GetIntValue(Woman,"FW.NumChilds",0)
+			if CurrentState >= 4
+				if numChilds >0
+					bIsPregnant=true
+				else
+					bIsPregnant=false
+				endIf
+			endif
+			
+			; At least - Delete to old sperm (after 20 Days)
+			int c = StorageUtil.FloatListCount(Woman, "FW.SpermTime")
+			while c>0
+				c-=1
+				if StorageUtil.FloatListGet(Woman, "FW.SpermTime", c) + SpermDeleteTime < StateEnterTime || StorageUtil.FloatListGet(Woman, "FW.SpermAmount", c)<0.1
+					StorageUtil.FloatListRemoveAt(Woman, "FW.SpermTime", c)
+					StorageUtil.FormListRemoveAt(Woman, "FW.SpermName", c)
+					StorageUtil.FloatListRemoveAt(Woman, "FW.SpermAmount", c)
+				endIf
+			endWhile
+		endWhile
+		
+		;System.Message("States added for "+Woman.GetLeveledActorBase().GetName()+": "+StateAdded+" ("+FWUtility.getTimeString(Utility.GetCurrentGameTime() - StorageUtil.GetFloatValue(Woman,"FW.StateEnterTime",0))+")" , System.MSG_All )
+		string[] Cont = new string[3]
+		Cont[0]=Woman.GetLeveledActorBase().GetName()
+		Cont[1]=StateAdded
+		Cont[2]=FWUtility.getTimeString(Utility.GetCurrentGameTime() - StorageUtil.GetFloatValue(Woman,"FW.StateEnterTime",0))
+		System.Message( FWUtility.ArrayReplace(Contents.StatesAddedForNPC,Cont) , System.MSG_All )
+		
+		; Save the new Data to Storage
+		StorageUtil.SetFloatValue(Woman,"FW.StateEnterTime",StateEnterTime)
+		StorageUtil.SetintValue(Woman,"FW.CurrentState",CurrentState)
+		if bIsPregnant== false
+			StorageUtil.SetintValue(Woman,"FW.NumChilds",0)
+			StorageUtil.SetFloatValue(Woman,"FW.UnbornHealth",0.0)
+		endIf
+	endIf
+endFunction
+
+; This will delete all BeeingFemale related StorageUtil variables
+function Delete(actor Woman) global
+	StorageUtil.UnsetFloatValue(Woman,"FW.LastUpdate")
+	StorageUtil.UnsetFloatValue(Woman,"FW.StateEnterTime")
+	StorageUtil.UnsetIntValue(Woman,"FW.CurrentState")
+	StorageUtil.UnsetIntValue(Woman,"FW.Abortus")
+	StorageUtil.UnsetFloatValue(Woman,"FW.AbortusTime")
+	StorageUtil.UnsetFloatValue(Woman,"FW.UnbornHealth")
+	StorageUtil.UnsetIntValue(Woman,"FW.NumChilds")
+	StorageUtil.FormListClear(Woman,"FW.ChildFather")
+	StorageUtil.FloatListClear(Woman,"FW.SpermTime")
+	StorageUtil.FormListClear(Woman,"FW.SpermName")
+	StorageUtil.FloatListClear(Woman,"FW.SpermAmount")
+	StorageUtil.UnsetIntValue(Woman,"FW.Flags")
+	StorageUtil.UnsetFloatValue(Woman,"FW.PainLevel")
+	StorageUtil.UnsetFloatValue(Woman,"FW.Contraception")
+	StorageUtil.UnsetFloatValue(Woman,"FW.ContraceptionTime")
+	StorageUtil.UnsetIntValue(Woman,"FW.NumBirth")
+	StorageUtil.UnsetIntValue(Woman,"FW.NumBabys")
+	StorageUtil.UnsetFloatValue(Woman,"FW.PauseTime")
+	
+	StorageUtil.FormListRemove(none,"FW.SavedNPCs",Woman)
+endFunction
+
+; This will reset all BeeingFemale related StorageUtil variables
+; bPlayer: This will reset the player only
+function ResetNpcData(bool bPlayer=false) global
+	int i=StorageUtil.FormListCount(none,"FW.SavedNPCs")
+	actor p = Game.GetPlayer()
+	while i>0
+		i-=1
+		actor woman=StorageUtil.FormListGet(none,"FW.SavedNPCs",i) as Actor
+		if woman != p || bPlayer==true
+			StorageUtil.UnsetFloatValue(Woman,"FW.StateEnterTime")
+			StorageUtil.UnsetIntValue(Woman,"FW.CurrentState")
+			StorageUtil.UnsetIntValue(Woman,"FW.Abortus")
+			StorageUtil.UnsetFloatValue(Woman,"FW.AbortusTime")
+			StorageUtil.UnsetFloatValue(Woman,"FW.UnbornHealth")
+			StorageUtil.UnsetIntValue(Woman,"FW.NumChilds")
+			StorageUtil.FormListClear(Woman,"FW.ChildFather")
+			StorageUtil.FloatListClear(Woman,"FW.SpermTime")
+			StorageUtil.FormListClear(Woman,"FW.SpermName")
+			StorageUtil.FloatListClear(Woman,"FW.SpermAmount")
+			StorageUtil.UnsetIntValue(Woman,"FW.Flags")
+			StorageUtil.UnsetFloatValue(Woman,"FW.PainLevel")
+			StorageUtil.UnsetFloatValue(Woman,"FW.Contraception")
+			StorageUtil.UnsetFloatValue(Woman,"FW.ContraceptionTime")
+			StorageUtil.UnsetIntValue(Woman,"FW.NumBirth")
+			StorageUtil.UnsetIntValue(Woman,"FW.NumBabys")
+			StorageUtil.UnsetFloatValue(Woman,"FW.PauseTime")
+		endif
+	endWhile
+	StorageUtil.FormListClear(none,"FW.SavedNPCs")
+	if bPlayer==false
+		StorageUtil.FormListAdd(none,"FW.SavedNPCs",p)
+	endif
+endFunction
+
+function deleteChildren() global
+	int c = StorageUtil.FormListCount(none,"FW.Babys")
+	while c>0
+		c-=1
+		FWChildActor baby1 = StorageUtil.FormListGet(none, "FW.Babys",c) as FWChildActor
+		FWChildItem baby2 = StorageUtil.FormListGet(none, "FW.Babys",c) as FWChildItem
+		Actor baby3 = StorageUtil.FormListGet(none, "FW.Babys",c) as Actor
+		if baby1 != none
+			baby1.Delete()
+		elseif baby2 != none
+			baby2.Delete()
+		elseif baby3 != none
+			baby3.Delete()
+		endif
+	endwhile
+endFunction
+
+function Upgrade(int oldVersion, int newVersion)
+	System = Game.GetFormFromFile(0xD63, "BeeingFemale.esm") as FWSystem
+	Contents = Game.GetFormFromFile(0x3e31, "BeeingFemale.esm") as FWTextContents
+	Controller = Game.GetFormFromFile(0x182A, "BeeingFemale.esm") as FWController
+endFunction
+
+
+
+;ObjectReference.GetItemCount(Form ItemType)
+;ObjectReference.RemoveItem(Form akItemToRemove, int aiCount = 1, bool abSilent = false, ObjectReference akOtherContainer = None)

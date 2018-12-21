@@ -1,253 +1,247 @@
-;/ Decompiled by Champollion V1.0.1
-Source   : FWShowStats.psc
-Modified : 2016-12-06 03:52:40
-Compiled : 2017-01-18 08:35:17
-User     : admin
-Computer : PATRICK
-/;
-scriptName FWShowStats extends ActiveMagicEffect
+﻿Scriptname FWShowStats extends ActiveMagicEffect  
 
-;-- Properties --------------------------------------
-fwcontroller property Controller auto
-Int property Magnetude = 100 auto
+FWController property Controller auto
+int property Magnetude = 100 auto
+actor ActorRef=none
+bool bInit=false
 
-;-- Variables ---------------------------------------
-Bool bInit = false
-actor ActorRef
-
-;-- Functions ---------------------------------------
-
-function printMaleInformations()
-
-	if ActorRef.GetLeveledActorBase() != none
-		debug.Trace("BeeingMale Saved Data for: " + ActorRef.GetLeveledActorBase().GetName(), 0)
-	else
-		debug.Trace("BeeingMale Saved Data for: " + ActorRef.GetName(), 0)
-	endIf
-	self.PrintLinked()
-	debug.Trace("-----------------------------------------------------------------", 0)
-endFunction
-
-function printChildInformations()
-
-	if ActorRef.GetLeveledActorBase() != none
-		debug.Trace("BeeingChild Saved Data for: " + ActorRef.GetLeveledActorBase().GetName(), 0)
-	else
-		debug.Trace("BeeingChild Saved Data for: " + ActorRef.GetName(), 0)
-	endIf
-	debug.Trace("Child Name: " + storageutil.GetStringValue(ActorRef as form, "FW.Child.Name", ""), 0)
-	debug.Trace("Child last Update: " + storageutil.GetFloatValue(ActorRef as form, "FW.Child.LastUpdate", 0.000000) as String, 0)
-	actor Mother = storageutil.GetFormValue(ActorRef as form, "FW.Child.Mother", none) as actor
-	actor Father = storageutil.GetFormValue(ActorRef as form, "FW.Child.Father", none) as actor
-	if Mother != none
-		if Mother.GetLeveledActorBase() != none
-			debug.Trace("Mother: " + Mother.GetLeveledActorBase().GetName(), 0)
-		else
-			debug.Trace("Mother: #" + Mother.GetName(), 0)
-		endIf
-	else
-		debug.Trace("Mother: <NONE>", 0)
-	endIf
-	if Father != none
-		if Father.GetLeveledActorBase() != none
-			debug.Trace("Father: " + Father.GetLeveledActorBase().GetName(), 0)
-		else
-			debug.Trace("Father: #" + Father.GetName(), 0)
-		endIf
-	else
-		debug.Trace("Father: <NONE>", 0)
-	endIf
-	debug.Trace("Level: " + storageutil.GetFloatValue(ActorRef as form, "FW.Child.Level", 0.000000) as String, 0)
-	debug.Trace("Experience: " + storageutil.GetFloatValue(ActorRef as form, "FW.Child.StatExperience", 0.000000) as String, 0)
-	debug.Trace("Stats:", 0)
-	debug.Trace("Comprehension: " + storageutil.GetFloatValue(ActorRef as form, "FW.Child.StatComprehension", 0.000000) as String, 0)
-	debug.Trace("Destruction: " + storageutil.GetFloatValue(ActorRef as form, "FW.Child.StatDestruction", 0.000000) as String, 0)
-	debug.Trace("Illusion: " + storageutil.GetFloatValue(ActorRef as form, "FW.Child.StatIllusion", 0.000000) as String, 0)
-	debug.Trace("Conjuration: " + storageutil.GetFloatValue(ActorRef as form, "FW.Child.StatConjuration", 0.000000) as String, 0)
-	debug.Trace("Restoration: " + storageutil.GetFloatValue(ActorRef as form, "FW.Child.StatRestoration", 0.000000) as String, 0)
-	debug.Trace("Alteration: " + storageutil.GetFloatValue(ActorRef as form, "FW.Child.StatAlteration", 0.000000) as String, 0)
-	debug.Trace("Block: " + storageutil.GetFloatValue(ActorRef as form, "FW.Child.StatBlock", 0.000000) as String, 0)
-	debug.Trace("OneHanded: " + storageutil.GetFloatValue(ActorRef as form, "FW.Child.StatOneHanded", 0.000000) as String, 0)
-	debug.Trace("TwoHanded: " + storageutil.GetFloatValue(ActorRef as form, "FW.Child.StatTwoHanded", 0.000000) as String, 0)
-	debug.Trace("Marksman: " + storageutil.GetFloatValue(ActorRef as form, "FW.Child.StatMarksman", 0.000000) as String, 0)
-	debug.Trace("Sneak: " + storageutil.GetFloatValue(ActorRef as form, "FW.Child.StatSneak", 0.000000) as String, 0)
-	debug.Trace("Magicka: " + storageutil.GetFloatValue(ActorRef as form, "FW.Child.StatMagicka", 0.000000) as String, 0)
-	debug.Trace("CarryWeight: " + storageutil.GetFloatValue(ActorRef as form, "FW.Child.StatCarryWeight", 0.000000) as String, 0)
-	debug.Trace("Health: " + storageutil.GetFloatValue(ActorRef as form, "FW.Child.StatHealth", 0.000000) as String, 0)
-	debug.Trace("Perks:", 0)
-	Int sc = storageutil.FormListCount(ActorRef as form, "FW.Child.Perks")
-	while sc > 0
-		sc -= 1
-		spell S = storageutil.FormListGet(ActorRef as form, "FW.Child.Perks", sc) as spell
-		if S != none
-			debug.Trace(S.GetName(), 0)
-		else
-			debug.Trace("Unknown Perk", 0)
-		endIf
-	endWhile
-	self.PrintLinked()
-	debug.Trace("-----------------------------------------------------------------", 0)
-endFunction
-
-function OnInit()
-
-	bInit = true
-	self.execute()
-endFunction
-
-; Skipped compiler generated GotoState
-
-function OnEffectStart(actor akTarget, actor akCaster)
-
-	if akTarget == none && akCaster.GetAngleX() > 85.0000
-		ActorRef = game.GetPlayer()
-		self.execute()
-	elseIf akTarget != none
+Event OnEffectStart(Actor akTarget, Actor akCaster)
+	if akTarget==none && akCaster.GetAngleX()>85
+		ActorRef = Game.GetPlayer()
+		execute()
+	elseif akTarget!=none
 		ActorRef = akTarget
-		self.execute()
-	endIf
-endFunction
+		execute()
+	endif
+endEvent
 
-function printFemaleInformations()
-
-	Int i = 0
-	Int cChildFather = storageutil.FormListCount(ActorRef as form, "FW.ChildFather")
-	Int cSpermTime = storageutil.FloatListCount(ActorRef as form, "FW.SpermTime")
-	Int cSpermName = storageutil.FormListCount(ActorRef as form, "FW.SpermName")
-	Int cSpermAmmount = storageutil.FloatListCount(ActorRef as form, "FW.SpermAmount")
-	Int cBornChildFather = storageutil.FormListCount(ActorRef as form, "FW.BornChildFather")
-	Int cBornChildTime = storageutil.FloatListCount(ActorRef as form, "FW.BornChildTime")
-	debug.Trace("-----------------------------------------------------------------", 0)
-	if ActorRef.GetLeveledActorBase() != none
-		debug.Trace("BeeingFemale Saved Data for: " + ActorRef.GetLeveledActorBase().GetName(), 0)
-	else
-		debug.Trace("BeeingFemale Saved Data for: #" + ActorRef.GetName(), 0)
-	endIf
-	debug.Trace("Current Game Time: " + utility.GetCurrentGameTime() as String, 0)
-	debug.Trace("-----------------------------------------------------------------", 0)
-	debug.Trace(" FW.LastUpdate :  " + storageutil.GetFloatValue(ActorRef as form, "FW.LastUpdate", 0.000000) as String, 0)
-	debug.Trace(" FW.StateEnterTime :  " + storageutil.GetFloatValue(ActorRef as form, "FW.StateEnterTime", 0.000000) as String + " [" + fwutility.GetTimeString(utility.GetCurrentGameTime() - storageutil.GetFloatValue(ActorRef as form, "FW.StateEnterTime", 0.000000), true, "") + "]", 0)
-	debug.Trace(" FW.CurrentState :  " + storageutil.GetIntValue(ActorRef as form, "FW.CurrentState", 0) as String, 0)
-	debug.Trace(" FW.Abortus :  " + storageutil.GetIntValue(ActorRef as form, "FW.Abortus", 0) as String, 0)
-	debug.Trace(" FW.AbortusTime :  " + storageutil.GetFloatValue(ActorRef as form, "FW.AbortusTime", 0.000000) as String + " [" + fwutility.GetTimeString(utility.GetCurrentGameTime() - storageutil.GetFloatValue(ActorRef as form, "FW.AbortusTime", 0.000000), true, "") + "]", 0)
-	debug.Trace(" FW.UnbornHealth :  " + storageutil.GetFloatValue(ActorRef as form, "FW.UnbornHealth", 0.000000) as String, 0)
-	debug.Trace(" FW.NumChilds :  " + storageutil.GetIntValue(ActorRef as form, "FW.NumChilds", 0) as String, 0)
-	i = 0
-	while i < cChildFather
-		actor a = storageutil.FormListGet(ActorRef as form, "FW.ChildFather", i) as actor
-		if a != none
-			if a.GetLeveledActorBase() != none
-				debug.Trace(" FW.ChildFather[" + i as String + "] :  " + a.GetLeveledActorBase().GetName(), 0)
-			else
-				debug.Trace(" FW.ChildFather[" + i as String + "] :  #" + a.GetName(), 0)
-			endIf
-		endIf
-		i += 1
-	endWhile
-	i = 0
-	while i < cSpermTime
-		debug.Trace(" FW.SpermTime[" + i as String + "] :  " + storageutil.FloatListGet(ActorRef as form, "FW.SpermTime", i) as String + " [" + fwutility.GetTimeString(utility.GetCurrentGameTime() - storageutil.FloatListGet(ActorRef as form, "FW.SpermTime", i), true, "") + "]", 0)
-		i += 1
-	endWhile
-	i = 0
-	while i < cSpermName
-		actor a = storageutil.FormListGet(ActorRef as form, "FW.SpermName", i) as actor
-		if a != none
-			if a.GetLeveledActorBase() != none
-				debug.Trace(" FW.SpermName[" + i as String + "] :  " + a.GetLeveledActorBase().GetName(), 0)
-			else
-				debug.Trace(" FW.SpermName[" + i as String + "] :  #" + a.GetName(), 0)
-			endIf
-		endIf
-		i += 1
-	endWhile
-	i = 0
-	while i < cSpermAmmount
-		debug.Trace(" FW.SpermAmount[" + i as String + "] :  " + storageutil.FloatListGet(ActorRef as form, "FW.SpermAmount", i) as String, 0)
-		i += 1
-	endWhile
-	debug.Trace(" FW.Flags :  " + storageutil.GetIntValue(ActorRef as form, "FW.Flags", 0) as String, 0)
-	debug.Trace(" FW.PainLevel :  " + storageutil.GetFloatValue(ActorRef as form, "FW.PainLevel", 0.000000) as String, 0)
-	debug.Trace(" FW.Contraception :  " + storageutil.GetFloatValue(ActorRef as form, "FW.Contraception", 0.000000) as String, 0)
-	debug.Trace(" FW.ContraceptionTime :  " + storageutil.GetFloatValue(ActorRef as form, "FW.ContraceptionTime", 0.000000) as String + " [" + fwutility.GetTimeString(utility.GetCurrentGameTime() - storageutil.GetFloatValue(ActorRef as form, "FW.ContraceptionTime", 0.000000), true, "") + "]", 0)
-	debug.Trace(" FW.NumBirth :  " + storageutil.GetIntValue(ActorRef as form, "FW.NumBirth", 0) as String, 0)
-	debug.Trace(" FW.NumBabys :  " + storageutil.GetIntValue(ActorRef as form, "FW.NumBabys", 0) as String, 0)
-	debug.Trace(" FW.PauseTime :  " + storageutil.GetFloatValue(ActorRef as form, "FW.PauseTime", 0.000000) as String + " [" + fwutility.GetTimeString(utility.GetCurrentGameTime() - storageutil.GetFloatValue(ActorRef as form, "FW.PauseTime", 0.000000), true, "") + "]", 0)
-	debug.Trace(" FW.LastBornChildTime :  " + storageutil.GetFloatValue(ActorRef as form, "FW.LastBornChildTime", 0.000000) as String + " [" + fwutility.GetTimeString(utility.GetCurrentGameTime() - storageutil.GetFloatValue(ActorRef as form, "FW.LastBornChildTime", 0.000000), true, "") + "]", 0)
-	i = 0
-	while i < cBornChildFather
-		actor a = storageutil.FormListGet(ActorRef as form, "FW.BornChildFather", i) as actor
-		if a != none
-			if a.GetLeveledActorBase() != none
-				debug.Trace(" FW.BornChildFather[" + i as String + "] :  " + a.GetLeveledActorBase().GetName(), 0)
-			else
-				debug.Trace(" FW.BornChildFather[" + i as String + "] :  #" + a.GetName(), 0)
-			endIf
-		endIf
-		i += 1
-	endWhile
-	i = 0
-	while i < cBornChildTime
-		debug.Trace(" FW.BornChildTime[" + i as String + "] :  " + storageutil.FloatListGet(ActorRef as form, "FW.BornChildTime", i) as String + " [" + fwutility.GetTimeString(utility.GetCurrentGameTime() - storageutil.FloatListGet(ActorRef as form, "FW.BornChildTime", i), true, "") + "]", 0)
-		i += 1
-	endWhile
-	self.PrintLinked()
-	debug.Trace("-----------------------------------------------------------------", 0)
-endFunction
-
-; Skipped compiler generated GetState
+Event OnInit()
+	bInit=true
+	execute()
+endEvent
 
 function execute()
-
-	if ActorRef == none || bInit == false
-		return 
-	endIf
-	if ActorRef.HasSpell(Controller.System.BeeingFemaleSpell as form)
-		if ActorRef.HasMagicEffect(Controller.System.BeeingFemaleSpell.GetNthEffectMagicEffect(0)) == false
+	if ActorRef==none || bInit==false
+		return
+	endif
+	
+	If ActorRef.HasSpell(Controller.System.BeeingFemaleSpell)
+		if ActorRef.HasMagicEffect(Controller.System.BeeingFemaleSpell.GetNthEffectMagicEffect(0))==false
 			ActorRef.RemoveSpell(Controller.System.BeeingFemaleSpell)
-		endIf
-	endIf
-	if ActorRef.HasSpell(Controller.System.BeeingMaleSpell as form)
-		if ActorRef.HasMagicEffect(Controller.System.BeeingMaleSpell.GetNthEffectMagicEffect(0)) == false
+		endif
+	endif
+	if ActorRef.HasSpell(Controller.System.BeeingMaleSpell)
+		if ActorRef.HasMagicEffect(Controller.System.BeeingMaleSpell.GetNthEffectMagicEffect(0))==false
 			ActorRef.RemoveSpell(Controller.System.BeeingMaleSpell)
-		endIf
-	endIf
-	if ActorRef.HasSpell(Controller.System.BeeingFemaleSpell as form) == false && Controller.System.IsValidateActor(ActorRef, false) as Bool
-		fwutility.ActorAddSpell(ActorRef, Controller.System.BeeingFemaleSpell, false, false)
-	elseIf ActorRef.HasSpell(Controller.System.BeeingMaleSpell as form) == false && Controller.System.IsValidateMaleActor(ActorRef, false) as Bool
-		if ActorRef.HasMagicEffect(Controller.System.BeeingMaleSpell.GetNthEffectMagicEffect(0)) == false
+		endif
+	endif
+	
+	If ActorRef.HasSpell(Controller.System.BeeingFemaleSpell)==false && Controller.System.IsValidateActor(ActorRef)
+		FWUtility.ActorAddSpell(ActorRef, Controller.System.BeeingFemaleSpell)
+	elseif ActorRef.HasSpell(Controller.System.BeeingMaleSpell)==false && Controller.System.IsValidateMaleActor(ActorRef)
+		if ActorRef.HasMagicEffect(Controller.System.BeeingMaleSpell.GetNthEffectMagicEffect(0))==false
 			ActorRef.RemoveSpell(Controller.System.BeeingMaleSpell)
-		endIf
-		fwutility.ActorAddSpell(ActorRef, Controller.System.BeeingMaleSpell, false, false)
-	endIf
+		endif
+		FWUtility.ActorAddSpell(ActorRef, Controller.System.BeeingMaleSpell)
+	endif
+	
+	;int Magnetude = GetMagnitude() as int
 	Controller.showRankedInfoBox(ActorRef, Magnetude)
-	if Controller.System.cfg.Messages == 0
-		if ActorRef as fwchildactor != none
-			self.printChildInformations()
-		elseIf ActorRef.GetLeveledActorBase() != none
-			if ActorRef.GetLeveledActorBase().GetSex() == 0
-				self.printMaleInformations()
-			else
-				self.printFemaleInformations()
-			endIf
-		endIf
-	endIf
+	;UI.OpenCustomMenu("beeingfemale/info_spell.swf");
+	;if ActorRef.GetLeveledActorBase()!=none
+	;	if ActorRef.GetLeveledActorBase().GetSex()==0
+	;		return
+	;	endif
+	;endif
+	if Controller.System.cfg.Messages==0
+		if ActorRef as FWChildActor !=none
+			printChildInformations()
+		else
+			if ActorRef.GetLeveledActorBase()!=none
+				if ActorRef.GetLeveledActorBase().GetSex()==0
+					printMaleInformations()
+				else
+					printFemaleInformations()
+				endif
+			endif
+		endif
+	endif
 endFunction
 
 function PrintLinked()
-
-	Int cChain = ActorRef.countLinkedRefChain(none, 100)
-	Int i = 0
-	objectreference lnkRef = ActorRef.GetLinkedRef(none)
-	if lnkRef != none
-		debug.Trace("Linked References: " + lnkRef.GetName() + " [" + lnkRef.GetFormID() as String + "]", 0)
+	int cChain=ActorRef.countLinkedRefChain()
+	int i=0
+	ObjectReference lnkRef = ActorRef.GetLinkedRef()
+	if lnkRef!=none
+		Debug.Trace("Linked References: " + lnkRef.GetName() + " [" + lnkRef.GetFormID() + "]")
 	else
-		debug.Trace("Linked References: <NONE>", 0)
-	endIf
-	debug.Trace("Linked Ref Chains: " + cChain as String, 0)
-	while i < cChain
-		objectreference lnk = ActorRef.GetNthLinkedRef(i)
-		debug.Trace(i as String + ": " + lnk.GetName() + " [" + lnk.GetFormID() as String + "]", 0)
-		i += 1
+		Debug.Trace("Linked References: <NONE>")
+	endif
+	Debug.Trace("Linked Ref Chains: " + cChain)
+	while i<cChain
+		ObjectReference lnk = ActorRef.GetNthLinkedRef(i)
+		Debug.Trace(i + ": " + lnk.GetName() + " [" + lnk.GetFormID() + "]")
+		i+=1
 	endWhile
+endFunction
+
+function printChildInformations()
+	if ActorRef.GetLeveledActorBase()!=none
+		Debug.Trace("BeeingChild Saved Data for: "+ActorRef.GetLeveledActorBase().GetName());
+	else
+		Debug.Trace("BeeingChild Saved Data for: "+ActorRef.GetName());
+	endif
+	Debug.Trace("Child Name: "+StorageUtil.GetStringValue(ActorRef,"FW.Child.Name",""))
+	Debug.Trace("Child last Update: " + StorageUtil.GetFloatValue(ActorRef,"FW.Child.LastUpdate",0))
+	actor Mother = StorageUtil.GetFormValue(ActorRef,"FW.Child.Mother") as actor
+	actor Father = StorageUtil.GetFormValue(ActorRef,"FW.Child.Father") as actor
+	if Mother!=none
+		if Mother.GetLeveledActorBase()!=none
+			Debug.Trace("Mother: "+Mother.GetLeveledActorBase().GetName())
+		else
+			Debug.Trace("Mother: #"+Mother.GetName())
+		endif
+	else
+		Debug.Trace("Mother: <NONE>")
+	endif
+	if Father!=none
+		if Father.GetLeveledActorBase()!=none
+			Debug.Trace("Father: "+Father.GetLeveledActorBase().GetName())
+		else
+			Debug.Trace("Father: #"+Father.GetName())
+		endif
+	else
+		Debug.Trace("Father: <NONE>")
+	endif
+	Debug.Trace("Level: "+StorageUtil.GetFloatValue(ActorRef, "FW.Child.Level"))
+	Debug.Trace("Experience: "+StorageUtil.GetFloatValue(ActorRef, "FW.Child.StatExperience"))
+	Debug.Trace("Stats:")
+	Debug.Trace("Comprehension: " + StorageUtil.GetFloatValue(ActorRef,"FW.Child.StatComprehension"))
+	Debug.Trace("Destruction: " + StorageUtil.GetFloatValue(ActorRef,"FW.Child.StatDestruction"))
+	Debug.Trace("Illusion: " + StorageUtil.GetFloatValue(ActorRef,"FW.Child.StatIllusion"))
+	Debug.Trace("Conjuration: " + StorageUtil.GetFloatValue(ActorRef,"FW.Child.StatConjuration"))
+	Debug.Trace("Restoration: " + StorageUtil.GetFloatValue(ActorRef,"FW.Child.StatRestoration"))
+	Debug.Trace("Alteration: " + StorageUtil.GetFloatValue(ActorRef,"FW.Child.StatAlteration"))
+	Debug.Trace("Block: " + StorageUtil.GetFloatValue(ActorRef,"FW.Child.StatBlock"))
+	Debug.Trace("OneHanded: " + StorageUtil.GetFloatValue(ActorRef,"FW.Child.StatOneHanded"))
+	Debug.Trace("TwoHanded: " + StorageUtil.GetFloatValue(ActorRef,"FW.Child.StatTwoHanded"))
+	Debug.Trace("Marksman: " + StorageUtil.GetFloatValue(ActorRef,"FW.Child.StatMarksman"))
+	Debug.Trace("Sneak: " + StorageUtil.GetFloatValue(ActorRef,"FW.Child.StatSneak"))
+	Debug.Trace("Magicka: " + StorageUtil.GetFloatValue(ActorRef,"FW.Child.StatMagicka"))
+	Debug.Trace("CarryWeight: " + StorageUtil.GetFloatValue(ActorRef,"FW.Child.StatCarryWeight"))
+	Debug.Trace("Health: " + StorageUtil.GetFloatValue(ActorRef,"FW.Child.StatHealth"))
+	Debug.Trace("Perks:")
+	int sc = StorageUtil.FormListCount(ActorRef,"FW.Child.Perks")
+	while sc>0
+		sc-=1
+		spell s = StorageUtil.FormListGet(ActorRef,"FW.Child.Perks",sc) as spell
+		if s!=none
+			Debug.Trace(s.GetName())
+		else
+			Debug.Trace("Unknown Perk")
+		endif
+	endWhile
+	
+	PrintLinked()
+	
+	Debug.Trace("-----------------------------------------------------------------")
+endfunction
+
+function printMaleInformations()
+	if ActorRef.GetLeveledActorBase()!=none
+		Debug.Trace("BeeingMale Saved Data for: "+ActorRef.GetLeveledActorBase().GetName());
+	else
+		Debug.Trace("BeeingMale Saved Data for: "+ActorRef.GetName());
+	endif
+	PrintLinked()
+	
+	Debug.Trace("-----------------------------------------------------------------")
+endfunction
+
+function printFemaleInformations()
+	int i=0
+	int cChildFather=StorageUtil.FormListCount(ActorRef,"FW.ChildFather")
+	int cSpermTime=StorageUtil.FloatListCount(ActorRef,"FW.SpermTime")
+	int cSpermName=StorageUtil.FormListCount(ActorRef,"FW.SpermName")
+	int cSpermAmmount=StorageUtil.FloatListCount(ActorRef,"FW.SpermAmount")
+	int cBornChildFather=StorageUtil.FormListCount(ActorRef,"FW.BornChildFather")
+	int cBornChildTime=StorageUtil.FloatListCount(ActorRef,"FW.BornChildTime")
+	Debug.Trace("-----------------------------------------------------------------")
+	if ActorRef.GetLeveledActorBase()!=none
+		Debug.Trace("BeeingFemale Saved Data for: "+ActorRef.GetLeveledActorBase().GetName());
+	else
+		Debug.Trace("BeeingFemale Saved Data for: #"+ActorRef.GetName());
+	endif
+	Debug.Trace("Current Game Time: "+ Utility.GetCurrentGameTime())
+	Debug.Trace("-----------------------------------------------------------------")
+	Debug.Trace(" FW.LastUpdate :  "+StorageUtil.GetFloatValue(ActorRef,"FW.LastUpdate"))
+	Debug.Trace(" FW.StateEnterTime :  "+StorageUtil.GetFloatValue(ActorRef,"FW.StateEnterTime")+" ["+ FWUtility.GetTimeString(Utility.GetCurrentGameTime() - StorageUtil.GetFloatValue(ActorRef,"FW.StateEnterTime")) +"]")
+	Debug.Trace(" FW.CurrentState :  "+StorageUtil.GetIntValue(ActorRef,"FW.CurrentState"))
+	Debug.Trace(" FW.Abortus :  "+StorageUtil.GetIntValue(ActorRef,"FW.Abortus"))
+	Debug.Trace(" FW.AbortusTime :  "+StorageUtil.GetFloatValue(ActorRef,"FW.AbortusTime")+" ["+ FWUtility.GetTimeString(Utility.GetCurrentGameTime() - StorageUtil.GetFloatValue(ActorRef,"FW.AbortusTime")) +"]")
+	Debug.Trace(" FW.UnbornHealth :  "+StorageUtil.GetFloatValue(ActorRef,"FW.UnbornHealth"))
+	Debug.Trace(" FW.NumChilds :  "+StorageUtil.GetIntValue(ActorRef,"FW.NumChilds"))
+	i=0
+	while i<cChildFather
+		actor a = StorageUtil.FormListGet(ActorRef,"FW.ChildFather",i) as Actor
+		if a!=none
+			if a.GetLeveledActorBase()!=none
+				Debug.Trace(" FW.ChildFather["+i+"] :  "+a.GetLeveledActorBase().GetName())
+			else
+				Debug.Trace(" FW.ChildFather["+i+"] :  #"+a.GetName())
+			endif
+		endif
+		i+=1
+	endwhile
+	i=0
+	while i<cSpermTime
+		Debug.Trace(" FW.SpermTime["+i+"] :  "+StorageUtil.FloatListGet(ActorRef,"FW.SpermTime",i)+" ["+ FWUtility.GetTimeString(Utility.GetCurrentGameTime() - StorageUtil.FloatListGet(ActorRef,"FW.SpermTime",i)) +"]")
+		i+=1
+	endwhile
+	i=0
+	while i<cSpermName
+		actor a = StorageUtil.FormListGet(ActorRef,"FW.SpermName",i) as Actor
+		if a!=none
+			if a.GetLeveledActorBase()!=none
+				Debug.Trace(" FW.SpermName["+i+"] :  "+a.GetLeveledActorBase().GetName())
+			else
+				Debug.Trace(" FW.SpermName["+i+"] :  #"+a.GetName())
+			endif
+		endif
+		i+=1
+	endwhile
+	i=0
+	while i<cSpermAmmount
+		Debug.Trace(" FW.SpermAmount["+i+"] :  "+StorageUtil.FloatListGet(ActorRef,"FW.SpermAmount",i))
+		i+=1
+	endwhile
+	Debug.Trace(" FW.Flags :  "+StorageUtil.GetIntValue(ActorRef,"FW.Flags"))
+	Debug.Trace(" FW.PainLevel :  "+StorageUtil.GetFloatValue(ActorRef,"FW.PainLevel"))
+	Debug.Trace(" FW.Contraception :  "+StorageUtil.GetFloatValue(ActorRef,"FW.Contraception"))
+	Debug.Trace(" FW.ContraceptionTime :  "+StorageUtil.GetFloatValue(ActorRef,"FW.ContraceptionTime")+" ["+ FWUtility.GetTimeString(Utility.GetCurrentGameTime() - StorageUtil.GetFloatValue(ActorRef,"FW.ContraceptionTime")) +"]")
+	Debug.Trace(" FW.NumBirth :  "+StorageUtil.GetIntValue(ActorRef,"FW.NumBirth"))
+	Debug.Trace(" FW.NumBabys :  "+StorageUtil.GetIntValue(ActorRef,"FW.NumBabys"))
+	Debug.Trace(" FW.PauseTime :  "+StorageUtil.GetFloatValue(ActorRef,"FW.PauseTime")+" ["+ FWUtility.GetTimeString(Utility.GetCurrentGameTime() - StorageUtil.GetFloatValue(ActorRef,"FW.PauseTime")) +"]")
+	Debug.Trace(" FW.LastBornChildTime :  "+StorageUtil.GetFloatValue(ActorRef,"FW.LastBornChildTime")+" ["+ FWUtility.GetTimeString(Utility.GetCurrentGameTime() - StorageUtil.GetFloatValue(ActorRef,"FW.LastBornChildTime")) +"]")
+	i=0
+	while i<cBornChildFather
+		actor a = StorageUtil.FormListGet(ActorRef,"FW.BornChildFather",i) as Actor
+		if a!=none
+			if a.GetLeveledActorBase()!=none
+				Debug.Trace(" FW.BornChildFather["+i+"] :  "+a.GetLeveledActorBase().GetName())
+			else
+				Debug.Trace(" FW.BornChildFather["+i+"] :  #"+a.GetName())
+			endif
+		endif
+		i+=1
+	endwhile
+	i=0
+	while i<cBornChildTime
+		Debug.Trace(" FW.BornChildTime["+i+"] :  "+StorageUtil.FloatListGet(ActorRef,"FW.BornChildTime",i)+" ["+ FWUtility.GetTimeString(Utility.GetCurrentGameTime() - StorageUtil.FloatListGet(ActorRef,"FW.BornChildTime",i)) +"]")
+		i+=1
+	endwhile
+	
+	PrintLinked()
+	
+	Debug.Trace("-----------------------------------------------------------------")
 endFunction

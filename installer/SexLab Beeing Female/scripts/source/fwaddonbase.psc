@@ -1,23 +1,39 @@
-;/ Decompiled by Champollion V1.0.1
-Source   : FWAddOnBase.psc
-Modified : 2017-01-12 13:18:38
-Compiled : 2017-01-18 08:36:39
-User     : admin
-Computer : PATRICK
-/;
-scriptName FWAddOnBase extends Quest
+﻿Scriptname FWAddOnBase extends Quest  
 
-;-- Properties --------------------------------------
-Bool property AddOnVisible = true auto
-Bool property AddOnLocked = false auto
-fwaddonmanager property AddOnManager auto hidden
-String property AddOnDescription = "" auto
-String property AddOnAuthor = "" auto
+FWAddOnManager property AddOnManager Auto hidden
+String Property AddOnDescription = "" Auto
+Bool Property AddOnVisible = True Auto
+Bool Property AddOnLocked = False Auto
+string property AddOnAuthor = "" auto
 
-;-- Variables ---------------------------------------
 
-;-- Functions ---------------------------------------
+;event OnInit()
+;	GetAddOnManager()
+;	;SendModEvent("BeeingFemale", "FWRefreshAddOns")
+;	RegisterForModEvent("FWAddOnRefresh","RefreshAddOns")
+;endEvent
 
-; Skipped compiler generated GetState
+;event RefreshAddOns(string eventName, string strArg, float numArg, Form sender)
+;	if eventName == "FWAddOnRefresh"
+;		Refresh(strArg, (sender as FWAddOnManager))
+;	endIf
+;endEvent
 
-; Skipped compiler generated GotoState
+;function Refresh(string strArg, FWAddOnManager sender)
+	;Debug.Notification("Empty Refresh called")
+;endFunction
+
+;function GetAddOnManager()
+;	if !AddOnManager || AddOnManager==none
+;		int idx = Game.GetModCount()
+;		string modName = ""
+;		while idx > 0
+;			idx -= 1
+;			modName = Game.GetModName(idx)
+;			if modName == "BeeingFemale.esp" || modName == "BeeingFemale.esm"
+;				AddOnManager = Game.GetFormFromFile(0x00001829, modName) as FWAddOnManager
+;				idx = 0
+;			endIf
+;		endWhile
+;	endIf
+;endFunction

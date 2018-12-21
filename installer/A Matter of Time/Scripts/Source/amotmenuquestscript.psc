@@ -56,7 +56,7 @@ float		_defaultSymbol2YOffset				= 0.0
 int			_defaultIGClockAlpha				= 100
 int			_defaultIGClockHotkey				= 0
 int			_defaultIGClockScale				= 70
-int			_defaultIGClockTypeIndex			= 3
+int			_defaultIGClockTypeIndex			= 2
 
 int			_defaultIGDateAlpha					= 100
 int			_defaultIGDateFormatIndex			= 5
@@ -87,22 +87,27 @@ int 		_defaultIGClockAlignmentIndex		= 0
 int 		_defaultIGClockControlModeIndex		= 0
 int 		_defaultIGClockPeriodIndex			= 2
 int 		_defaultIGClockVertAlignmentIndex	= 0
+
 int 		_defaultIGDateAlignmentIndex		= 0
 int 		_defaultIGDateControlModeIndex		= 0
 int 		_defaultIGDatePeriodIndex			= 2
 int 		_defaultIGDateVertAlignmentIndex	= 0
+
 int 		_defaultRLClockAlignmentIndex		= 0
 int 		_defaultRLClockControlModeIndex		= 0
 int 		_defaultRLClockPeriodIndex			= 2
 int 		_defaultRLClockVertAlignmentIndex	= 0
+
 int 		_defaultRLDateAlignmentIndex		= 0
 int 		_defaultRLDateControlModeIndex		= 0
 int 		_defaultRLDatePeriodIndex			= 2
 int 		_defaultRLDateVertAlignmentIndex	= 0
+
 int 		_defaultSymbol1AlignmentIndex		= 0
 int 		_defaultSymbol1ControlModeIndex		= 0
 int 		_defaultSymbol1PeriodIndex			= 2
 int 		_defaultSymbol1VertAlignmentIndex	= 0
+
 int 		_defaultSymbol2AlignmentIndex		= 2
 int 		_defaultSymbol2ControlModeIndex		= 0
 int 		_defaultSymbol2PeriodIndex			= 2
@@ -191,7 +196,7 @@ event OnConfigInit()
 	LoadDefaultsGeneral()
 	LoadDefaultsDisplay()
 	LoadDefaultsControl()
-	LoadUserSettings()
+	;LoadUserSettings()
 endEvent
 
 

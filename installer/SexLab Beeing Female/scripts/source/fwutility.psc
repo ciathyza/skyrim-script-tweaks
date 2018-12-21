@@ -1,3712 +1,4669 @@
-;/ Decompiled by Champollion V1.0.1
-Source   : FWUtility.psc
-Modified : 2017-01-18 08:34:33
-Compiled : 2017-01-18 08:35:03
-User     : admin
-Computer : PATRICK
-/;
-scriptName FWUtility
+﻿Scriptname FWUtility
 
-;-- Properties --------------------------------------
-
-;-- Variables ---------------------------------------
-
-;-- Functions ---------------------------------------
-
-String function GetTimeString(Float akTime, Bool akShortFormat, String akNegativeText) global
-
+; Time functions
+String Function GetTimeString(Float akTime, Bool akShortFormat = True, String akNegativeText = "") Global
 	String sign = ""
-	if akTime < 0.000000
-		if akNegativeText != ""
-			return akNegativeText
-		endIf
+	If (akTime < 0.0)
+		If akNegativeText!=""
+			Return akNegativeText
+		EndIf
 		sign = "-"
-		akTime *= -1.00000
-	endIf
+		akTime *= -1
+	EndIf
+	
 	String timeString = ""
-	Int val = akTime as Int
-	if val != 0
-		timeString += val as String
-		if akShortFormat
+	
+	; Days
+	Int val = (akTime as Int)
+	If val != 0
+		timeString += val
+		
+		If akShortFormat
 			timeString += "d "
-		elseIf val == 1
+		ElseIf val == 1
 			timeString += "day "
-		else
+		Else
 			timeString += "days "
-		endIf
-	endIf
-	akTime = (akTime - val as Float) * 24.0000
-	val = akTime as Int
-	if val != 0
-		timeString += val as String
-		if akShortFormat
+		EndIf
+	EndIf
+	akTime = (akTime - val) * 24
+	
+	; Hours
+	val = (akTime as Int)
+	If val != 0
+		timeString += val
+		
+		If akShortFormat
 			timeString += "h "
-		elseIf val == 1
+		ElseIf val == 1
 			timeString += "hour "
-		else
+		Else
 			timeString += "hours "
-		endIf
-	endIf
-	akTime = (akTime - val as Float) * 60.0000
-	val = akTime as Int
-	if val != 0
-		timeString += val as String
-		if akShortFormat
+		EndIf
+	EndIf
+	akTime = (akTime - val) * 60
+	
+	; Minutes
+	val = (akTime as Int)
+	If val != 0
+		timeString += val
+		
+		If akShortFormat
 			timeString += "m"
-		elseIf val == 1
+		ElseIf val == 1
 			timeString += "minute"
-		else
+		Else
 			timeString += "minutes"
-		endIf
-	endIf
-	return sign + timeString
-endFunction
+		EndIf
+	EndIf
+	
+	Return sign + timeString
+EndFunction
 
-Int function GetFileCount(String argPath, String extention) global native
-
-function UnequipItem(actor a, form item) global
-
-	if item != none && a != none
-		if a.IsEquipped(item)
-			a.UnequipItem(item, true, true)
-		endIf
-		a.RemoveItem(item, 1, true, none)
-	endIf
-endFunction
-
-String function getRandomName(Int iSex) global
-
-	String lang = utility.getIniString("sLanguage:General")
-	String path = "../../../BeeingFemale/Names/"
-	String Full = path + "BeeingFemaleNames_" + lang + ".json"
-	String ssex = ""
-	if iSex == 0
-		ssex = "male"
-	elseIf iSex == 1
-		ssex = "female"
-	endIf
-	Int Count = jsonutil.StringListCount(Full, ssex)
-	Int id = utility.RandomInt(0, Count - 1)
-	String sName = jsonutil.StringListGet(Full, ssex, id)
-	return sName
-endFunction
-
-String function SwitchString(Bool cond, String a, String b) global
-
-	if cond
-		return a
-	endIf
-	return b
-endFunction
-
-function UnlockPlayer() global
-
-	actor PlayerRef = game.GetPlayer()
-	game.SetPlayerAIDriven(false)
-	game.SetInChargen(false, false, false)
-endFunction
-
-function setIniInt(String Type, String File, String Variable, Int value) global native
-
-Bool function IsNumber(String Char) global
-
-	if Char == "0"
-		return true
-	elseIf Char == "1"
-		return true
-	elseIf Char == "2"
-		return true
-	elseIf Char == "3"
-		return true
-	elseIf Char == "4"
-		return true
-	elseIf Char == "5"
-		return true
-	elseIf Char == "6"
-		return true
-	elseIf Char == "7"
-		return true
-	elseIf Char == "8"
-		return true
-	elseIf Char == "9"
-		return true
-	endIf
+bool function IsModInstalled(string ModName) global
+	int c = Game.GetModCount()
+	while c>0
+		c-=1
+		string m = Game.GetModName(c)
+		if m==ModName || m==ModName+".esp" || m==ModName+".esm"
+			return true
+		endif
+	endWhile
 	return false
 endFunction
 
-function EquipItem(actor a, form item) global
-
-	if item != none && a != none
-		a.addItem(item, 1, true)
-		if !a.IsEquipped(item)
-			a.EquipItem(item, false, true)
-		endIf
-	endIf
-endFunction
-
-String function GetModFromString(String S, Bool bExtension) global native
-
-String function ScriptUser(String script) global native
-
-String function getNextAutoFile(String Directory, String FileName, String Ext) global native
-
-Bool function ScriptHasString(String script, String str) global native
-
-String function GetDirectoryHash(String dir) global native
-
-quest function GetQuestObject(String ModName, Int index) global native
-
-String function _getStateName_(Int StateID) global
-
-	if StateID == 0
-		return "Follicular Phase"
-	elseIf StateID == 1
-		return "Ovulation"
-	elseIf StateID == 2
-		return "Luteal Phase"
-	elseIf StateID == 3
-		return "Menstruation"
-	elseIf StateID == 4
-		return "1st Pregnancy State"
-	elseIf StateID == 5
-		return "2nd Pregnancy State"
-	elseIf StateID == 6
-		return "3rd Pregnancy State"
-	elseIf StateID == 7
-		return "LaborPains"
-	elseIf StateID == 8
-		return "Recovery Phase"
-	elseIf StateID == 20
-		return "Pregnant"
-	elseIf StateID == 21
-		return "Pregnant by chaurus"
-	endIf
-endFunction
-
-String function GetStringFromRaces(Race[] frms) global
-
-	Int i = 0
-	String S = ""
-	Int c = frms.length
-	while i < c
-		String tmp = FWUtility.GetStringFromForm(frms[i] as form)
-		if tmp != ""
-			if i > 0
-				S += ","
-			endIf
-			S += tmp
-		endIf
-		i += 1
-	endWhile
-	return S
-endFunction
-
-Int function GetQuestObjectCount(String ModName) global native
-
-Float function getIniFloat(String Type, String File, String Variable, Float Default) global native
-
-String function Hex(Int value, Int Digits) global native
-
-String function MultiStringReplace(String Text, String Replace0, String Replace1, String Replace2, String Replace3, String Replace4, String Replace5) global native
-
-Int function MinInt(Int a, Int b) global
-
-	if a < b
-		return a
-	endIf
-	return b
-endFunction
-
-String function getIniCString(String Type, String File, String Categorie, String Variable, String Default) global native
-
-Actor[] function ActorArrayAppend(Actor[] OldArray, actor Append, Int Count) global
-
-	Int c = OldArray.length
-	if c == 0
-		Actor[] t = FWUtility.ActorArray(Count)
-		while Count > 0
-			Count -= 1
-			t[Count] = Append
-		endWhile
-		return t
-	elseIf c > 127
-		return OldArray
-	endIf
-	if c + Count > 127
-		Count = 127
-	endIf
-	Actor[] na = FWUtility.ActorArray(c + Count)
-	while Count > 0
-		Count -= 1
-		na[c + Count] = Append
-	endWhile
-	while c > 0
-		c -= 1
-		na[c] = OldArray[c]
-	endWhile
-	return na
-endFunction
-
-String function GetFileName(String argPath, String extention, Int fileID) global native
-
-Float function MinFloat(Float a, Float b) global
-
-	if a < b
-		return a
-	endIf
-	return b
-endFunction
-
-String function getTypeString(Int fileID) global native
-
-function setIniCBool(String Type, String File, String Categorie, String Variable, Bool value) global native
-
-Int function SwitchInt(Bool cond, Int a, Int b) global
-
-	if cond
-		return a
-	endIf
-	return b
-endFunction
-
-String function GetIniFileCombine(String Mod, String Hex) global
-
-	return Mod + "_" + Hex + ".ini"
-endFunction
-
-Bool function OpenChildMenu(FWChildActor Child) global
-
-	if Child == none
-		return false
-	endIf
-	Child.OpenSkillMenu()
-endFunction
-
-Int function GetFormIDFromString(String S) global native
-
-Int function getIniCInt(String Type, String File, String Categorie, String Variable, Int Default) global native
-
-Actor[] function ActorArrayResize(Actor[] OldArray, Int NewSize) global
-
-	Actor[] res = FWUtility.ActorArray(NewSize)
-	Int i = 0
-	while i < NewSize && i < OldArray.length
-		res[i] = OldArray[i]
-		i += 1
-	endWhile
-	return res
-endFunction
-
-String function GetStringFromForm(form frm) global native
-
-function setIniFloat(String Type, String File, String Variable, Float value) global native
-
-function setIniCString(String Type, String File, String Categorie, String Variable, String value) global native
-
-Form[] function FormArray(Int size) global
-
-	size = FWUtility.ClampInt(size, 1, 128)
-	if size > 64
-		if size > 96
-			if size > 112
-				if size > 120
-					if size > 124
-						if size > 126
-							if size == 128
-								return new Form[128]
-							else
-								return new Form[127]
-							endIf
-						elseIf size == 126
-							return new Form[126]
-						else
-							return new Form[125]
-						endIf
-					elseIf size > 122
-						if size == 124
-							return new Form[124]
-						else
-							return new Form[123]
-						endIf
-					elseIf size == 122
-						return new Form[122]
-					else
-						return new Form[121]
-					endIf
-				elseIf size > 116
-					if size > 118
-						if size == 120
-							return new Form[120]
-						else
-							return new Form[119]
-						endIf
-					elseIf size == 118
-						return new Form[118]
-					else
-						return new Form[117]
-					endIf
-				elseIf size > 114
-					if size == 116
-						return new Form[116]
-					else
-						return new Form[115]
-					endIf
-				elseIf size == 114
-					return new Form[114]
-				else
-					return new Form[113]
-				endIf
-			elseIf size > 104
-				if size > 108
-					if size > 110
-						if size == 112
-							return new Form[112]
-						else
-							return new Form[111]
-						endIf
-					elseIf size == 110
-						return new Form[110]
-					else
-						return new Form[109]
-					endIf
-				elseIf size > 106
-					if size == 108
-						return new Form[108]
-					else
-						return new Form[107]
-					endIf
-				elseIf size == 106
-					return new Form[106]
-				else
-					return new Form[105]
-				endIf
-			elseIf size > 100
-				if size > 102
-					if size == 104
-						return new Form[104]
-					else
-						return new Form[103]
-					endIf
-				elseIf size == 102
-					return new Form[102]
-				else
-					return new Form[101]
-				endIf
-			elseIf size > 98
-				if size == 100
-					return new Form[100]
-				else
-					return new Form[99]
-				endIf
-			elseIf size == 98
-				return new Form[98]
-			else
-				return new Form[97]
-			endIf
-		elseIf size > 80
-			if size > 88
-				if size > 92
-					if size > 94
-						if size == 96
-							return new Form[96]
-						else
-							return new Form[95]
-						endIf
-					elseIf size == 94
-						return new Form[94]
-					else
-						return new Form[93]
-					endIf
-				elseIf size > 90
-					if size == 92
-						return new Form[92]
-					else
-						return new Form[91]
-					endIf
-				elseIf size == 90
-					return new Form[90]
-				else
-					return new Form[89]
-				endIf
-			elseIf size > 84
-				if size > 86
-					if size == 88
-						return new Form[88]
-					else
-						return new Form[87]
-					endIf
-				elseIf size == 86
-					return new Form[86]
-				else
-					return new Form[85]
-				endIf
-			elseIf size > 82
-				if size == 84
-					return new Form[84]
-				else
-					return new Form[83]
-				endIf
-			elseIf size == 82
-				return new Form[82]
-			else
-				return new Form[81]
-			endIf
-		elseIf size > 72
-			if size > 76
-				if size > 78
-					if size == 80
-						return new Form[80]
-					else
-						return new Form[79]
-					endIf
-				elseIf size == 78
-					return new Form[78]
-				else
-					return new Form[77]
-				endIf
-			elseIf size > 74
-				if size == 76
-					return new Form[76]
-				else
-					return new Form[75]
-				endIf
-			elseIf size == 74
-				return new Form[74]
-			else
-				return new Form[73]
-			endIf
-		elseIf size > 68
-			if size > 70
-				if size == 72
-					return new Form[72]
-				else
-					return new Form[71]
-				endIf
-			elseIf size == 70
-				return new Form[70]
-			else
-				return new Form[69]
-			endIf
-		elseIf size > 66
-			if size == 68
-				return new Form[68]
-			else
-				return new Form[67]
-			endIf
-		elseIf size == 66
-			return new Form[66]
-		else
-			return new Form[65]
-		endIf
-	elseIf size > 32
-		if size > 48
-			if size > 56
-				if size > 60
-					if size > 62
-						if size == 64
-							return new Form[64]
-						else
-							return new Form[63]
-						endIf
-					elseIf size == 62
-						return new Form[62]
-					else
-						return new Form[61]
-					endIf
-				elseIf size > 58
-					if size == 60
-						return new Form[60]
-					else
-						return new Form[59]
-					endIf
-				elseIf size == 58
-					return new Form[58]
-				else
-					return new Form[57]
-				endIf
-			elseIf size > 52
-				if size > 54
-					if size == 56
-						return new Form[56]
-					else
-						return new Form[55]
-					endIf
-				elseIf size == 54
-					return new Form[54]
-				else
-					return new Form[53]
-				endIf
-			elseIf size > 50
-				if size == 52
-					return new Form[52]
-				else
-					return new Form[51]
-				endIf
-			elseIf size == 50
-				return new Form[50]
-			else
-				return new Form[49]
-			endIf
-		elseIf size > 40
-			if size > 44
-				if size > 46
-					if size == 48
-						return new Form[48]
-					else
-						return new Form[47]
-					endIf
-				elseIf size == 46
-					return new Form[46]
-				else
-					return new Form[45]
-				endIf
-			elseIf size > 42
-				if size == 44
-					return new Form[44]
-				else
-					return new Form[43]
-				endIf
-			elseIf size == 42
-				return new Form[42]
-			else
-				return new Form[41]
-			endIf
-		elseIf size > 36
-			if size > 38
-				if size == 40
-					return new Form[40]
-				else
-					return new Form[39]
-				endIf
-			elseIf size == 38
-				return new Form[38]
-			else
-				return new Form[37]
-			endIf
-		elseIf size > 34
-			if size == 36
-				return new Form[36]
-			else
-				return new Form[35]
-			endIf
-		elseIf size == 34
-			return new Form[34]
-		else
-			return new Form[33]
-		endIf
-	elseIf size > 16
-		if size > 24
-			if size > 28
-				if size > 30
-					if size == 32
-						return new Form[32]
-					else
-						return new Form[31]
-					endIf
-				elseIf size == 30
-					return new Form[30]
-				else
-					return new Form[29]
-				endIf
-			elseIf size > 26
-				if size == 28
-					return new Form[28]
-				else
-					return new Form[27]
-				endIf
-			elseIf size == 26
-				return new Form[26]
-			else
-				return new Form[25]
-			endIf
-		elseIf size > 20
-			if size > 22
-				if size == 24
-					return new Form[24]
-				else
-					return new Form[23]
-				endIf
-			elseIf size == 22
-				return new Form[22]
-			else
-				return new Form[21]
-			endIf
-		elseIf size > 18
-			if size == 20
-				return new Form[20]
-			else
-				return new Form[19]
-			endIf
-		elseIf size == 18
-			return new Form[18]
-		else
-			return new Form[17]
-		endIf
-	elseIf size > 8
-		if size > 12
-			if size > 14
-				if size == 16
-					return new Form[16]
-				else
-					return new Form[15]
-				endIf
-			elseIf size == 14
-				return new Form[14]
-			else
-				return new Form[13]
-			endIf
-		elseIf size > 10
-			if size == 12
-				return new Form[12]
-			else
-				return new Form[11]
-			endIf
-		elseIf size == 10
-			return new Form[10]
-		else
-			return new Form[9]
-		endIf
-	elseIf size > 4
-		if size > 6
-			if size == 8
-				return new Form[8]
-			else
-				return new Form[7]
-			endIf
-		elseIf size == 6
-			return new Form[6]
-		else
-			return new Form[5]
-		endIf
-	elseIf size > 2
-		if size == 4
-			return new Form[4]
-		else
-			return new Form[3]
-		endIf
-	elseIf size == 2
-		return new Form[2]
-	else
-		return new Form[1]
-	endIf
-endFunction
-
-String function ScriptMashine(String script) global native
-
-String function GetVersionString(String modDesc) global
-
-	Bool bRunning = true
-	Int startpos = 0
-	Int vpos = 0
-	Int descLen = stringutil.GetLength(modDesc)
-	while bRunning
-		vpos = stringutil.Find(modDesc, "ersion", vpos)
-		if vpos > 0
-			if stringutil.GetNthChar(modDesc, vpos - 1) == "V" || stringutil.GetNthChar(modDesc, vpos - 1) == "V"
-				vpos += 6
-				while stringutil.GetNthChar(modDesc, vpos) != ":" && stringutil.GetNthChar(modDesc, vpos) != " " && vpos < descLen
-					vpos += 1
-				endWhile
-				startpos = vpos
-				while (FWUtility.IsNumber(stringutil.Substring(modDesc, vpos, 1)) || stringutil.Substring(modDesc, vpos, 1) == ".") && vpos < descLen
-					vpos += 1
-				endWhile
-				vpos -= 1
-				if stringutil.Substring(modDesc, vpos + 1, 1) == "b"
-					return "Beta " + stringutil.Substring(modDesc, startpos, vpos - startpos)
-				else
-					return stringutil.Substring(modDesc, startpos, vpos - startpos)
-				endIf
-			endIf
-		else
-			bRunning = false
-		endIf
-	endWhile
-	return "Undefined"
-endFunction
-
-String[] function StringArray(Int size) global
-
-	size = FWUtility.ClampInt(size, 1, 128)
-	if size > 64
-		if size > 96
-			if size > 112
-				if size > 120
-					if size > 124
-						if size > 126
-							if size == 128
-								return new String[128]
-							else
-								return new String[127]
-							endIf
-						elseIf size == 126
-							return new String[126]
-						else
-							return new String[125]
-						endIf
-					elseIf size > 122
-						if size == 124
-							return new String[124]
-						else
-							return new String[123]
-						endIf
-					elseIf size == 122
-						return new String[122]
-					else
-						return new String[121]
-					endIf
-				elseIf size > 116
-					if size > 118
-						if size == 120
-							return new String[120]
-						else
-							return new String[119]
-						endIf
-					elseIf size == 118
-						return new String[118]
-					else
-						return new String[117]
-					endIf
-				elseIf size > 114
-					if size == 116
-						return new String[116]
-					else
-						return new String[115]
-					endIf
-				elseIf size == 114
-					return new String[114]
-				else
-					return new String[113]
-				endIf
-			elseIf size > 104
-				if size > 108
-					if size > 110
-						if size == 112
-							return new String[112]
-						else
-							return new String[111]
-						endIf
-					elseIf size == 110
-						return new String[110]
-					else
-						return new String[109]
-					endIf
-				elseIf size > 106
-					if size == 108
-						return new String[108]
-					else
-						return new String[107]
-					endIf
-				elseIf size == 106
-					return new String[106]
-				else
-					return new String[105]
-				endIf
-			elseIf size > 100
-				if size > 102
-					if size == 104
-						return new String[104]
-					else
-						return new String[103]
-					endIf
-				elseIf size == 102
-					return new String[102]
-				else
-					return new String[101]
-				endIf
-			elseIf size > 98
-				if size == 100
-					return new String[100]
-				else
-					return new String[99]
-				endIf
-			elseIf size == 98
-				return new String[98]
-			else
-				return new String[97]
-			endIf
-		elseIf size > 80
-			if size > 88
-				if size > 92
-					if size > 94
-						if size == 96
-							return new String[96]
-						else
-							return new String[95]
-						endIf
-					elseIf size == 94
-						return new String[94]
-					else
-						return new String[93]
-					endIf
-				elseIf size > 90
-					if size == 92
-						return new String[92]
-					else
-						return new String[91]
-					endIf
-				elseIf size == 90
-					return new String[90]
-				else
-					return new String[89]
-				endIf
-			elseIf size > 84
-				if size > 86
-					if size == 88
-						return new String[88]
-					else
-						return new String[87]
-					endIf
-				elseIf size == 86
-					return new String[86]
-				else
-					return new String[85]
-				endIf
-			elseIf size > 82
-				if size == 84
-					return new String[84]
-				else
-					return new String[83]
-				endIf
-			elseIf size == 82
-				return new String[82]
-			else
-				return new String[81]
-			endIf
-		elseIf size > 72
-			if size > 76
-				if size > 78
-					if size == 80
-						return new String[80]
-					else
-						return new String[79]
-					endIf
-				elseIf size == 78
-					return new String[78]
-				else
-					return new String[77]
-				endIf
-			elseIf size > 74
-				if size == 76
-					return new String[76]
-				else
-					return new String[75]
-				endIf
-			elseIf size == 74
-				return new String[74]
-			else
-				return new String[73]
-			endIf
-		elseIf size > 68
-			if size > 70
-				if size == 72
-					return new String[72]
-				else
-					return new String[71]
-				endIf
-			elseIf size == 70
-				return new String[70]
-			else
-				return new String[69]
-			endIf
-		elseIf size > 66
-			if size == 68
-				return new String[68]
-			else
-				return new String[67]
-			endIf
-		elseIf size == 66
-			return new String[66]
-		else
-			return new String[65]
-		endIf
-	elseIf size > 32
-		if size > 48
-			if size > 56
-				if size > 60
-					if size > 62
-						if size == 64
-							return new String[64]
-						else
-							return new String[63]
-						endIf
-					elseIf size == 62
-						return new String[62]
-					else
-						return new String[61]
-					endIf
-				elseIf size > 58
-					if size == 60
-						return new String[60]
-					else
-						return new String[59]
-					endIf
-				elseIf size == 58
-					return new String[58]
-				else
-					return new String[57]
-				endIf
-			elseIf size > 52
-				if size > 54
-					if size == 56
-						return new String[56]
-					else
-						return new String[55]
-					endIf
-				elseIf size == 54
-					return new String[54]
-				else
-					return new String[53]
-				endIf
-			elseIf size > 50
-				if size == 52
-					return new String[52]
-				else
-					return new String[51]
-				endIf
-			elseIf size == 50
-				return new String[50]
-			else
-				return new String[49]
-			endIf
-		elseIf size > 40
-			if size > 44
-				if size > 46
-					if size == 48
-						return new String[48]
-					else
-						return new String[47]
-					endIf
-				elseIf size == 46
-					return new String[46]
-				else
-					return new String[45]
-				endIf
-			elseIf size > 42
-				if size == 44
-					return new String[44]
-				else
-					return new String[43]
-				endIf
-			elseIf size == 42
-				return new String[42]
-			else
-				return new String[41]
-			endIf
-		elseIf size > 36
-			if size > 38
-				if size == 40
-					return new String[40]
-				else
-					return new String[39]
-				endIf
-			elseIf size == 38
-				return new String[38]
-			else
-				return new String[37]
-			endIf
-		elseIf size > 34
-			if size == 36
-				return new String[36]
-			else
-				return new String[35]
-			endIf
-		elseIf size == 34
-			return new String[34]
-		else
-			return new String[33]
-		endIf
-	elseIf size > 16
-		if size > 24
-			if size > 28
-				if size > 30
-					if size == 32
-						return new String[32]
-					else
-						return new String[31]
-					endIf
-				elseIf size == 30
-					return new String[30]
-				else
-					return new String[29]
-				endIf
-			elseIf size > 26
-				if size == 28
-					return new String[28]
-				else
-					return new String[27]
-				endIf
-			elseIf size == 26
-				return new String[26]
-			else
-				return new String[25]
-			endIf
-		elseIf size > 20
-			if size > 22
-				if size == 24
-					return new String[24]
-				else
-					return new String[23]
-				endIf
-			elseIf size == 22
-				return new String[22]
-			else
-				return new String[21]
-			endIf
-		elseIf size > 18
-			if size == 20
-				return new String[20]
-			else
-				return new String[19]
-			endIf
-		elseIf size == 18
-			return new String[18]
-		else
-			return new String[17]
-		endIf
-	elseIf size > 8
-		if size > 12
-			if size > 14
-				if size == 16
-					return new String[16]
-				else
-					return new String[15]
-				endIf
-			elseIf size == 14
-				return new String[14]
-			else
-				return new String[13]
-			endIf
-		elseIf size > 10
-			if size == 12
-				return new String[12]
-			else
-				return new String[11]
-			endIf
-		elseIf size == 10
-			return new String[10]
-		else
-			return new String[9]
-		endIf
-	elseIf size > 4
-		if size > 6
-			if size == 8
-				return new String[8]
-			else
-				return new String[7]
-			endIf
-		elseIf size == 6
-			return new String[6]
-		else
-			return new String[5]
-		endIf
-	elseIf size > 2
-		if size == 4
-			return new String[4]
-		else
-			return new String[3]
-		endIf
-	elseIf size == 2
-		return new String[2]
-	else
-		return new String[1]
-	endIf
-endFunction
-
-Int[] function IntArray(Int size) global
-
-	size = FWUtility.ClampInt(size, 1, 128)
-	if size > 64
-		if size > 96
-			if size > 112
-				if size > 120
-					if size > 124
-						if size > 126
-							if size == 128
-								return new Int[128]
-							else
-								return new Int[127]
-							endIf
-						elseIf size == 126
-							return new Int[126]
-						else
-							return new Int[125]
-						endIf
-					elseIf size > 122
-						if size == 124
-							return new Int[124]
-						else
-							return new Int[123]
-						endIf
-					elseIf size == 122
-						return new Int[122]
-					else
-						return new Int[121]
-					endIf
-				elseIf size > 116
-					if size > 118
-						if size == 120
-							return new Int[120]
-						else
-							return new Int[119]
-						endIf
-					elseIf size == 118
-						return new Int[118]
-					else
-						return new Int[117]
-					endIf
-				elseIf size > 114
-					if size == 116
-						return new Int[116]
-					else
-						return new Int[115]
-					endIf
-				elseIf size == 114
-					return new Int[114]
-				else
-					return new Int[113]
-				endIf
-			elseIf size > 104
-				if size > 108
-					if size > 110
-						if size == 112
-							return new Int[112]
-						else
-							return new Int[111]
-						endIf
-					elseIf size == 110
-						return new Int[110]
-					else
-						return new Int[109]
-					endIf
-				elseIf size > 106
-					if size == 108
-						return new Int[108]
-					else
-						return new Int[107]
-					endIf
-				elseIf size == 106
-					return new Int[106]
-				else
-					return new Int[105]
-				endIf
-			elseIf size > 100
-				if size > 102
-					if size == 104
-						return new Int[104]
-					else
-						return new Int[103]
-					endIf
-				elseIf size == 102
-					return new Int[102]
-				else
-					return new Int[101]
-				endIf
-			elseIf size > 98
-				if size == 100
-					return new Int[100]
-				else
-					return new Int[99]
-				endIf
-			elseIf size == 98
-				return new Int[98]
-			else
-				return new Int[97]
-			endIf
-		elseIf size > 80
-			if size > 88
-				if size > 92
-					if size > 94
-						if size == 96
-							return new Int[96]
-						else
-							return new Int[95]
-						endIf
-					elseIf size == 94
-						return new Int[94]
-					else
-						return new Int[93]
-					endIf
-				elseIf size > 90
-					if size == 92
-						return new Int[92]
-					else
-						return new Int[91]
-					endIf
-				elseIf size == 90
-					return new Int[90]
-				else
-					return new Int[89]
-				endIf
-			elseIf size > 84
-				if size > 86
-					if size == 88
-						return new Int[88]
-					else
-						return new Int[87]
-					endIf
-				elseIf size == 86
-					return new Int[86]
-				else
-					return new Int[85]
-				endIf
-			elseIf size > 82
-				if size == 84
-					return new Int[84]
-				else
-					return new Int[83]
-				endIf
-			elseIf size == 82
-				return new Int[82]
-			else
-				return new Int[81]
-			endIf
-		elseIf size > 72
-			if size > 76
-				if size > 78
-					if size == 80
-						return new Int[80]
-					else
-						return new Int[79]
-					endIf
-				elseIf size == 78
-					return new Int[78]
-				else
-					return new Int[77]
-				endIf
-			elseIf size > 74
-				if size == 76
-					return new Int[76]
-				else
-					return new Int[75]
-				endIf
-			elseIf size == 74
-				return new Int[74]
-			else
-				return new Int[73]
-			endIf
-		elseIf size > 68
-			if size > 70
-				if size == 72
-					return new Int[72]
-				else
-					return new Int[71]
-				endIf
-			elseIf size == 70
-				return new Int[70]
-			else
-				return new Int[69]
-			endIf
-		elseIf size > 66
-			if size == 68
-				return new Int[68]
-			else
-				return new Int[67]
-			endIf
-		elseIf size == 66
-			return new Int[66]
-		else
-			return new Int[65]
-		endIf
-	elseIf size > 32
-		if size > 48
-			if size > 56
-				if size > 60
-					if size > 62
-						if size == 64
-							return new Int[64]
-						else
-							return new Int[63]
-						endIf
-					elseIf size == 62
-						return new Int[62]
-					else
-						return new Int[61]
-					endIf
-				elseIf size > 58
-					if size == 60
-						return new Int[60]
-					else
-						return new Int[59]
-					endIf
-				elseIf size == 58
-					return new Int[58]
-				else
-					return new Int[57]
-				endIf
-			elseIf size > 52
-				if size > 54
-					if size == 56
-						return new Int[56]
-					else
-						return new Int[55]
-					endIf
-				elseIf size == 54
-					return new Int[54]
-				else
-					return new Int[53]
-				endIf
-			elseIf size > 50
-				if size == 52
-					return new Int[52]
-				else
-					return new Int[51]
-				endIf
-			elseIf size == 50
-				return new Int[50]
-			else
-				return new Int[49]
-			endIf
-		elseIf size > 40
-			if size > 44
-				if size > 46
-					if size == 48
-						return new Int[48]
-					else
-						return new Int[47]
-					endIf
-				elseIf size == 46
-					return new Int[46]
-				else
-					return new Int[45]
-				endIf
-			elseIf size > 42
-				if size == 44
-					return new Int[44]
-				else
-					return new Int[43]
-				endIf
-			elseIf size == 42
-				return new Int[42]
-			else
-				return new Int[41]
-			endIf
-		elseIf size > 36
-			if size > 38
-				if size == 40
-					return new Int[40]
-				else
-					return new Int[39]
-				endIf
-			elseIf size == 38
-				return new Int[38]
-			else
-				return new Int[37]
-			endIf
-		elseIf size > 34
-			if size == 36
-				return new Int[36]
-			else
-				return new Int[35]
-			endIf
-		elseIf size == 34
-			return new Int[34]
-		else
-			return new Int[33]
-		endIf
-	elseIf size > 16
-		if size > 24
-			if size > 28
-				if size > 30
-					if size == 32
-						return new Int[32]
-					else
-						return new Int[31]
-					endIf
-				elseIf size == 30
-					return new Int[30]
-				else
-					return new Int[29]
-				endIf
-			elseIf size > 26
-				if size == 28
-					return new Int[28]
-				else
-					return new Int[27]
-				endIf
-			elseIf size == 26
-				return new Int[26]
-			else
-				return new Int[25]
-			endIf
-		elseIf size > 20
-			if size > 22
-				if size == 24
-					return new Int[24]
-				else
-					return new Int[23]
-				endIf
-			elseIf size == 22
-				return new Int[22]
-			else
-				return new Int[21]
-			endIf
-		elseIf size > 18
-			if size == 20
-				return new Int[20]
-			else
-				return new Int[19]
-			endIf
-		elseIf size == 18
-			return new Int[18]
-		else
-			return new Int[17]
-		endIf
-	elseIf size > 8
-		if size > 12
-			if size > 14
-				if size == 16
-					return new Int[16]
-				else
-					return new Int[15]
-				endIf
-			elseIf size == 14
-				return new Int[14]
-			else
-				return new Int[13]
-			endIf
-		elseIf size > 10
-			if size == 12
-				return new Int[12]
-			else
-				return new Int[11]
-			endIf
-		elseIf size == 10
-			return new Int[10]
-		else
-			return new Int[9]
-		endIf
-	elseIf size > 4
-		if size > 6
-			if size == 8
-				return new Int[8]
-			else
-				return new Int[7]
-			endIf
-		elseIf size == 6
-			return new Int[6]
-		else
-			return new Int[5]
-		endIf
-	elseIf size > 2
-		if size == 4
-			return new Int[4]
-		else
-			return new Int[3]
-		endIf
-	elseIf size == 2
-		return new Int[2]
-	else
-		return new Int[1]
-	endIf
-endFunction
-
-String function GetModFromID(form frm, Bool bFileExtention) global
-
-	Int c = game.GetModCount()
-	Int i = 0
-	String mName = ""
-	Bool bFound = false
-	if frm as actor != none
-		actor a = frm as actor
-		actorbase b = a.GetLeveledActorBase()
-		Int mID = a.GetFormID() % 16777216
-		Int nID = b.GetFormID() % 16777216
-		debug.Trace("Find Mod by Actor '" + b.GetName() + "' - " + mID as String + "(" + a.GetFormID() as String + ") / " + nID as String + "(" + b.GetFormID() as String + ")", 0)
-		while i < c
-			mName = game.GetModName(i)
-			if a == game.GetFormFromFile(mID, mName) as actor
-				i = c
-				c = 0
-				bFound = true
-			elseIf b == game.GetFormFromFile(nID, mName) as actorbase
-				i = c
-				c = 0
-				bFound = true
-			endIf
-			i += 1
-		endWhile
-	else
-		Int mid = frm.GetFormID() % 16777216
-		while i < c
-			mName = game.GetModName(i)
-			if frm == game.GetFormFromFile(mid, mName)
-				i = c
-				c = 0
-				bFound = true
-			endIf
-			i += 1
-		endWhile
-	endIf
-	if bFound
-		if bFileExtention
-			return mName
-		else
-			Int len = stringutil.GetLength(mName) - 4
-			return stringutil.Substring(mName, 0, len)
-		endIf
-	else
-		return "unknown"
-	endIf
-endFunction
-
-Int function ClampInt(Int a, Int min, Int max) global
-
-	if a < min
-		return min
-	elseIf a > max
-		return max
-	endIf
-	return a
-endFunction
-
-Int function MaxInt(Int a, Int b) global
-
-	if b < a
-		return a
-	endIf
-	return b
-endFunction
-
-String function getStateNameTranslated(Int StateID) global
-
-	return "$FW_MENU_INFO_StateName" + StateID as String
-endFunction
-
-Form[] function FormArrayConcat(Form[] f1, Form[] f2) global
-
-	if f1.length == 0
-		return f2
-	elseIf f2.length == 0
-		return f1
-	else
-		Int n = f1.length + f2.length
-		Int f1l = f1.length
-		Int f2l = f2.length
-		if n > 128
-			f2l = 128 - f1l
-		endIf
-		Form[] fn = FWUtility.FormArray(n)
-		Int i = 0
-		while i < f1l
-			fn[f1l] = f1[f1l]
-			i += 1
-		endWhile
-		i = 0
-		while i < f2l
-			fn[i + f2l] = f2[i]
-			i += 1
-		endWhile
-	endIf
-endFunction
-
-String function ScriptSource(String script) global native
-
-Bool[] function BoolArray(Int size) global
-
-	size = FWUtility.ClampInt(size, 1, 128)
-	if size > 64
-		if size > 96
-			if size > 112
-				if size > 120
-					if size > 124
-						if size > 126
-							if size == 128
-								return new Bool[128]
-							else
-								return new Bool[127]
-							endIf
-						elseIf size == 126
-							return new Bool[126]
-						else
-							return new Bool[125]
-						endIf
-					elseIf size > 122
-						if size == 124
-							return new Bool[124]
-						else
-							return new Bool[123]
-						endIf
-					elseIf size == 122
-						return new Bool[122]
-					else
-						return new Bool[121]
-					endIf
-				elseIf size > 116
-					if size > 118
-						if size == 120
-							return new Bool[120]
-						else
-							return new Bool[119]
-						endIf
-					elseIf size == 118
-						return new Bool[118]
-					else
-						return new Bool[117]
-					endIf
-				elseIf size > 114
-					if size == 116
-						return new Bool[116]
-					else
-						return new Bool[115]
-					endIf
-				elseIf size == 114
-					return new Bool[114]
-				else
-					return new Bool[113]
-				endIf
-			elseIf size > 104
-				if size > 108
-					if size > 110
-						if size == 112
-							return new Bool[112]
-						else
-							return new Bool[111]
-						endIf
-					elseIf size == 110
-						return new Bool[110]
-					else
-						return new Bool[109]
-					endIf
-				elseIf size > 106
-					if size == 108
-						return new Bool[108]
-					else
-						return new Bool[107]
-					endIf
-				elseIf size == 106
-					return new Bool[106]
-				else
-					return new Bool[105]
-				endIf
-			elseIf size > 100
-				if size > 102
-					if size == 104
-						return new Bool[104]
-					else
-						return new Bool[103]
-					endIf
-				elseIf size == 102
-					return new Bool[102]
-				else
-					return new Bool[101]
-				endIf
-			elseIf size > 98
-				if size == 100
-					return new Bool[100]
-				else
-					return new Bool[99]
-				endIf
-			elseIf size == 98
-				return new Bool[98]
-			else
-				return new Bool[97]
-			endIf
-		elseIf size > 80
-			if size > 88
-				if size > 92
-					if size > 94
-						if size == 96
-							return new Bool[96]
-						else
-							return new Bool[95]
-						endIf
-					elseIf size == 94
-						return new Bool[94]
-					else
-						return new Bool[93]
-					endIf
-				elseIf size > 90
-					if size == 92
-						return new Bool[92]
-					else
-						return new Bool[91]
-					endIf
-				elseIf size == 90
-					return new Bool[90]
-				else
-					return new Bool[89]
-				endIf
-			elseIf size > 84
-				if size > 86
-					if size == 88
-						return new Bool[88]
-					else
-						return new Bool[87]
-					endIf
-				elseIf size == 86
-					return new Bool[86]
-				else
-					return new Bool[85]
-				endIf
-			elseIf size > 82
-				if size == 84
-					return new Bool[84]
-				else
-					return new Bool[83]
-				endIf
-			elseIf size == 82
-				return new Bool[82]
-			else
-				return new Bool[81]
-			endIf
-		elseIf size > 72
-			if size > 76
-				if size > 78
-					if size == 80
-						return new Bool[80]
-					else
-						return new Bool[79]
-					endIf
-				elseIf size == 78
-					return new Bool[78]
-				else
-					return new Bool[77]
-				endIf
-			elseIf size > 74
-				if size == 76
-					return new Bool[76]
-				else
-					return new Bool[75]
-				endIf
-			elseIf size == 74
-				return new Bool[74]
-			else
-				return new Bool[73]
-			endIf
-		elseIf size > 68
-			if size > 70
-				if size == 72
-					return new Bool[72]
-				else
-					return new Bool[71]
-				endIf
-			elseIf size == 70
-				return new Bool[70]
-			else
-				return new Bool[69]
-			endIf
-		elseIf size > 66
-			if size == 68
-				return new Bool[68]
-			else
-				return new Bool[67]
-			endIf
-		elseIf size == 66
-			return new Bool[66]
-		else
-			return new Bool[65]
-		endIf
-	elseIf size > 32
-		if size > 48
-			if size > 56
-				if size > 60
-					if size > 62
-						if size == 64
-							return new Bool[64]
-						else
-							return new Bool[63]
-						endIf
-					elseIf size == 62
-						return new Bool[62]
-					else
-						return new Bool[61]
-					endIf
-				elseIf size > 58
-					if size == 60
-						return new Bool[60]
-					else
-						return new Bool[59]
-					endIf
-				elseIf size == 58
-					return new Bool[58]
-				else
-					return new Bool[57]
-				endIf
-			elseIf size > 52
-				if size > 54
-					if size == 56
-						return new Bool[56]
-					else
-						return new Bool[55]
-					endIf
-				elseIf size == 54
-					return new Bool[54]
-				else
-					return new Bool[53]
-				endIf
-			elseIf size > 50
-				if size == 52
-					return new Bool[52]
-				else
-					return new Bool[51]
-				endIf
-			elseIf size == 50
-				return new Bool[50]
-			else
-				return new Bool[49]
-			endIf
-		elseIf size > 40
-			if size > 44
-				if size > 46
-					if size == 48
-						return new Bool[48]
-					else
-						return new Bool[47]
-					endIf
-				elseIf size == 46
-					return new Bool[46]
-				else
-					return new Bool[45]
-				endIf
-			elseIf size > 42
-				if size == 44
-					return new Bool[44]
-				else
-					return new Bool[43]
-				endIf
-			elseIf size == 42
-				return new Bool[42]
-			else
-				return new Bool[41]
-			endIf
-		elseIf size > 36
-			if size > 38
-				if size == 40
-					return new Bool[40]
-				else
-					return new Bool[39]
-				endIf
-			elseIf size == 38
-				return new Bool[38]
-			else
-				return new Bool[37]
-			endIf
-		elseIf size > 34
-			if size == 36
-				return new Bool[36]
-			else
-				return new Bool[35]
-			endIf
-		elseIf size == 34
-			return new Bool[34]
-		else
-			return new Bool[33]
-		endIf
-	elseIf size > 16
-		if size > 24
-			if size > 28
-				if size > 30
-					if size == 32
-						return new Bool[32]
-					else
-						return new Bool[31]
-					endIf
-				elseIf size == 30
-					return new Bool[30]
-				else
-					return new Bool[29]
-				endIf
-			elseIf size > 26
-				if size == 28
-					return new Bool[28]
-				else
-					return new Bool[27]
-				endIf
-			elseIf size == 26
-				return new Bool[26]
-			else
-				return new Bool[25]
-			endIf
-		elseIf size > 20
-			if size > 22
-				if size == 24
-					return new Bool[24]
-				else
-					return new Bool[23]
-				endIf
-			elseIf size == 22
-				return new Bool[22]
-			else
-				return new Bool[21]
-			endIf
-		elseIf size > 18
-			if size == 20
-				return new Bool[20]
-			else
-				return new Bool[19]
-			endIf
-		elseIf size == 18
-			return new Bool[18]
-		else
-			return new Bool[17]
-		endIf
-	elseIf size > 8
-		if size > 12
-			if size > 14
-				if size == 16
-					return new Bool[16]
-				else
-					return new Bool[15]
-				endIf
-			elseIf size == 14
-				return new Bool[14]
-			else
-				return new Bool[13]
-			endIf
-		elseIf size > 10
-			if size == 12
-				return new Bool[12]
-			else
-				return new Bool[11]
-			endIf
-		elseIf size == 10
-			return new Bool[10]
-		else
-			return new Bool[9]
-		endIf
-	elseIf size > 4
-		if size > 6
-			if size == 8
-				return new Bool[8]
-			else
-				return new Bool[7]
-			endIf
-		elseIf size == 6
-			return new Bool[6]
-		else
-			return new Bool[5]
-		endIf
-	elseIf size > 2
-		if size == 4
-			return new Bool[4]
-		else
-			return new Bool[3]
-		endIf
-	elseIf size == 2
-		return new Bool[2]
-	else
-		return new Bool[1]
-	endIf
-endFunction
-
-Bool function FileExists(String FilePath) global native
-
-function ActorRemoveSpells(actor a, Spell[] sa) global
-
-	if a == none
-		return 
-	endIf
-	Int i = 0
-	Int c = sa.length
-	while i < c
-		FWUtility.ActorRemoveSpell(a, sa[i])
-		i += 1
-	endWhile
-endFunction
-
-ActorBase[] function ActorBaseArray(Int size) global
-
-	size = FWUtility.ClampInt(size, 1, 128)
-	if size > 64
-		if size > 96
-			if size > 112
-				if size > 120
-					if size > 124
-						if size > 126
-							if size == 128
-								return new ActorBase[128]
-							else
-								return new ActorBase[127]
-							endIf
-						elseIf size == 126
-							return new ActorBase[126]
-						else
-							return new ActorBase[125]
-						endIf
-					elseIf size > 122
-						if size == 124
-							return new ActorBase[124]
-						else
-							return new ActorBase[123]
-						endIf
-					elseIf size == 122
-						return new ActorBase[122]
-					else
-						return new ActorBase[121]
-					endIf
-				elseIf size > 116
-					if size > 118
-						if size == 120
-							return new ActorBase[120]
-						else
-							return new ActorBase[119]
-						endIf
-					elseIf size == 118
-						return new ActorBase[118]
-					else
-						return new ActorBase[117]
-					endIf
-				elseIf size > 114
-					if size == 116
-						return new ActorBase[116]
-					else
-						return new ActorBase[115]
-					endIf
-				elseIf size == 114
-					return new ActorBase[114]
-				else
-					return new ActorBase[113]
-				endIf
-			elseIf size > 104
-				if size > 108
-					if size > 110
-						if size == 112
-							return new ActorBase[112]
-						else
-							return new ActorBase[111]
-						endIf
-					elseIf size == 110
-						return new ActorBase[110]
-					else
-						return new ActorBase[109]
-					endIf
-				elseIf size > 106
-					if size == 108
-						return new ActorBase[108]
-					else
-						return new ActorBase[107]
-					endIf
-				elseIf size == 106
-					return new ActorBase[106]
-				else
-					return new ActorBase[105]
-				endIf
-			elseIf size > 100
-				if size > 102
-					if size == 104
-						return new ActorBase[104]
-					else
-						return new ActorBase[103]
-					endIf
-				elseIf size == 102
-					return new ActorBase[102]
-				else
-					return new ActorBase[101]
-				endIf
-			elseIf size > 98
-				if size == 100
-					return new ActorBase[100]
-				else
-					return new ActorBase[99]
-				endIf
-			elseIf size == 98
-				return new ActorBase[98]
-			else
-				return new ActorBase[97]
-			endIf
-		elseIf size > 80
-			if size > 88
-				if size > 92
-					if size > 94
-						if size == 96
-							return new ActorBase[96]
-						else
-							return new ActorBase[95]
-						endIf
-					elseIf size == 94
-						return new ActorBase[94]
-					else
-						return new ActorBase[93]
-					endIf
-				elseIf size > 90
-					if size == 92
-						return new ActorBase[92]
-					else
-						return new ActorBase[91]
-					endIf
-				elseIf size == 90
-					return new ActorBase[90]
-				else
-					return new ActorBase[89]
-				endIf
-			elseIf size > 84
-				if size > 86
-					if size == 88
-						return new ActorBase[88]
-					else
-						return new ActorBase[87]
-					endIf
-				elseIf size == 86
-					return new ActorBase[86]
-				else
-					return new ActorBase[85]
-				endIf
-			elseIf size > 82
-				if size == 84
-					return new ActorBase[84]
-				else
-					return new ActorBase[83]
-				endIf
-			elseIf size == 82
-				return new ActorBase[82]
-			else
-				return new ActorBase[81]
-			endIf
-		elseIf size > 72
-			if size > 76
-				if size > 78
-					if size == 80
-						return new ActorBase[80]
-					else
-						return new ActorBase[79]
-					endIf
-				elseIf size == 78
-					return new ActorBase[78]
-				else
-					return new ActorBase[77]
-				endIf
-			elseIf size > 74
-				if size == 76
-					return new ActorBase[76]
-				else
-					return new ActorBase[75]
-				endIf
-			elseIf size == 74
-				return new ActorBase[74]
-			else
-				return new ActorBase[73]
-			endIf
-		elseIf size > 68
-			if size > 70
-				if size == 72
-					return new ActorBase[72]
-				else
-					return new ActorBase[71]
-				endIf
-			elseIf size == 70
-				return new ActorBase[70]
-			else
-				return new ActorBase[69]
-			endIf
-		elseIf size > 66
-			if size == 68
-				return new ActorBase[68]
-			else
-				return new ActorBase[67]
-			endIf
-		elseIf size == 66
-			return new ActorBase[66]
-		else
-			return new ActorBase[65]
-		endIf
-	elseIf size > 32
-		if size > 48
-			if size > 56
-				if size > 60
-					if size > 62
-						if size == 64
-							return new ActorBase[64]
-						else
-							return new ActorBase[63]
-						endIf
-					elseIf size == 62
-						return new ActorBase[62]
-					else
-						return new ActorBase[61]
-					endIf
-				elseIf size > 58
-					if size == 60
-						return new ActorBase[60]
-					else
-						return new ActorBase[59]
-					endIf
-				elseIf size == 58
-					return new ActorBase[58]
-				else
-					return new ActorBase[57]
-				endIf
-			elseIf size > 52
-				if size > 54
-					if size == 56
-						return new ActorBase[56]
-					else
-						return new ActorBase[55]
-					endIf
-				elseIf size == 54
-					return new ActorBase[54]
-				else
-					return new ActorBase[53]
-				endIf
-			elseIf size > 50
-				if size == 52
-					return new ActorBase[52]
-				else
-					return new ActorBase[51]
-				endIf
-			elseIf size == 50
-				return new ActorBase[50]
-			else
-				return new ActorBase[49]
-			endIf
-		elseIf size > 40
-			if size > 44
-				if size > 46
-					if size == 48
-						return new ActorBase[48]
-					else
-						return new ActorBase[47]
-					endIf
-				elseIf size == 46
-					return new ActorBase[46]
-				else
-					return new ActorBase[45]
-				endIf
-			elseIf size > 42
-				if size == 44
-					return new ActorBase[44]
-				else
-					return new ActorBase[43]
-				endIf
-			elseIf size == 42
-				return new ActorBase[42]
-			else
-				return new ActorBase[41]
-			endIf
-		elseIf size > 36
-			if size > 38
-				if size == 40
-					return new ActorBase[40]
-				else
-					return new ActorBase[39]
-				endIf
-			elseIf size == 38
-				return new ActorBase[38]
-			else
-				return new ActorBase[37]
-			endIf
-		elseIf size > 34
-			if size == 36
-				return new ActorBase[36]
-			else
-				return new ActorBase[35]
-			endIf
-		elseIf size == 34
-			return new ActorBase[34]
-		else
-			return new ActorBase[33]
-		endIf
-	elseIf size > 16
-		if size > 24
-			if size > 28
-				if size > 30
-					if size == 32
-						return new ActorBase[32]
-					else
-						return new ActorBase[31]
-					endIf
-				elseIf size == 30
-					return new ActorBase[30]
-				else
-					return new ActorBase[29]
-				endIf
-			elseIf size > 26
-				if size == 28
-					return new ActorBase[28]
-				else
-					return new ActorBase[27]
-				endIf
-			elseIf size == 26
-				return new ActorBase[26]
-			else
-				return new ActorBase[25]
-			endIf
-		elseIf size > 20
-			if size > 22
-				if size == 24
-					return new ActorBase[24]
-				else
-					return new ActorBase[23]
-				endIf
-			elseIf size == 22
-				return new ActorBase[22]
-			else
-				return new ActorBase[21]
-			endIf
-		elseIf size > 18
-			if size == 20
-				return new ActorBase[20]
-			else
-				return new ActorBase[19]
-			endIf
-		elseIf size == 18
-			return new ActorBase[18]
-		else
-			return new ActorBase[17]
-		endIf
-	elseIf size > 8
-		if size > 12
-			if size > 14
-				if size == 16
-					return new ActorBase[16]
-				else
-					return new ActorBase[15]
-				endIf
-			elseIf size == 14
-				return new ActorBase[14]
-			else
-				return new ActorBase[13]
-			endIf
-		elseIf size > 10
-			if size == 12
-				return new ActorBase[12]
-			else
-				return new ActorBase[11]
-			endIf
-		elseIf size == 10
-			return new ActorBase[10]
-		else
-			return new ActorBase[9]
-		endIf
-	elseIf size > 4
-		if size > 6
-			if size == 8
-				return new ActorBase[8]
-			else
-				return new ActorBase[7]
-			endIf
-		elseIf size == 6
-			return new ActorBase[6]
-		else
-			return new ActorBase[5]
-		endIf
-	elseIf size > 2
-		if size == 4
-			return new ActorBase[4]
-		else
-			return new ActorBase[3]
-		endIf
-	elseIf size == 2
-		return new ActorBase[2]
-	else
-		return new ActorBase[1]
-	endIf
-endFunction
-
-function setIniBool(String Type, String File, String Variable, Bool value) global native
-
-Int[] function IntArrayResize(Int[] OldArray, Int NewSize) global
-
-	Int[] res = FWUtility.IntArray(NewSize)
-	Int i = 0
-	while i < NewSize && i < OldArray.length
-		res[i] = OldArray[i]
-		i += 1
-	endWhile
-	return res
-endFunction
-
-Bool function AreModsInstalled(String[] ModNames) global
-
-	Int c = ModNames.length
-	while c > 0
-		c -= 1
-		if ModNames[c] != "" && FWUtility.IsModInstalled(ModNames[c]) == false
+bool function AreModsInstalled(string[] ModNames) global
+	int c = ModNames.length
+	while c>0
+		c-=1
+		if ModNames[c]!="" && IsModInstalled(ModNames[c])==false
 			return false
-		endIf
+		endif
 	endWhile
 	return true
 endFunction
 
-String function GetStringFromForms(Form[] frms) global
-
-	Int i = 0
-	String S = ""
-	Int c = frms.length
-	while i < c
-		String tmp = FWUtility.GetStringFromForm(frms[i])
-		if tmp != ""
-			if i > 0
-				S += ","
-			endIf
-			S += tmp
-		endIf
-		i += 1
-	endWhile
-	return S
-endFunction
-
-String function ModFile(String ModName) global
-
-	Int c = game.GetModCount()
-	while c > 0
-		c -= 1
-		String m = game.GetModName(c)
-		if m == ModName || m == ModName + ".esp" || m == ModName + ".esm"
+string function ModFile(string ModName) global
+	int c = Game.GetModCount()
+	while c>0
+		c-=1
+		string m = Game.GetModName(c)
+		if m==ModName || m==ModName+".esp" || m==ModName+".esm"
 			return m
-		endIf
+		endif
 	endWhile
 	return ""
 endFunction
 
-Int[] function IntArrayAppend(Int[] OldArray, Int Append) global
-
-	Int c = OldArray.length
-	if c == 0
-		Int[] t = new Int[1]
-		t[0] = Append
-		return t
-	elseIf c > 127
-		return OldArray
-	endIf
-	Int[] na = FWUtility.IntArray(c + 1)
-	na[c] = Append
-	while c > 0
-		c -= 1
-		na[c] = OldArray[c]
-	endWhile
-	return na
+string function GetJsonFile(form frm) global
+	;if frm as actor != none
+	;	return GetJsonFileCombine(GetModFromID(frm,false), Hex((frm as actor).GetLeveledActorBase().GetFormID(), 6))
+	;else
+		return GetJsonFileCombine(GetModFromID(frm,false), Hex(frm.GetFormID(), 6))
+	;endif
 endFunction
 
-Actor[] function ActorArrayUnique(Actor[] a) global
-
-	if a.length < 2
-		return a
-	endIf
-	Int newLen = a.length
-	Int c = a.length
-	Int i = 0
-	while i < c - 1
-		if a.find(a[i], i + 1) != -1
-			a[i] = none
-			newLen -= 1
-		endIf
-		i += 1
-	endWhile
-	Actor[] new_a = FWUtility.ActorArray(newLen)
-	i = 0
-	Int ni = 0
-	while i < c
-		if a[i] != none
-			new_a[ni] = a[i]
-			ni += 1
-		endIf
-		i += 1
-	endWhile
-	return new_a
-endFunction
-
-Float[] function FloatArrayAppend(Float[] OldArray, Float Append) global
-
-	Int c = OldArray.length
-	if c == 0
-		Float[] t = new Float[1]
-		t[0] = Append
-		return t
-	elseIf c > 127
-		return OldArray
-	endIf
-	Float[] na = FWUtility.FloatArray(c + 1)
-	na[c] = Append
-	while c > 0
-		c -= 1
-		na[c] = OldArray[c]
-	endWhile
-	return na
-endFunction
-
-form function GetFormFromString(String S) global native
-
-Float[] function FloatArrayResize(Float[] OldArray, Int NewSize) global
-
-	Float[] res = FWUtility.FloatArray(NewSize)
-	Int i = 0
-	while i < NewSize && i < OldArray.length
-		res[i] = OldArray[i]
-		i += 1
-	endWhile
-	return res
-endFunction
-
-function ActorRemoveSpell(actor a, spell S) global
-
-	if S != none && a != none
-		if a.HasSpell(S as form)
-			a.RemoveSpell(S)
-		endIf
-	endIf
-endFunction
-
-String function StringReplace(String Text, String Find, String Replace) global native
-
-Float function SwitchFloat(Bool cond, Float a, Float b) global
-
-	if cond
-		return a
-	endIf
-	return b
-endFunction
-
-String function GetModFromForm(form frm, Bool bExtension) global native
-
-Actor[] function removeDuplicatedActors(Actor[] list) global
-
-	Int i = 0
-	Int j = 0
-	Int c = list.length
-	Int S = 0
-	while i < c - 1
-		j = i + 1
-		while j < c
-			if list[i] == list[j]
-				list[j] = none
-				S += 1
-			endIf
-			j += 1
-		endWhile
-		i += 1
-	endWhile
-	Actor[] res = FWUtility.ActorArray(S)
-	i = 0
-	j = 0
-	while i < c
-		if list[i] != none
-			res[j] = list[i]
-		endIf
-		i += 1
-	endWhile
-	return res
-endFunction
-
-Float[] function FloatArray(Int size) global
-
-	size = FWUtility.ClampInt(size, 1, 128)
-	if size > 64
-		if size > 96
-			if size > 112
-				if size > 120
-					if size > 124
-						if size > 126
-							if size == 128
-								return new Float[128]
-							else
-								return new Float[127]
-							endIf
-						elseIf size == 126
-							return new Float[126]
-						else
-							return new Float[125]
-						endIf
-					elseIf size > 122
-						if size == 124
-							return new Float[124]
-						else
-							return new Float[123]
-						endIf
-					elseIf size == 122
-						return new Float[122]
-					else
-						return new Float[121]
-					endIf
-				elseIf size > 116
-					if size > 118
-						if size == 120
-							return new Float[120]
-						else
-							return new Float[119]
-						endIf
-					elseIf size == 118
-						return new Float[118]
-					else
-						return new Float[117]
-					endIf
-				elseIf size > 114
-					if size == 116
-						return new Float[116]
-					else
-						return new Float[115]
-					endIf
-				elseIf size == 114
-					return new Float[114]
-				else
-					return new Float[113]
-				endIf
-			elseIf size > 104
-				if size > 108
-					if size > 110
-						if size == 112
-							return new Float[112]
-						else
-							return new Float[111]
-						endIf
-					elseIf size == 110
-						return new Float[110]
-					else
-						return new Float[109]
-					endIf
-				elseIf size > 106
-					if size == 108
-						return new Float[108]
-					else
-						return new Float[107]
-					endIf
-				elseIf size == 106
-					return new Float[106]
-				else
-					return new Float[105]
-				endIf
-			elseIf size > 100
-				if size > 102
-					if size == 104
-						return new Float[104]
-					else
-						return new Float[103]
-					endIf
-				elseIf size == 102
-					return new Float[102]
-				else
-					return new Float[101]
-				endIf
-			elseIf size > 98
-				if size == 100
-					return new Float[100]
-				else
-					return new Float[99]
-				endIf
-			elseIf size == 98
-				return new Float[98]
-			else
-				return new Float[97]
-			endIf
-		elseIf size > 80
-			if size > 88
-				if size > 92
-					if size > 94
-						if size == 96
-							return new Float[96]
-						else
-							return new Float[95]
-						endIf
-					elseIf size == 94
-						return new Float[94]
-					else
-						return new Float[93]
-					endIf
-				elseIf size > 90
-					if size == 92
-						return new Float[92]
-					else
-						return new Float[91]
-					endIf
-				elseIf size == 90
-					return new Float[90]
-				else
-					return new Float[89]
-				endIf
-			elseIf size > 84
-				if size > 86
-					if size == 88
-						return new Float[88]
-					else
-						return new Float[87]
-					endIf
-				elseIf size == 86
-					return new Float[86]
-				else
-					return new Float[85]
-				endIf
-			elseIf size > 82
-				if size == 84
-					return new Float[84]
-				else
-					return new Float[83]
-				endIf
-			elseIf size == 82
-				return new Float[82]
-			else
-				return new Float[81]
-			endIf
-		elseIf size > 72
-			if size > 76
-				if size > 78
-					if size == 80
-						return new Float[80]
-					else
-						return new Float[79]
-					endIf
-				elseIf size == 78
-					return new Float[78]
-				else
-					return new Float[77]
-				endIf
-			elseIf size > 74
-				if size == 76
-					return new Float[76]
-				else
-					return new Float[75]
-				endIf
-			elseIf size == 74
-				return new Float[74]
-			else
-				return new Float[73]
-			endIf
-		elseIf size > 68
-			if size > 70
-				if size == 72
-					return new Float[72]
-				else
-					return new Float[71]
-				endIf
-			elseIf size == 70
-				return new Float[70]
-			else
-				return new Float[69]
-			endIf
-		elseIf size > 66
-			if size == 68
-				return new Float[68]
-			else
-				return new Float[67]
-			endIf
-		elseIf size == 66
-			return new Float[66]
-		else
-			return new Float[65]
-		endIf
-	elseIf size > 32
-		if size > 48
-			if size > 56
-				if size > 60
-					if size > 62
-						if size == 64
-							return new Float[64]
-						else
-							return new Float[63]
-						endIf
-					elseIf size == 62
-						return new Float[62]
-					else
-						return new Float[61]
-					endIf
-				elseIf size > 58
-					if size == 60
-						return new Float[60]
-					else
-						return new Float[59]
-					endIf
-				elseIf size == 58
-					return new Float[58]
-				else
-					return new Float[57]
-				endIf
-			elseIf size > 52
-				if size > 54
-					if size == 56
-						return new Float[56]
-					else
-						return new Float[55]
-					endIf
-				elseIf size == 54
-					return new Float[54]
-				else
-					return new Float[53]
-				endIf
-			elseIf size > 50
-				if size == 52
-					return new Float[52]
-				else
-					return new Float[51]
-				endIf
-			elseIf size == 50
-				return new Float[50]
-			else
-				return new Float[49]
-			endIf
-		elseIf size > 40
-			if size > 44
-				if size > 46
-					if size == 48
-						return new Float[48]
-					else
-						return new Float[47]
-					endIf
-				elseIf size == 46
-					return new Float[46]
-				else
-					return new Float[45]
-				endIf
-			elseIf size > 42
-				if size == 44
-					return new Float[44]
-				else
-					return new Float[43]
-				endIf
-			elseIf size == 42
-				return new Float[42]
-			else
-				return new Float[41]
-			endIf
-		elseIf size > 36
-			if size > 38
-				if size == 40
-					return new Float[40]
-				else
-					return new Float[39]
-				endIf
-			elseIf size == 38
-				return new Float[38]
-			else
-				return new Float[37]
-			endIf
-		elseIf size > 34
-			if size == 36
-				return new Float[36]
-			else
-				return new Float[35]
-			endIf
-		elseIf size == 34
-			return new Float[34]
-		else
-			return new Float[33]
-		endIf
-	elseIf size > 16
-		if size > 24
-			if size > 28
-				if size > 30
-					if size == 32
-						return new Float[32]
-					else
-						return new Float[31]
-					endIf
-				elseIf size == 30
-					return new Float[30]
-				else
-					return new Float[29]
-				endIf
-			elseIf size > 26
-				if size == 28
-					return new Float[28]
-				else
-					return new Float[27]
-				endIf
-			elseIf size == 26
-				return new Float[26]
-			else
-				return new Float[25]
-			endIf
-		elseIf size > 20
-			if size > 22
-				if size == 24
-					return new Float[24]
-				else
-					return new Float[23]
-				endIf
-			elseIf size == 22
-				return new Float[22]
-			else
-				return new Float[21]
-			endIf
-		elseIf size > 18
-			if size == 20
-				return new Float[20]
-			else
-				return new Float[19]
-			endIf
-		elseIf size == 18
-			return new Float[18]
-		else
-			return new Float[17]
-		endIf
-	elseIf size > 8
-		if size > 12
-			if size > 14
-				if size == 16
-					return new Float[16]
-				else
-					return new Float[15]
-				endIf
-			elseIf size == 14
-				return new Float[14]
-			else
-				return new Float[13]
-			endIf
-		elseIf size > 10
-			if size == 12
-				return new Float[12]
-			else
-				return new Float[11]
-			endIf
-		elseIf size == 10
-			return new Float[10]
-		else
-			return new Float[9]
-		endIf
-	elseIf size > 4
-		if size > 6
-			if size == 8
-				return new Float[8]
-			else
-				return new Float[7]
-			endIf
-		elseIf size == 6
-			return new Float[6]
-		else
-			return new Float[5]
-		endIf
-	elseIf size > 2
-		if size == 4
-			return new Float[4]
-		else
-			return new Float[3]
-		endIf
-	elseIf size == 2
-		return new Float[2]
-	else
-		return new Float[1]
-	endIf
-endFunction
-
-Float function floatModulo(Float value, Float Mod) global
-
-	Float tmpval = value
-	while tmpval >= Mod
-		tmpval -= Mod
-	endWhile
-	return tmpval
-endFunction
-
-String function GetJsonFile(form frm) global
-
-	return FWUtility.GetJsonFileCombine(FWUtility.GetModFromID(frm, false), FWUtility.Hex(frm.GetFormID(), 6))
-endFunction
-
-function LockPlayer() global
-
-	actor PlayerRef = game.GetPlayer()
-	game.ForceThirdPerson()
-	game.SetPlayerAIDriven(true)
-	game.SetInChargen(true, true, false)
-endFunction
-
-String function ScriptStringGet(String script, Int num) global native
-
-function setIniCFloat(String Type, String File, String Categorie, String Variable, Float value) global native
-
-String function GetJsonFileCombine(String Mod, String Hex) global
-
+string function GetJsonFileCombine(string Mod, string Hex) global
 	return Mod + "_" + Hex + ".json"
 endFunction
 
-function setIniString(String Type, String File, String Variable, String value) global native
-
-function ActorAddSpellsS(actor a, String sa, Bool PlayerOnly, Bool bIsCast) global
-
-	if a == none
-		return 
-	endIf
-	Int c = storageutil.FormListCount(none, "FW.AddOn." + sa)
-	while c > 0
-		c -= 1
-		spell S = storageutil.FormListGet(none, "FW.AddOn." + sa, c) as spell
-		if S != none
-			FWUtility.ActorAddSpell(a, S, PlayerOnly, bIsCast)
-		endIf
-	endWhile
+string function GetIniFile(form frm) global
+	return GetIniFileCombine(GetModFromID(frm,false), Hex(frm.GetFormID(), 6))
 endFunction
 
-String function getActorListNames(Actor[] objs, Bool PrefareDisplayName) global
+string function GetIniFileCombine(string Mod, string Hex) global
+	return Mod + "_" + Hex + ".ini"
+endFunction
 
-	if objs.length == 0
+string function GetModFromID(Form frm, bool bFileExtention = true) global
+	int c = Game.GetModCount()
+	int i=0
+	string mName = ""
+	bool bFound = false
+	if (frm as Actor) !=none
+		actor a = frm as Actor
+		actorbase b = a.GetLeveledActorBase()
+		int mID = a.GetFormID() % 0x1000000
+		int nID = b.GetFormID() % 0x1000000
+		Debug.Trace("Find Mod by Actor '"+b.GetName()+"' - "+mID+ "("+a.GetFormID()+") / " + nID + "("+b.GetFormID()+")")
+		while i<c
+			mName = Game.GetModName(i)
+			if a == Game.GetFormFromFile(mID,mName) as actor
+				i=c
+				c=0
+				bFound = true
+			elseif b == Game.GetFormFromFile(nID,mName) as actorbase
+				i=c
+				c=0
+				bFound = true
+			endif
+			i += 1
+		endWhile
+	else
+		int mID = frm.GetFormID() % 0x1000000
+		while i<c
+			mName = Game.GetModName(i)
+			if frm == Game.GetFormFromFile(mID,mName)
+				i=c
+				c=0
+				bFound = true
+			endif
+			i += 1
+		endWhile
+	endif
+	if bFound
+		if bFileExtention
+			return mName
+		else
+			int len = StringUtil.GetLength(mName) - 4
+			return StringUtil.Substring(mName, 0, len)
+		endif
+	else
+		return "unknown"
+	endif
+endFunction
+
+
+string function GetDirectoryHash(string dir) native global
+;string function GetDirectoryHash(string dir) global
+;	return "000"
+;endfunction
+
+; Generates a Hex Value out of integer with the Given number of digits
+; Hex( 500 , 4 ) = "01F4"
+string function Hex(int value, int Digits) native global
+;string function Hex(int value, int Digits) global
+;	string sHex = ""
+;	if Digits<=1
+;		sHex = sHex + HexDigit(value,0xF)
+;	elseif Digits==2
+;		sHex = sHex + HexDigit(value,0xF0,4)
+;		sHex = sHex + HexDigit(value,0x0F)
+;	elseif Digits==3
+;		sHex = sHex + HexDigit(value,0xF00,8)
+;		sHex = sHex + HexDigit(value,0x0F0,4)
+;		sHex = sHex + HexDigit(value,0x00F)
+;	elseif Digits==4
+;		sHex = sHex + HexDigit(value,0xF000,12)
+;		sHex = sHex + HexDigit(value,0x0F00,8)
+;		sHex = sHex + HexDigit(value,0x00F0,4)
+;		sHex = sHex + HexDigit(value,0x000F)
+;	elseif Digits==5
+;		sHex = sHex + HexDigit(value,0xF0000,16)
+;		sHex = sHex + HexDigit(value,0x0F000,12)
+;		sHex = sHex + HexDigit(value,0x00F00,8)
+;		sHex = sHex + HexDigit(value,0x000F0,4)
+;		sHex = sHex + HexDigit(value,0x0000F)
+;	elseif Digits==6
+;		sHex = sHex + HexDigit(value,0xF00000,20)
+;		sHex = sHex + HexDigit(value,0x0F0000,16)
+;		sHex = sHex + HexDigit(value,0x00F000,12)
+;		sHex = sHex + HexDigit(value,0x000F00,8)
+;		sHex = sHex + HexDigit(value,0x0000F0,4)
+;		sHex = sHex + HexDigit(value,0x00000F)
+;	elseif Digits==7
+;		sHex = sHex + HexDigit(value,0xF000000,24)
+;		sHex = sHex + HexDigit(value,0x0F00000,20)
+;		sHex = sHex + HexDigit(value,0x00F0000,16)
+;		sHex = sHex + HexDigit(value,0x000F000,12)
+;		sHex = sHex + HexDigit(value,0x0000F00,8)
+;		sHex = sHex + HexDigit(value,0x00000F0,4)
+;		sHex = sHex + HexDigit(value,0x000000F)
+;	elseif Digits==8
+;		if Digits>8
+;			Debug.Trace("Max Hex digit count: 8")
+;		endif
+;		sHex = sHex + HexDigit(value,0xF0000000,28)
+;		sHex = sHex + HexDigit(value,0x0F000000,24)
+;		sHex = sHex + HexDigit(value,0x00F00000,20)
+;		sHex = sHex + HexDigit(value,0x000F0000,16)
+;		sHex = sHex + HexDigit(value,0x0000F000,12)
+;		sHex = sHex + HexDigit(value,0x00000F00,8)
+;		sHex = sHex + HexDigit(value,0x000000F0,4)
+;		sHex = sHex + HexDigit(value,0x0000000F)
+;	endif
+;	return sHex
+;endFunction
+
+;string function HexDigit(int Value, int Max, int Shift=0) global
+;	int x=0
+;	if Shift<1
+;		x = Math.LogicalAnd(Value, Max)
+;	else
+;		x = Math.RightShift( Math.LogicalAnd(Value, Max), Shift)
+;	endif
+;	if x >=0 && x<16
+;		return StringUtil.Substring("0123456789ABCDEF",x,1)
+;	else
+;		return ""
+;	endif
+;endFunction
+
+string function toLower(string str) global native
+string function toUpper(string str) global native
+
+bool function ScriptHasString(string script, string str) global native
+int function ScriptStringCount(string script) global native
+string function ScriptStringGet(string script, int num) global native
+string function ScriptUser(string script) global native
+string function ScriptSource(string script) global native
+string function ScriptMashine(string script) global native
+
+;string function IOReadTranslation(string Langauge) global native
+;string function getLangText(string lngContent, string VarName) global native
+
+int function GetFileCount(string argPath, string extention="json") global native
+string function GetFileName(string argPath, string extention="json", int fileID=0) global native
+bool function FileExists(string FilePath) global native
+string function getNextAutoFile(string Directory, string FileName, string Ext) global native
+
+string function getTypeString(int fileID=0) global native
+
+string function getIniPath(string Type, string File) global native
+
+string function getIniString(string Type, string File, string Variable, string Default="") global native
+bool function getIniBool(string Type, string File, string Variable, bool Default=false) global native
+int function getIniInt(string Type, string File, string Variable, int Default=0) global native
+float function getIniFloat(string Type, string File, string Variable, float Default=0.0) global native
+string function getIniCString(string Type, string File, string Categorie, string Variable, string Default="") global native
+bool function getIniCBool(string Type, string File, string Categorie, string Variable, bool Default=false) global native
+int function getIniCInt(string Type, string File, string Categorie, string Variable, int Default=0) global native
+float function getIniCFloat(string Type, string File, string Categorie, string Variable, float Default=0.0) global native
+
+function setIniString(string Type, string File, string Variable, string Value) global native
+function setIniBool(string Type, string File, string Variable, bool Value) global native
+function setIniInt(string Type, string File, string Variable, int Value) global native
+function setIniFloat(string Type, string File, string Variable, float Value) global native
+function setIniCString(string Type, string File, string Categorie, string Variable, string Value) global native
+function setIniCBool(string Type, string File, string Categorie, string Variable, bool Value) global native
+function setIniCInt(string Type, string File, string Categorie, string Variable, int Value) global native
+function setIniCFloat(string Type, string File, string Categorie, string Variable, float Value) global native
+
+
+form function GetFormFromString(string s) global native ; returns the Form of a string
+string function GetModFromString(string s, bool bExtension = false) global native ; returns the Mod Name from a FormString (BeeingFemale_1234 => BeeingFemale)
+int function GetFormIDFromString(string s) global native ; returns the Hex ID + Numeric ID from a formString (Like: BeeingFemale_1234 => 0x04001234 => Result: 67113524)
+string function GetStringFromForm(form frm) global native ; returns the Form String from a form (like: "BeeingFemale_1234")
+string function GetModFromForm(form frm, bool bExtension = false) global native ; returns the mod File from a form (like: "BeeingFemale")
+string function GetStringFromForms(Form[] frms) global
+	int i=0
+	string s=""
+	int c=frms.Length
+	while i<c
+		string tmp=GetStringFromForm(frms[i])
+		if tmp!=""
+			if i>0
+				s+=","
+			endif
+			s+=tmp
+		endif
+		i+=1
+	endWhile
+	return s
+endFunction
+string function GetStringFromRaces(Race[] frms) global
+	int i=0
+	string s=""
+	int c=frms.Length
+	while i<c
+		string tmp=GetStringFromForm(frms[i])
+		if tmp!=""
+			if i>0
+				s+=","
+			endif
+			s+=tmp
+		endif
+		i+=1
+	endWhile
+	return s
+endFunction
+string function GetStringFromSpells(Spell[] frms) global
+	int i=0
+	string s=""
+	int c=frms.Length
+	while i<c
+		string tmp=GetStringFromForm(frms[i])
+		if tmp!=""
+			if i>0
+				s+=","
+			endif
+			s+=tmp
+		endif
+		i+=1
+	endWhile
+	return s
+endFunction
+
+quest function GetQuestObject(string ModName, int index) global native
+int function GetQuestObjectCount(string ModName) global native
+
+
+string function getObjectListNames(ObjectReference[] objs, bool PrefareDisplayName=false) global
+	if objs.length==0
 		return ""
 	else
-		Int c = objs.length
-		Int i = 0
-		String str = ""
-		Bool bFirst = true
-		while i < c
-			if objs[i] != none
-				if bFirst == true
-					bFirst = false
+		int c=objs.length
+		int i=0
+		string str=""
+		bool bFirst=true
+		while i<c
+			if objs[i]!=none
+				if bFirst==true
+					bFirst=false
 				else
-					str += ", "
-				endIf
-				if PrefareDisplayName == false
-					if objs[i].GetLeveledActorBase() != none
-						str += objs[i].GetLeveledActorBase().GetName()
-					elseIf objs[i].GetDisplayName() != ""
-						str += objs[i].GetDisplayName()
+					str+=", "
+				endif
+				actor a = objs[i] as actor
+				; Actors are handles different
+				if a!=none && PrefareDisplayName==false
+					if a.GetLeveledActorBase()!=none
+						str+=a.GetLeveledActorBase().GetName()
 					else
-						str += objs[i].GetName()
-					endIf
-				elseIf objs[i].GetDisplayName() != ""
-					str += objs[i].GetDisplayName()
-				elseIf objs[i].GetLeveledActorBase() != none
-					str += objs[i].GetLeveledActorBase().GetName()
+						str+=a.GetDisplayName()
+					endif
 				else
-					str += objs[i].GetName()
-				endIf
-			endIf
-			i += 1
+					if PrefareDisplayName==true && objs[i].GetDisplayName()!=""
+						str+=objs[i].GetDisplayName()
+					else
+						str+=objs[i].GetName()
+					endif
+				endif
+			endif
+			i+=1
 		endWhile
 		return str
 	endIf
 endFunction
 
-String function getIniString(String Type, String File, String Variable, String Default) global native
-
-function ActorAddSpells(actor a, Spell[] sa, Bool PlayerOnly, Bool bIsCast) global
-
-	if a == none
-		return 
-	endIf
-	Int i = 0
-	Int c = sa.length
-	while i < c
-		FWUtility.ActorAddSpell(a, sa[i], PlayerOnly, bIsCast)
-		i += 1
-	endWhile
+string function getRandomName(int iSex) Global
+	;Debug.Trace("BeeingFemale - getRandomName("+iSex+")")
+	string lang = Utility.GetINIString("sLanguage:General")
+	string path = "../../../BeeingFemale/Names/"
+	string Full = path + "BeeingFemaleNames_" + lang + ".json"
+	string ssex = ""
+	;Debug.Trace("- Use Language: '"+lang+"'")
+	;Debug.Trace("- Name File: '" + Full + "'")
+	
+	if iSex == 0
+		ssex = "male"
+	elseif iSex == 1
+		ssex = "female"
+	endif
+	;Debug.Trace("- ssex: '" + ssex + "'")
+	int Count = JsonUtil.StringListCount(Full, ssex)
+	;Debug.Trace("- Name Count: '" + Count + "'")
+	;JsonUtil.StringListAdd(Full, ssex, "Alex", false)
+	int id = Utility.RandomInt(0, Count - 1)
+	;Debug.Trace("- Random ID: '" + id + "'")
+	string sName = JsonUtil.StringListGet(Full, ssex, id)
+	;Debug.Trace("- Result: '" + sName+"'")
+	return sName
 endFunction
 
-Float function ClampFloat(Float a, Float min, Float max) global
-
-	if a < min
-		return min
-	elseIf a > max
-		return max
+string function getActorListNames(Actor[] objs, bool PrefareDisplayName=false) global
+	if objs.length==0
+		return ""
+	else
+		int c=objs.length
+		int i=0
+		string str=""
+		bool bFirst=true
+		while i<c
+			if objs[i]!=none
+				if bFirst==true
+					bFirst=false
+				else
+					str+=", "
+				endif
+				if PrefareDisplayName==false
+					if objs[i].GetLeveledActorBase()!=none
+						str+=objs[i].GetLeveledActorBase().GetName()
+					elseif objs[i].GetDisplayName()!=""
+						str+=objs[i].GetDisplayName()
+					else
+						str+=objs[i].GetName()
+					endif
+				else
+					if objs[i].GetDisplayName()!=""
+						str+=objs[i].GetDisplayName()
+					elseif objs[i].GetLeveledActorBase()!=none
+						str+=objs[i].GetLeveledActorBase().GetName()
+					else
+						str+=objs[i].GetName()
+					endif
+				endif
+			endif
+			i+=1
+		endWhile
+		return str
 	endIf
-	return a
 endFunction
 
-String function getIniPath(String Type, String File) global native
+bool function OpenChildMenu(FWChildActor Child) Global
+	if Child==none
+		return false
+	endif
+	Child.OpenSkillMenu()
+endFunction
 
-String function ArrayReplace(String Text, String[] Replace) global
+string Function GetPercentage(float percentage, int Decimal=0, bool bDecimalBase=true) global
+	If percentage < 0.0001
+		Return "< 1"
+	EndIf
+	if Decimal==0 && bDecimalBase
+		Return Math.Floor(percentage * 100) as string
+	elseif Decimal==1 && bDecimalBase
+		Return (Math.Floor(percentage * 100) as string) + "." + ((Math.Floor(percentage * 1000) % 10) as string)
+	elseif Decimal==2 && bDecimalBase
+		Return (Math.Floor(percentage * 100) as string) + "." + ((Math.Floor(percentage * 10000) % 100) as string)
+	elseif Decimal==3 && bDecimalBase
+		Return (Math.Floor(percentage * 100) as string) + "." + ((Math.Floor(percentage * 100000) % 1000) as string)
+	
+	elseif Decimal==0 && !bDecimalBase
+		Return Math.Floor(percentage) as string
+	elseif Decimal==1 && !bDecimalBase
+		Return (Math.Floor(percentage) as string) + "." + ((Math.Floor(percentage * 10) % 10) as string)
+	elseif Decimal==2 && !bDecimalBase
+		Return (Math.Floor(percentage) as string) + "." + ((Math.Floor(percentage * 100) % 100) as string)
+	elseif Decimal==3 && !bDecimalBase
+		Return (Math.Floor(percentage) as string) + "." + ((Math.Floor(percentage * 1000) % 1000) as string)
+	elseif Decimal==4 && !bDecimalBase
+		Return (Math.Floor(percentage) as string) + "." + ((Math.Floor(percentage * 10000) % 10000) as string)
+	elseif Decimal==5 && !bDecimalBase
+		Return (Math.Floor(percentage) as string) + "." + ((Math.Floor(percentage * 100000) % 100000) as string)
+	endif
+EndFunction
 
-	Int c = Replace.length
-	while c > 0
-		c -= 1
-		Text = FWUtility.StringReplace(Text, "{" + c as String + "}", Replace[c])
+;string function StringReplace(string Text, string Find, string Replace) global
+;	bool bRunning=true
+;	int FindLen = StringUtil.GetLength(Find)
+;	int TextLen = StringUtil.GetLength(Text)
+;	int pos=0
+;	while bRunning
+;		pos = StringUtil.Find(Text, Find,0)
+;		if pos==-1
+;			bRunning=false
+;		elseif pos==0
+;			Text = Replace + StringUtil.Substring(Text,pos + FindLen)
+;		elseif pos+FindLen>=TextLen
+;			Text = StringUtil.Substring(Text,0,pos) + Replace
+;		else
+;			Text = StringUtil.Substring(Text,0,pos) + Replace + StringUtil.Substring(Text,pos + FindLen)
+;		endIf
+;	endWhile
+;	pos=0
+;	bRunning=true
+;	while bRunning
+;		pos = StringUtil.Find(Text, "\\n",0)
+;		if pos<0
+;			bRunning=false
+;		elseif pos==0
+;			Text = "\n" + StringUtil.Substring(Text,pos + 2)
+;		elseif pos+3>=TextLen
+;			Text = StringUtil.Substring(Text,0,pos) + "\n"
+;		else
+;			Text = StringUtil.Substring(Text,0,pos) + "\n" + StringUtil.Substring(Text,pos + 2)
+;		endIf
+;	endWhile
+;	return Text
+;endFunction
+string function StringReplace(string Text, string Find, string Replace) global native
+
+string function ArrayReplace(string Text, string[] Replace) global
+	int c=Replace.Length
+	while c>0
+		c-=1
+		Text = StringReplace(Text, "{"+c+"}",Replace[c])
 	endWhile
 	return Text
 endFunction
 
-function ActorAddSpell(actor a, spell S, Bool PlayerOnly, Bool bIsCast) global
+;string function MultiStringReplace(string Text, string Replace0="", string Replace1="", string Replace2="", string Replace3="", string Replace4="", string Replace5="") global
+;	if Replace0!=""
+;		Text = StringReplace(Text, "{0}",Replace0)
+;	endif
+;	if Replace1!=""
+;		Text = StringReplace(Text, "{1}",Replace1)
+;	endif
+;	if Replace2!=""
+;		Text = StringReplace(Text, "{2}",Replace2)
+;	endif
+;	if Replace3!=""
+;		Text = StringReplace(Text, "{3}",Replace3)
+;	endif
+;	if Replace4!=""
+;		Text = StringReplace(Text, "{4}",Replace4)
+;	endif
+;	if Replace5!=""
+;		Text = StringReplace(Text, "{5}",Replace5)
+;	endif
+;	return Text
+;endFunction
+string function MultiStringReplace(string Text, string Replace0="", string Replace1="", string Replace2="", string Replace3="", string Replace4="", string Replace5="") global native
 
-	if S != none && a != none
-		if (PlayerOnly == true && game.GetPlayer() == a || PlayerOnly == false) && a.HasSpell(S as form) == false
-			if bIsCast
-				location curLoc = a.GetCurrentLocation()
-				if curLoc != none
-					if a.Is3DLoaded() && curLoc.IsLoaded()
-						S.Cast(a as objectreference, a as objectreference)
-					endIf
-				endIf
-			else
-				a.addSpell(S, true)
-			endIf
-		endIf
-	endIf
-endFunction
-
-String function toLower(String str) global native
-
-String function GetStringFromSpells(Spell[] frms) global
-
-	Int i = 0
-	String S = ""
-	Int c = frms.length
-	while i < c
-		String tmp = FWUtility.GetStringFromForm(frms[i] as form)
-		if tmp != ""
-			if i > 0
-				S += ","
-			endIf
-			S += tmp
-		endIf
-		i += 1
-	endWhile
-	return S
-endFunction
-
-Float function MaxFloat(Float a, Float b) global
-
-	if b < a
-		return a
-	endIf
-	return b
-endFunction
-
-String function GetNames(Actor[] Actors) global
-
-	String tmp = ""
-	Int i = 0
-	Int c = Actors.length
-	Bool bFirst = true
-	while i < c
-		if Actors[i] != none && Actors[i].GetLeveledActorBase() != none && Actors[i].GetLeveledActorBase().GetName() != ""
-			if bFirst == false
-				tmp += ", "
-			endIf
-			tmp += Actors[i].GetLeveledActorBase().GetName()
-			bFirst = false
-		endIf
-		i += 1
-	endWhile
-	return tmp
-endFunction
-
-Float function RangedFloat(Float value, Float min, Float max) global
-
-	if value < min
-		return min
-	elseIf value > max
-		return max
-	else
-		return value
-	endIf
-endFunction
-
-String function GetPercentage(Float percentage, Int Decimal, Bool bDecimalBase) global
-
-	if percentage < 0.000100000
-		return "< 1"
-	endIf
-	if Decimal == 0 && bDecimalBase
-		return math.Floor(percentage * 100.000) as String
-	elseIf Decimal == 1 && bDecimalBase
-		return math.Floor(percentage * 100.000) as String + "." + (math.Floor(percentage * 1000.00) % 10) as String
-	elseIf Decimal == 2 && bDecimalBase
-		return math.Floor(percentage * 100.000) as String + "." + (math.Floor(percentage * 10000.0) % 100) as String
-	elseIf Decimal == 3 && bDecimalBase
-		return math.Floor(percentage * 100.000) as String + "." + (math.Floor(percentage * 100000.0) % 1000) as String
-	elseIf Decimal == 0 && !bDecimalBase
-		return math.Floor(percentage) as String
-	elseIf Decimal == 1 && !bDecimalBase
-		return math.Floor(percentage) as String + "." + (math.Floor(percentage * 10.0000) % 10) as String
-	elseIf Decimal == 2 && !bDecimalBase
-		return math.Floor(percentage) as String + "." + (math.Floor(percentage * 100.000) % 100) as String
-	elseIf Decimal == 3 && !bDecimalBase
-		return math.Floor(percentage) as String + "." + (math.Floor(percentage * 1000.00) % 1000) as String
-	elseIf Decimal == 4 && !bDecimalBase
-		return math.Floor(percentage) as String + "." + (math.Floor(percentage * 10000.0) % 10000) as String
-	elseIf Decimal == 5 && !bDecimalBase
-		return math.Floor(percentage) as String + "." + (math.Floor(percentage * 100000.0) % 100000) as String
-	endIf
-endFunction
-
-String function GetIniFile(form frm) global
-
-	return FWUtility.GetIniFileCombine(FWUtility.GetModFromID(frm, false), FWUtility.Hex(frm.GetFormID(), 6))
-endFunction
-
-Bool function getIniCBool(String Type, String File, String Categorie, String Variable, Bool Default) global native
-
-Actor[] function ActorArray(Int size) global
-
-	size = FWUtility.ClampInt(size, 1, 128)
-	if size > 64
-		if size > 96
-			if size > 112
-				if size > 120
-					if size > 124
-						if size > 126
-							if size == 128
-								return new Actor[128]
-							else
-								return new Actor[127]
-							endIf
-						elseIf size == 126
-							return new Actor[126]
-						else
-							return new Actor[125]
-						endIf
-					elseIf size > 122
-						if size == 124
-							return new Actor[124]
-						else
-							return new Actor[123]
-						endIf
-					elseIf size == 122
-						return new Actor[122]
-					else
-						return new Actor[121]
-					endIf
-				elseIf size > 116
-					if size > 118
-						if size == 120
-							return new Actor[120]
-						else
-							return new Actor[119]
-						endIf
-					elseIf size == 118
-						return new Actor[118]
-					else
-						return new Actor[117]
-					endIf
-				elseIf size > 114
-					if size == 116
-						return new Actor[116]
-					else
-						return new Actor[115]
-					endIf
-				elseIf size == 114
-					return new Actor[114]
-				else
-					return new Actor[113]
-				endIf
-			elseIf size > 104
-				if size > 108
-					if size > 110
-						if size == 112
-							return new Actor[112]
-						else
-							return new Actor[111]
-						endIf
-					elseIf size == 110
-						return new Actor[110]
-					else
-						return new Actor[109]
-					endIf
-				elseIf size > 106
-					if size == 108
-						return new Actor[108]
-					else
-						return new Actor[107]
-					endIf
-				elseIf size == 106
-					return new Actor[106]
-				else
-					return new Actor[105]
-				endIf
-			elseIf size > 100
-				if size > 102
-					if size == 104
-						return new Actor[104]
-					else
-						return new Actor[103]
-					endIf
-				elseIf size == 102
-					return new Actor[102]
-				else
-					return new Actor[101]
-				endIf
-			elseIf size > 98
-				if size == 100
-					return new Actor[100]
-				else
-					return new Actor[99]
-				endIf
-			elseIf size == 98
-				return new Actor[98]
-			else
-				return new Actor[97]
-			endIf
-		elseIf size > 80
-			if size > 88
-				if size > 92
-					if size > 94
-						if size == 96
-							return new Actor[96]
-						else
-							return new Actor[95]
-						endIf
-					elseIf size == 94
-						return new Actor[94]
-					else
-						return new Actor[93]
-					endIf
-				elseIf size > 90
-					if size == 92
-						return new Actor[92]
-					else
-						return new Actor[91]
-					endIf
-				elseIf size == 90
-					return new Actor[90]
-				else
-					return new Actor[89]
-				endIf
-			elseIf size > 84
-				if size > 86
-					if size == 88
-						return new Actor[88]
-					else
-						return new Actor[87]
-					endIf
-				elseIf size == 86
-					return new Actor[86]
-				else
-					return new Actor[85]
-				endIf
-			elseIf size > 82
-				if size == 84
-					return new Actor[84]
-				else
-					return new Actor[83]
-				endIf
-			elseIf size == 82
-				return new Actor[82]
-			else
-				return new Actor[81]
-			endIf
-		elseIf size > 72
-			if size > 76
-				if size > 78
-					if size == 80
-						return new Actor[80]
-					else
-						return new Actor[79]
-					endIf
-				elseIf size == 78
-					return new Actor[78]
-				else
-					return new Actor[77]
-				endIf
-			elseIf size > 74
-				if size == 76
-					return new Actor[76]
-				else
-					return new Actor[75]
-				endIf
-			elseIf size == 74
-				return new Actor[74]
-			else
-				return new Actor[73]
-			endIf
-		elseIf size > 68
-			if size > 70
-				if size == 72
-					return new Actor[72]
-				else
-					return new Actor[71]
-				endIf
-			elseIf size == 70
-				return new Actor[70]
-			else
-				return new Actor[69]
-			endIf
-		elseIf size > 66
-			if size == 68
-				return new Actor[68]
-			else
-				return new Actor[67]
-			endIf
-		elseIf size == 66
-			return new Actor[66]
+string function getIniValue(string iniContent, string Variable, string default="")
+	int pos=0
+	int varLen=StringUtil.GetLength(Variable)+2
+	pos = StringUtil.Find(iniContent, "$"+Variable+"=",pos)
+	if pos>=0
+		int len1=StringUtil.Find(iniContent, StringUtil.AsChar(13),pos)
+		int len2=StringUtil.Find(iniContent, StringUtil.AsChar(10),pos)
+		int len=0
+		if len1<len2 && len1>=0
+			len=len1
 		else
-			return new Actor[65]
-		endIf
-	elseIf size > 32
-		if size > 48
-			if size > 56
-				if size > 60
-					if size > 62
-						if size == 64
-							return new Actor[64]
-						else
-							return new Actor[63]
-						endIf
-					elseIf size == 62
-						return new Actor[62]
-					else
-						return new Actor[61]
-					endIf
-				elseIf size > 58
-					if size == 60
-						return new Actor[60]
-					else
-						return new Actor[59]
-					endIf
-				elseIf size == 58
-					return new Actor[58]
-				else
-					return new Actor[57]
-				endIf
-			elseIf size > 52
-				if size > 54
-					if size == 56
-						return new Actor[56]
-					else
-						return new Actor[55]
-					endIf
-				elseIf size == 54
-					return new Actor[54]
-				else
-					return new Actor[53]
-				endIf
-			elseIf size > 50
-				if size == 52
-					return new Actor[52]
-				else
-					return new Actor[51]
-				endIf
-			elseIf size == 50
-				return new Actor[50]
-			else
-				return new Actor[49]
-			endIf
-		elseIf size > 40
-			if size > 44
-				if size > 46
-					if size == 48
-						return new Actor[48]
-					else
-						return new Actor[47]
-					endIf
-				elseIf size == 46
-					return new Actor[46]
-				else
-					return new Actor[45]
-				endIf
-			elseIf size > 42
-				if size == 44
-					return new Actor[44]
-				else
-					return new Actor[43]
-				endIf
-			elseIf size == 42
-				return new Actor[42]
-			else
-				return new Actor[41]
-			endIf
-		elseIf size > 36
-			if size > 38
-				if size == 40
-					return new Actor[40]
-				else
-					return new Actor[39]
-				endIf
-			elseIf size == 38
-				return new Actor[38]
-			else
-				return new Actor[37]
-			endIf
-		elseIf size > 34
-			if size == 36
-				return new Actor[36]
-			else
-				return new Actor[35]
-			endIf
-		elseIf size == 34
-			return new Actor[34]
+			len=len2
+		endif
+		if len==-1
+			return StringUtil.Substring(iniContent,pos+varLen)
 		else
-			return new Actor[33]
-		endIf
-	elseIf size > 16
-		if size > 24
-			if size > 28
-				if size > 30
-					if size == 32
-						return new Actor[32]
-					else
-						return new Actor[31]
-					endIf
-				elseIf size == 30
-					return new Actor[30]
-				else
-					return new Actor[29]
-				endIf
-			elseIf size > 26
-				if size == 28
-					return new Actor[28]
-				else
-					return new Actor[27]
-				endIf
-			elseIf size == 26
-				return new Actor[26]
-			else
-				return new Actor[25]
-			endIf
-		elseIf size > 20
-			if size > 22
-				if size == 24
-					return new Actor[24]
-				else
-					return new Actor[23]
-				endIf
-			elseIf size == 22
-				return new Actor[22]
-			else
-				return new Actor[21]
-			endIf
-		elseIf size > 18
-			if size == 20
-				return new Actor[20]
-			else
-				return new Actor[19]
-			endIf
-		elseIf size == 18
-			return new Actor[18]
-		else
-			return new Actor[17]
-		endIf
-	elseIf size > 8
-		if size > 12
-			if size > 14
-				if size == 16
-					return new Actor[16]
-				else
-					return new Actor[15]
-				endIf
-			elseIf size == 14
-				return new Actor[14]
-			else
-				return new Actor[13]
-			endIf
-		elseIf size > 10
-			if size == 12
-				return new Actor[12]
-			else
-				return new Actor[11]
-			endIf
-		elseIf size == 10
-			return new Actor[10]
-		else
-			return new Actor[9]
-		endIf
-	elseIf size > 4
-		if size > 6
-			if size == 8
-				return new Actor[8]
-			else
-				return new Actor[7]
-			endIf
-		elseIf size == 6
-			return new Actor[6]
-		else
-			return new Actor[5]
-		endIf
-	elseIf size > 2
-		if size == 4
-			return new Actor[4]
-		else
-			return new Actor[3]
-		endIf
-	elseIf size == 2
-		return new Actor[2]
-	else
-		return new Actor[1]
-	endIf
-endFunction
-
-Int function RangedInt(Int value, Int min, Int max) global
-
-	if value < min
-		return min
-	elseIf value > max
-		return max
-	else
-		return value
-	endIf
-endFunction
-
-Float function getIniCFloat(String Type, String File, String Categorie, String Variable, Float Default) global native
-
-function setIniCInt(String Type, String File, String Categorie, String Variable, Int value) global native
-
-Bool function getIniBool(String Type, String File, String Variable, Bool Default) global native
-
-String function getObjectListNames(ObjectReference[] objs, Bool PrefareDisplayName) global
-
-	if objs.length == 0
-		return ""
-	else
-		Int c = objs.length
-		Int i = 0
-		String str = ""
-		Bool bFirst = true
-		while i < c
-			if objs[i] != none
-				if bFirst == true
-					bFirst = false
-				else
-					str += ", "
-				endIf
-				actor a = objs[i] as actor
-				if a != none && PrefareDisplayName == false
-					if a.GetLeveledActorBase() != none
-						str += a.GetLeveledActorBase().GetName()
-					else
-						str += a.GetDisplayName()
-					endIf
-				elseIf PrefareDisplayName == true && objs[i].GetDisplayName() != ""
-					str += objs[i].GetDisplayName()
-				else
-					str += objs[i].GetName()
-				endIf
-			endIf
-			i += 1
-		endWhile
-		return str
-	endIf
-endFunction
-
-Int function getIniInt(String Type, String File, String Variable, Int Default) global native
-
-Bool function IsModInstalled(String ModName) global
-
-	Int c = game.GetModCount()
-	while c > 0
-		c -= 1
-		String m = game.GetModName(c)
-		if m == ModName || m == ModName + ".esp" || m == ModName + ".esm"
-			return true
-		endIf
-	endWhile
-	return false
-endFunction
-
-Int function ScriptStringCount(String script) global native
-
-String function toUpper(String str) global native
-
-function ActorRemoveSpellsS(actor a, String sa) global
-
-	if a == none
-		return 
-	endIf
-	Int c = storageutil.FormListCount(none, "FW.AddOn." + sa)
-	while c > 0
-		c -= 1
-		spell S = storageutil.FormListGet(none, "FW.AddOn." + sa, c) as spell
-		FWUtility.ActorRemoveSpell(a, S)
-	endWhile
-endFunction
-
-; Skipped compiler generated GotoState
-
-; Skipped compiler generated GetState
-
-function onEndState()
-{Event received when this state is switched away from}
-
-	; Empty function
-endFunction
-
-String function getIniValue(String iniContent, String Variable, String Default)
-
-	Int pos = 0
-	Int varLen = stringutil.GetLength(Variable) + 2
-	pos = stringutil.Find(iniContent, "$" + Variable + "=", pos)
-	if pos >= 0
-		Int len1 = stringutil.Find(iniContent, stringutil.AsChar(13), pos)
-		Int len2 = stringutil.Find(iniContent, stringutil.AsChar(10), pos)
-		Int len = 0
-		if len1 < len2 && len1 >= 0
-			len = len1
-		else
-			len = len2
-		endIf
-		if len == -1
-			return stringutil.Substring(iniContent, pos + varLen, 0)
-		else
-			return stringutil.Substring(iniContent, pos + varLen, len - varLen - pos)
-		endIf
+			return StringUtil.Substring(iniContent,pos+varLen, len - varLen - pos)
+		endif
 	endIf
 	return ""
+endfunction
+
+string function _getStateName_(int StateID) Global
+	if StateID==0
+		return "Follicular Phase"
+	elseif StateID==1
+		return "Ovulation"
+	elseif StateID==2
+		return "Luteal Phase"
+	elseif StateID==3
+		return "Menstruation"
+	elseif StateID==4
+		return "1st Pregnancy State"
+	elseif StateID==5
+		return "2nd Pregnancy State"
+	elseif StateID==6
+		return "3rd Pregnancy State"
+	elseif StateID==7
+		return "LaborPains"
+	elseif StateID==8
+		return "Recovery Phase"
+	elseif StateID==20
+		return "Pregnant"
+	elseif StateID==21
+		return "Pregnant by chaurus"
+	endIf
 endFunction
 
-function onBeginState()
-{Event received when this state is switched to}
-
-	; Empty function
+string function getStateNameTranslated(int StateID) Global
+	return "$FW_MENU_INFO_StateName"+StateID
 endFunction
+
+
+; Numeric functions
+
+Float Function ClampFloat(Float a, Float min, Float max) Global
+	If a < min
+		Return min
+	ElseIf a > max
+		Return max
+	EndIf
+	Return a
+EndFunction
+
+Float Function MaxFloat(Float a, Float b) Global
+	If b < a
+		Return a
+	EndIf
+	Return b
+EndFunction
+
+Float Function MinFloat(Float a, Float b) Global
+	If a < b
+		Return a
+	EndIf
+	Return b
+EndFunction
+
+float function RangedFloat(float value, float Min, float Max) global
+	if value <Min
+		return Min
+	elseif value>Max
+		return Max
+	else
+		return value
+	endif
+endFunction
+
+Float Function SwitchFloat(Bool cond, Float a, Float b) Global
+	If cond
+		Return a
+	EndIf
+	Return b
+EndFunction
+
+Int Function ClampInt(Int a, Int min, Int max) Global
+	If a < min
+		Return min
+	ElseIf a > max
+		Return max
+	EndIf
+	Return a
+EndFunction
+
+Int Function MaxInt(Int a, Int b) Global
+	If b < a
+		Return a
+	EndIf
+	Return b
+EndFunction
+
+Int Function MinInt(Int a, Int b) Global
+	If a < b
+		Return a
+	EndIf
+	Return b
+EndFunction
+
+int function RangedInt(int value, int Min, int Max) global
+	if value <Min
+		return Min
+	elseif value>Max
+		return Max
+	else
+		return value
+	endif
+endFunction
+
+Int Function SwitchInt(Bool cond, Int a, Int b) Global
+	If cond
+		Return a
+	EndIf
+	Return b
+EndFunction
+
+
+; String functions
+
+String Function SwitchString(Bool cond, String a="true", String b="false") Global
+	If cond
+		Return a
+	EndIf
+	Return b
+EndFunction
+
+function UnequipItem(actor a, form item) Global
+	if item != none && a!=none
+		if a.IsEquipped(item)
+			a.UnequipItem(item, true, true)
+		endif
+		a.RemoveItem(item, 1, true)
+	endIf 
+endFunction
+
+function EquipItem(actor a, form item) Global
+	if item != none && a!=none
+		a.addItem(item, 1, true)
+		if !a.IsEquipped(item)
+			a.EquipItem(item, false, true)	
+		endif
+	endIf 
+endFunction
+
+function ActorAddSpell(actor a,Spell s, bool PlayerOnly = false, bool bIsCast = false) Global
+	if s!=none && a!=none
+		if ((PlayerOnly == true && Game.GetPlayer() == a) || PlayerOnly == false) && a.HasSpell(s)==false
+			if bIsCast
+				location curLoc = a.GetCurrentLocation()
+				if curLoc!=none
+					if a.Is3DLoaded() && curLoc.IsLoaded()
+						s.Cast(a,a)
+					endif
+				endif
+			else
+				a.addSpell(s)
+			endif
+		endIf
+	endif
+endFunction
+
+function ActorRemoveSpell(actor a, Spell s) Global
+	if s!=none && a!=none
+		if a.HasSpell(s)
+			a.RemoveSpell(s)
+		endIf
+	endIf
+endFunction
+
+function ActorAddSpells(actor a,Spell[] sa, bool PlayerOnly=false, bool bIsCast = false) Global
+	if a==none
+		return
+	endif
+	int i=0
+	int c=sa.length
+	while i < c
+		ActorAddSpell(a,sa[i],PlayerOnly,bIsCast)
+		i+=1
+	endWhile
+endFunction
+
+function ActorAddSpellsS(actor a,string sa, bool PlayerOnly=false, bool bIsCast = false) Global
+	if a==none
+		return
+	endif
+	int c=StorageUtil.FormListCount(none,"FW.AddOn."+sa)
+	while c>0
+		c-=1
+		spell s = StorageUtil.FormListGet(none,"FW.AddOn."+sa,c) as spell
+		if s!=none
+			ActorAddSpell(a,s,PlayerOnly,bIsCast)
+		endif
+	endWhile
+endFunction
+
+function ActorRemoveSpells(actor a,Spell[] sa) Global
+	if a==none
+		return
+	endif
+	int i=0
+	int c=sa.length
+	while i < c
+		ActorRemoveSpell(a,sa[i])
+		i+=1
+	endWhile
+endFunction
+
+function ActorRemoveSpellsS(actor a,string sa) Global
+	if a==none
+		return
+	endif
+	int c=StorageUtil.FormListCount(none,"FW.AddOn."+sa)
+	while c>0
+		c-=1
+		spell s = StorageUtil.FormListGet(none,"FW.AddOn."+sa,c) as spell
+		ActorRemoveSpell(a,s)
+	endWhile
+endFunction
+
+function LockPlayer() global
+	actor PlayerRef=Game.GetPlayer()
+	Game.ForceThirdPerson()
+	Game.SetPlayerAIDriven(true)
+	Game.SetInChargen(true, true, false)
+	;PlayerRef.SetDontMove(true)
+	;PlayerRef.SetRestrained(true)
+endFunction
+
+function UnlockPlayer() global
+	actor PlayerRef=Game.GetPlayer()
+	Game.SetPlayerAIDriven(false)
+	;PlayerRef.SetDontMove(false)
+	;PlayerRef.SetRestrained(false)
+	Game.SetInChargen(false, false, false)
+endFunction
+
+
+string function GetNames(actor[] Actors) global
+	string tmp=""
+	int i=0
+	int c=Actors.length
+	bool bFirst=true
+	while i<c
+		if Actors[i]!=none && Actors[i].GetLeveledActorBase()!=none && Actors[i].GetLeveledActorBase().GetName() != ""
+			if bFirst==false
+				tmp+=", "
+			endif
+			tmp+=Actors[i].GetLeveledActorBase().GetName()
+			bFirst=false
+		endif
+		i+=1
+	endwhile
+	return tmp
+endfunction
+
+float function floatModulo(float Value, float Mod) global
+	float tmpval=Value
+	while tmpval >=Mod
+		tmpval-=Mod
+	endwhile
+	return tmpval
+endfunction
+
+Form[] function FormArrayConcat(Form[] f1, Form[] f2) global
+	if f1.Length==0
+		return f2
+	elseif f2.length==0
+		return f1
+	else
+		int n = f1.length + f2.Length
+		int f1l = f1.length
+		int f2l = f2.length
+		if n>128
+			f2l=128-f1l
+		endif
+		Form[] fn = FormArray(n)
+		int i = 0
+		while i<f1l
+			fn[f1l]=f1[f1l]
+			i+=1
+		endwhile
+		i=0
+		while i<f2l
+			fn[i+f2l]=f2[i]
+			i+=1
+		endwhile
+	endif
+endFunction
+
+Actor[] function removeDuplicatedActors(Actor[] list) global
+	int i=0
+	int j=0
+	int c=list.length
+	int s=0
+	while i<c - 1
+		j=i+1
+		while j<c
+			if list[i]==list[j]
+				list[j]=none
+				s+=1
+			endif
+			j+=1
+		endwhile
+		i+=1
+	endwhile
+	Actor[] res=ActorArray(s)
+	i=0
+	j=0
+	while i<c
+		if list[i]!=none
+			res[j]=list[i]
+		endif
+		i+=1
+	endwhile
+	return res
+endfunction
+
+
+Actor[] function ActorArrayAppend(Actor[] OldArray, actor Append, int Count=1) global
+;	if OldArray==none
+;		actor[] t = ActorArray(Count)
+;		while Count>0
+;			Count-=1
+;			t[Count]=Append
+;		endwhile
+;		return t
+;	endif
+	int c=OldArray.length
+	if c==0
+		actor[] t=ActorArray(Count)
+		while Count>0
+			Count-=1
+			t[Count]=Append
+		endwhile
+		return t
+	elseif c>127
+		return OldArray
+	endif
+	if c+Count>127
+		Count = 127
+	endif
+	actor[] na= ActorArray(c + Count)
+	while Count>0
+		Count-=1
+		na[c+Count]=Append
+	endwhile
+	while c>0
+		c-=1
+		na[c]=OldArray[c]
+	endwhile
+	return na
+endfunction
+
+Actor[] function ActorArrayResize(Actor[] OldArray, int NewSize) global
+	Actor[] res = ActorArray(NewSize)
+	int i=0
+	while i<NewSize && i<OldArray.length
+		res[i]=OldArray[i]
+		i+=1
+	endwhile
+	return res
+endFunction
+
+Actor[] function ActorArrayUnique(Actor[] a) global
+	if a.length<2
+		return a
+	endif
+	int newLen = a.length
+	int c=a.length
+	int i=0
+	while i<c - 1
+		if a.find(a[i],i+1) != -1
+			a[i]=none
+			newLen-=1
+		endif
+		i+=1
+	endWhile
+	Actor[] new_a = ActorArray(newLen)
+	i=0
+	int ni = 0
+	while i<c
+		if a[i]!=none
+			new_a[ni]=a[i]
+			ni+=1
+		endif
+		i+=1
+	endWhile
+	return new_a
+endfunction
+
+
+Float[] function FloatArrayAppend(Float[] OldArray, Float Append) global
+	int c=OldArray.length
+	if c==0
+		Float[] t=new Float[1]
+		t[0]=Append
+		return t
+	elseif c>127
+		return OldArray
+	endif
+	Float[] na= FloatArray(c + 1)
+	na[c]=Append
+	while c>0
+		c-=1
+		na[c]=OldArray[c]
+	endwhile
+	return na
+endfunction
+
+Float[] function FloatArrayResize(Float[] OldArray, int NewSize) global
+	Float[] res = FloatArray(NewSize)
+	int i=0
+	while i<NewSize && i<OldArray.length
+		res[i]=OldArray[i]
+		i+=1
+	endwhile
+	return res
+endFunction
+
+int[] function IntArrayAppend(int[] OldArray, int Append) global
+	int c=OldArray.length
+	if c==0
+		int[] t=new int[1]
+		t[0]=Append
+		return t
+	elseif c>127
+		return OldArray
+	endif
+	int[] na= IntArray(c + 1)
+	na[c]=Append
+	while c>0
+		c-=1
+		na[c]=OldArray[c]
+	endwhile
+	return na
+endfunction
+
+int[] function IntArrayResize(int[] OldArray, int NewSize) global
+	int[] res = IntArray(NewSize)
+	int i=0
+	while i<NewSize && i<OldArray.length
+		res[i]=OldArray[i]
+		i+=1
+	endwhile
+	return res
+endFunction
+
+
+; Array Functions
+
+Actor[] Function ActorArray(Int size) Global
+	size = ClampInt(size, 1, 128)
+	
+	If size > 64
+		If size > 96
+			If size > 112
+				If size > 120
+					If size > 124
+						If size > 126
+							If size == 128
+								Return New Actor[128]
+							Else
+								Return New Actor[127]
+							EndIf
+						Else
+							If size == 126
+								Return New Actor[126]
+							Else
+								Return New Actor[125]
+							EndIf
+						EndIf
+					Else
+						If size > 122
+							If size == 124
+								Return New Actor[124]
+							Else
+								Return New Actor[123]
+							EndIf
+						Else
+							If size == 122
+								Return New Actor[122]
+							Else
+								Return New Actor[121]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 116
+						If size > 118
+							If size == 120
+								Return New Actor[120]
+							Else
+								Return New Actor[119]
+							EndIf
+						Else
+							If size == 118
+								Return New Actor[118]
+							Else
+								Return New Actor[117]
+							EndIf
+						EndIf
+					Else
+						If size > 114
+							If size == 116
+								Return New Actor[116]
+							Else
+								Return New Actor[115]
+							EndIf
+						Else
+							If size == 114
+								Return New Actor[114]
+							Else
+								Return New Actor[113]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			Else
+				If size > 104
+					If size > 108
+						If size > 110
+							If size == 112
+								Return New Actor[112]
+							Else
+								Return New Actor[111]
+							EndIf
+						Else
+							If size == 110
+								Return New Actor[110]
+							Else
+								Return New Actor[109]
+							EndIf
+						EndIf
+					Else
+						If size > 106
+							If size == 108
+								Return New Actor[108]
+							Else
+								Return New Actor[107]
+							EndIf
+						Else
+							If size == 106
+								Return New Actor[106]
+							Else
+								Return New Actor[105]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 100
+						If size > 102
+							If size == 104
+								Return New Actor[104]
+							Else
+								Return New Actor[103]
+							EndIf
+						Else
+							If size == 102
+								Return New Actor[102]
+							Else
+								Return New Actor[101]
+							EndIf
+						EndIf
+					Else
+						If size > 98
+							If size == 100
+								Return New Actor[100]
+							Else
+								Return New Actor[99]
+							EndIf
+						Else
+							If size == 98
+								Return New Actor[98]
+							Else
+								Return New Actor[97]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			EndIf
+		Else
+			If size > 80
+				If size > 88
+					If size > 92
+						If size > 94
+							If size == 96
+								Return New Actor[96]
+							Else
+								Return New Actor[95]
+							EndIf
+						Else
+							If size == 94
+								Return New Actor[94]
+							Else
+								Return New Actor[93]
+							EndIf
+						EndIf
+					Else
+						If size > 90
+							If size == 92
+								Return New Actor[92]
+							Else
+								Return New Actor[91]
+							EndIf
+						Else
+							If size == 90
+								Return New Actor[90]
+							Else
+								Return New Actor[89]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 84
+						If size > 86
+							If size == 88
+								Return New Actor[88]
+							Else
+								Return New Actor[87]
+							EndIf
+						Else
+							If size == 86
+								Return New Actor[86]
+							Else
+								Return New Actor[85]
+							EndIf
+						EndIf
+					Else
+						If size > 82
+							If size == 84
+								Return New Actor[84]
+							Else
+								Return New Actor[83]
+							EndIf
+						Else
+							If size == 82
+								Return New Actor[82]
+							Else
+								Return New Actor[81]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			Else
+				If size > 72
+					If size > 76
+						If size > 78
+							If size == 80
+								Return New Actor[80]
+							Else
+								Return New Actor[79]
+							EndIf
+						Else
+							If size == 78
+								Return New Actor[78]
+							Else
+								Return New Actor[77]
+							EndIf
+						EndIf
+					Else
+						If size > 74
+							If size == 76
+								Return New Actor[76]
+							Else
+								Return New Actor[75]
+							EndIf
+						Else
+							If size == 74
+								Return New Actor[74]
+							Else
+								Return New Actor[73]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 68
+						If size > 70
+							If size == 72
+								Return New Actor[72]
+							Else
+								Return New Actor[71]
+							EndIf
+						Else
+							If size == 70
+								Return New Actor[70]
+							Else
+								Return New Actor[69]
+							EndIf
+						EndIf
+					Else
+						If size > 66
+							If size == 68
+								Return New Actor[68]
+							Else
+								Return New Actor[67]
+							EndIf
+						Else
+							If size == 66
+								Return New Actor[66]
+							Else
+								Return New Actor[65]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			EndIf
+		EndIf
+	Else
+		If size > 32
+			If size > 48
+				If size > 56
+					If size > 60
+						If size > 62
+							If size == 64
+								Return New Actor[64]
+							Else
+								Return New Actor[63]
+							EndIf
+						Else
+							If size == 62
+								Return New Actor[62]
+							Else
+								Return New Actor[61]
+							EndIf
+						EndIf
+					Else
+						If size > 58
+							If size == 60
+								Return New Actor[60]
+							Else
+								Return New Actor[59]
+							EndIf
+						Else
+							If size == 58
+								Return New Actor[58]
+							Else
+								Return New Actor[57]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 52
+						If size > 54
+							If size == 56
+								Return New Actor[56]
+							Else
+								Return New Actor[55]
+							EndIf
+						Else
+							If size == 54
+								Return New Actor[54]
+							Else
+								Return New Actor[53]
+							EndIf
+						EndIf
+					Else
+						If size > 50
+							If size == 52
+								Return New Actor[52]
+							Else
+								Return New Actor[51]
+							EndIf
+						Else
+							If size == 50
+								Return New Actor[50]
+							Else
+								Return New Actor[49]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			Else
+				If size > 40
+					If size > 44
+						If size > 46
+							If size == 48
+								Return New Actor[48]
+							Else
+								Return New Actor[47]
+							EndIf
+						Else
+							If size == 46
+								Return New Actor[46]
+							Else
+								Return New Actor[45]
+							EndIf
+						EndIf
+					Else
+						If size > 42
+							If size == 44
+								Return New Actor[44]
+							Else
+								Return New Actor[43]
+							EndIf
+						Else
+							If size == 42
+								Return New Actor[42]
+							Else
+								Return New Actor[41]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 36
+						If size > 38
+							If size == 40
+								Return New Actor[40]
+							Else
+								Return New Actor[39]
+							EndIf
+						Else
+							If size == 38
+								Return New Actor[38]
+							Else
+								Return New Actor[37]
+							EndIf
+						EndIf
+					Else
+						If size > 34
+							If size == 36
+								Return New Actor[36]
+							Else
+								Return New Actor[35]
+							EndIf
+						Else
+							If size == 34
+								Return New Actor[34]
+							Else
+								Return New Actor[33]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			EndIf
+		Else
+			If size > 16
+				If size > 24
+					If size > 28
+						If size > 30
+							If size == 32
+								Return New Actor[32]
+							Else
+								Return New Actor[31]
+							EndIf
+						Else
+							If size == 30
+								Return New Actor[30]
+							Else
+								Return New Actor[29]
+							EndIf
+						EndIf
+					Else
+						If size > 26
+							If size == 28
+								Return New Actor[28]
+							Else
+								Return New Actor[27]
+							EndIf
+						Else
+							If size == 26
+								Return New Actor[26]
+							Else
+								Return New Actor[25]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 20
+						If size > 22
+							If size == 24
+								Return New Actor[24]
+							Else
+								Return New Actor[23]
+							EndIf
+						Else
+							If size == 22
+								Return New Actor[22]
+							Else
+								Return New Actor[21]
+							EndIf
+						EndIf
+					Else
+						If size > 18
+							If size == 20
+								Return New Actor[20]
+							Else
+								Return New Actor[19]
+							EndIf
+						Else
+							If size == 18
+								Return New Actor[18]
+							Else
+								Return New Actor[17]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			Else
+				If size > 8
+					If size > 12
+						If size > 14
+							If size == 16
+								Return New Actor[16]
+							Else
+								Return New Actor[15]
+							EndIf
+						Else
+							If size == 14
+								Return New Actor[14]
+							Else
+								Return New Actor[13]
+							EndIf
+						EndIf
+					Else
+						If size > 10
+							If size == 12
+								Return New Actor[12]
+							Else
+								Return New Actor[11]
+							EndIf
+						Else
+							If size == 10
+								Return New Actor[10]
+							Else
+								Return New Actor[9]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 4
+						If size > 6
+							If size == 8
+								Return New Actor[8]
+							Else
+								Return New Actor[7]
+							EndIf
+						Else
+							If size == 6
+								Return New Actor[6]
+							Else
+								Return New Actor[5]
+							EndIf
+						EndIf
+					Else
+						If size > 2
+							If size == 4
+								Return New Actor[4]
+							Else
+								Return New Actor[3]
+							EndIf
+						Else
+							If size == 2
+								Return New Actor[2]
+							Else
+								Return New Actor[1]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			EndIf
+		EndIf
+	EndIf
+EndFunction
+
+ActorBase[] Function ActorBaseArray(Int size) Global
+	size = ClampInt(size, 1, 128)
+	
+	If size > 64
+		If size > 96
+			If size > 112
+				If size > 120
+					If size > 124
+						If size > 126
+							If size == 128
+								Return New ActorBase[128]
+							Else
+								Return New ActorBase[127]
+							EndIf
+						Else
+							If size == 126
+								Return New ActorBase[126]
+							Else
+								Return New ActorBase[125]
+							EndIf
+						EndIf
+					Else
+						If size > 122
+							If size == 124
+								Return New ActorBase[124]
+							Else
+								Return New ActorBase[123]
+							EndIf
+						Else
+							If size == 122
+								Return New ActorBase[122]
+							Else
+								Return New ActorBase[121]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 116
+						If size > 118
+							If size == 120
+								Return New ActorBase[120]
+							Else
+								Return New ActorBase[119]
+							EndIf
+						Else
+							If size == 118
+								Return New ActorBase[118]
+							Else
+								Return New ActorBase[117]
+							EndIf
+						EndIf
+					Else
+						If size > 114
+							If size == 116
+								Return New ActorBase[116]
+							Else
+								Return New ActorBase[115]
+							EndIf
+						Else
+							If size == 114
+								Return New ActorBase[114]
+							Else
+								Return New ActorBase[113]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			Else
+				If size > 104
+					If size > 108
+						If size > 110
+							If size == 112
+								Return New ActorBase[112]
+							Else
+								Return New ActorBase[111]
+							EndIf
+						Else
+							If size == 110
+								Return New ActorBase[110]
+							Else
+								Return New ActorBase[109]
+							EndIf
+						EndIf
+					Else
+						If size > 106
+							If size == 108
+								Return New ActorBase[108]
+							Else
+								Return New ActorBase[107]
+							EndIf
+						Else
+							If size == 106
+								Return New ActorBase[106]
+							Else
+								Return New ActorBase[105]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 100
+						If size > 102
+							If size == 104
+								Return New ActorBase[104]
+							Else
+								Return New ActorBase[103]
+							EndIf
+						Else
+							If size == 102
+								Return New ActorBase[102]
+							Else
+								Return New ActorBase[101]
+							EndIf
+						EndIf
+					Else
+						If size > 98
+							If size == 100
+								Return New ActorBase[100]
+							Else
+								Return New ActorBase[99]
+							EndIf
+						Else
+							If size == 98
+								Return New ActorBase[98]
+							Else
+								Return New ActorBase[97]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			EndIf
+		Else
+			If size > 80
+				If size > 88
+					If size > 92
+						If size > 94
+							If size == 96
+								Return New ActorBase[96]
+							Else
+								Return New ActorBase[95]
+							EndIf
+						Else
+							If size == 94
+								Return New ActorBase[94]
+							Else
+								Return New ActorBase[93]
+							EndIf
+						EndIf
+					Else
+						If size > 90
+							If size == 92
+								Return New ActorBase[92]
+							Else
+								Return New ActorBase[91]
+							EndIf
+						Else
+							If size == 90
+								Return New ActorBase[90]
+							Else
+								Return New ActorBase[89]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 84
+						If size > 86
+							If size == 88
+								Return New ActorBase[88]
+							Else
+								Return New ActorBase[87]
+							EndIf
+						Else
+							If size == 86
+								Return New ActorBase[86]
+							Else
+								Return New ActorBase[85]
+							EndIf
+						EndIf
+					Else
+						If size > 82
+							If size == 84
+								Return New ActorBase[84]
+							Else
+								Return New ActorBase[83]
+							EndIf
+						Else
+							If size == 82
+								Return New ActorBase[82]
+							Else
+								Return New ActorBase[81]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			Else
+				If size > 72
+					If size > 76
+						If size > 78
+							If size == 80
+								Return New ActorBase[80]
+							Else
+								Return New ActorBase[79]
+							EndIf
+						Else
+							If size == 78
+								Return New ActorBase[78]
+							Else
+								Return New ActorBase[77]
+							EndIf
+						EndIf
+					Else
+						If size > 74
+							If size == 76
+								Return New ActorBase[76]
+							Else
+								Return New ActorBase[75]
+							EndIf
+						Else
+							If size == 74
+								Return New ActorBase[74]
+							Else
+								Return New ActorBase[73]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 68
+						If size > 70
+							If size == 72
+								Return New ActorBase[72]
+							Else
+								Return New ActorBase[71]
+							EndIf
+						Else
+							If size == 70
+								Return New ActorBase[70]
+							Else
+								Return New ActorBase[69]
+							EndIf
+						EndIf
+					Else
+						If size > 66
+							If size == 68
+								Return New ActorBase[68]
+							Else
+								Return New ActorBase[67]
+							EndIf
+						Else
+							If size == 66
+								Return New ActorBase[66]
+							Else
+								Return New ActorBase[65]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			EndIf
+		EndIf
+	Else
+		If size > 32
+			If size > 48
+				If size > 56
+					If size > 60
+						If size > 62
+							If size == 64
+								Return New ActorBase[64]
+							Else
+								Return New ActorBase[63]
+							EndIf
+						Else
+							If size == 62
+								Return New ActorBase[62]
+							Else
+								Return New ActorBase[61]
+							EndIf
+						EndIf
+					Else
+						If size > 58
+							If size == 60
+								Return New ActorBase[60]
+							Else
+								Return New ActorBase[59]
+							EndIf
+						Else
+							If size == 58
+								Return New ActorBase[58]
+							Else
+								Return New ActorBase[57]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 52
+						If size > 54
+							If size == 56
+								Return New ActorBase[56]
+							Else
+								Return New ActorBase[55]
+							EndIf
+						Else
+							If size == 54
+								Return New ActorBase[54]
+							Else
+								Return New ActorBase[53]
+							EndIf
+						EndIf
+					Else
+						If size > 50
+							If size == 52
+								Return New ActorBase[52]
+							Else
+								Return New ActorBase[51]
+							EndIf
+						Else
+							If size == 50
+								Return New ActorBase[50]
+							Else
+								Return New ActorBase[49]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			Else
+				If size > 40
+					If size > 44
+						If size > 46
+							If size == 48
+								Return New ActorBase[48]
+							Else
+								Return New ActorBase[47]
+							EndIf
+						Else
+							If size == 46
+								Return New ActorBase[46]
+							Else
+								Return New ActorBase[45]
+							EndIf
+						EndIf
+					Else
+						If size > 42
+							If size == 44
+								Return New ActorBase[44]
+							Else
+								Return New ActorBase[43]
+							EndIf
+						Else
+							If size == 42
+								Return New ActorBase[42]
+							Else
+								Return New ActorBase[41]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 36
+						If size > 38
+							If size == 40
+								Return New ActorBase[40]
+							Else
+								Return New ActorBase[39]
+							EndIf
+						Else
+							If size == 38
+								Return New ActorBase[38]
+							Else
+								Return New ActorBase[37]
+							EndIf
+						EndIf
+					Else
+						If size > 34
+							If size == 36
+								Return New ActorBase[36]
+							Else
+								Return New ActorBase[35]
+							EndIf
+						Else
+							If size == 34
+								Return New ActorBase[34]
+							Else
+								Return New ActorBase[33]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			EndIf
+		Else
+			If size > 16
+				If size > 24
+					If size > 28
+						If size > 30
+							If size == 32
+								Return New ActorBase[32]
+							Else
+								Return New ActorBase[31]
+							EndIf
+						Else
+							If size == 30
+								Return New ActorBase[30]
+							Else
+								Return New ActorBase[29]
+							EndIf
+						EndIf
+					Else
+						If size > 26
+							If size == 28
+								Return New ActorBase[28]
+							Else
+								Return New ActorBase[27]
+							EndIf
+						Else
+							If size == 26
+								Return New ActorBase[26]
+							Else
+								Return New ActorBase[25]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 20
+						If size > 22
+							If size == 24
+								Return New ActorBase[24]
+							Else
+								Return New ActorBase[23]
+							EndIf
+						Else
+							If size == 22
+								Return New ActorBase[22]
+							Else
+								Return New ActorBase[21]
+							EndIf
+						EndIf
+					Else
+						If size > 18
+							If size == 20
+								Return New ActorBase[20]
+							Else
+								Return New ActorBase[19]
+							EndIf
+						Else
+							If size == 18
+								Return New ActorBase[18]
+							Else
+								Return New ActorBase[17]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			Else
+				If size > 8
+					If size > 12
+						If size > 14
+							If size == 16
+								Return New ActorBase[16]
+							Else
+								Return New ActorBase[15]
+							EndIf
+						Else
+							If size == 14
+								Return New ActorBase[14]
+							Else
+								Return New ActorBase[13]
+							EndIf
+						EndIf
+					Else
+						If size > 10
+							If size == 12
+								Return New ActorBase[12]
+							Else
+								Return New ActorBase[11]
+							EndIf
+						Else
+							If size == 10
+								Return New ActorBase[10]
+							Else
+								Return New ActorBase[9]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 4
+						If size > 6
+							If size == 8
+								Return New ActorBase[8]
+							Else
+								Return New ActorBase[7]
+							EndIf
+						Else
+							If size == 6
+								Return New ActorBase[6]
+							Else
+								Return New ActorBase[5]
+							EndIf
+						EndIf
+					Else
+						If size > 2
+							If size == 4
+								Return New ActorBase[4]
+							Else
+								Return New ActorBase[3]
+							EndIf
+						Else
+							If size == 2
+								Return New ActorBase[2]
+							Else
+								Return New ActorBase[1]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			EndIf
+		EndIf
+	EndIf
+EndFunction
+
+Bool[] Function BoolArray(Int size) Global
+	size = ClampInt(size, 1, 128)
+	
+	If size > 64
+		If size > 96
+			If size > 112
+				If size > 120
+					If size > 124
+						If size > 126
+							If size == 128
+								Return New Bool[128]
+							Else
+								Return New Bool[127]
+							EndIf
+						Else
+							If size == 126
+								Return New Bool[126]
+							Else
+								Return New Bool[125]
+							EndIf
+						EndIf
+					Else
+						If size > 122
+							If size == 124
+								Return New Bool[124]
+							Else
+								Return New Bool[123]
+							EndIf
+						Else
+							If size == 122
+								Return New Bool[122]
+							Else
+								Return New Bool[121]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 116
+						If size > 118
+							If size == 120
+								Return New Bool[120]
+							Else
+								Return New Bool[119]
+							EndIf
+						Else
+							If size == 118
+								Return New Bool[118]
+							Else
+								Return New Bool[117]
+							EndIf
+						EndIf
+					Else
+						If size > 114
+							If size == 116
+								Return New Bool[116]
+							Else
+								Return New Bool[115]
+							EndIf
+						Else
+							If size == 114
+								Return New Bool[114]
+							Else
+								Return New Bool[113]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			Else
+				If size > 104
+					If size > 108
+						If size > 110
+							If size == 112
+								Return New Bool[112]
+							Else
+								Return New Bool[111]
+							EndIf
+						Else
+							If size == 110
+								Return New Bool[110]
+							Else
+								Return New Bool[109]
+							EndIf
+						EndIf
+					Else
+						If size > 106
+							If size == 108
+								Return New Bool[108]
+							Else
+								Return New Bool[107]
+							EndIf
+						Else
+							If size == 106
+								Return New Bool[106]
+							Else
+								Return New Bool[105]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 100
+						If size > 102
+							If size == 104
+								Return New Bool[104]
+							Else
+								Return New Bool[103]
+							EndIf
+						Else
+							If size == 102
+								Return New Bool[102]
+							Else
+								Return New Bool[101]
+							EndIf
+						EndIf
+					Else
+						If size > 98
+							If size == 100
+								Return New Bool[100]
+							Else
+								Return New Bool[99]
+							EndIf
+						Else
+							If size == 98
+								Return New Bool[98]
+							Else
+								Return New Bool[97]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			EndIf
+		Else
+			If size > 80
+				If size > 88
+					If size > 92
+						If size > 94
+							If size == 96
+								Return New Bool[96]
+							Else
+								Return New Bool[95]
+							EndIf
+						Else
+							If size == 94
+								Return New Bool[94]
+							Else
+								Return New Bool[93]
+							EndIf
+						EndIf
+					Else
+						If size > 90
+							If size == 92
+								Return New Bool[92]
+							Else
+								Return New Bool[91]
+							EndIf
+						Else
+							If size == 90
+								Return New Bool[90]
+							Else
+								Return New Bool[89]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 84
+						If size > 86
+							If size == 88
+								Return New Bool[88]
+							Else
+								Return New Bool[87]
+							EndIf
+						Else
+							If size == 86
+								Return New Bool[86]
+							Else
+								Return New Bool[85]
+							EndIf
+						EndIf
+					Else
+						If size > 82
+							If size == 84
+								Return New Bool[84]
+							Else
+								Return New Bool[83]
+							EndIf
+						Else
+							If size == 82
+								Return New Bool[82]
+							Else
+								Return New Bool[81]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			Else
+				If size > 72
+					If size > 76
+						If size > 78
+							If size == 80
+								Return New Bool[80]
+							Else
+								Return New Bool[79]
+							EndIf
+						Else
+							If size == 78
+								Return New Bool[78]
+							Else
+								Return New Bool[77]
+							EndIf
+						EndIf
+					Else
+						If size > 74
+							If size == 76
+								Return New Bool[76]
+							Else
+								Return New Bool[75]
+							EndIf
+						Else
+							If size == 74
+								Return New Bool[74]
+							Else
+								Return New Bool[73]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 68
+						If size > 70
+							If size == 72
+								Return New Bool[72]
+							Else
+								Return New Bool[71]
+							EndIf
+						Else
+							If size == 70
+								Return New Bool[70]
+							Else
+								Return New Bool[69]
+							EndIf
+						EndIf
+					Else
+						If size > 66
+							If size == 68
+								Return New Bool[68]
+							Else
+								Return New Bool[67]
+							EndIf
+						Else
+							If size == 66
+								Return New Bool[66]
+							Else
+								Return New Bool[65]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			EndIf
+		EndIf
+	Else
+		If size > 32
+			If size > 48
+				If size > 56
+					If size > 60
+						If size > 62
+							If size == 64
+								Return New Bool[64]
+							Else
+								Return New Bool[63]
+							EndIf
+						Else
+							If size == 62
+								Return New Bool[62]
+							Else
+								Return New Bool[61]
+							EndIf
+						EndIf
+					Else
+						If size > 58
+							If size == 60
+								Return New Bool[60]
+							Else
+								Return New Bool[59]
+							EndIf
+						Else
+							If size == 58
+								Return New Bool[58]
+							Else
+								Return New Bool[57]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 52
+						If size > 54
+							If size == 56
+								Return New Bool[56]
+							Else
+								Return New Bool[55]
+							EndIf
+						Else
+							If size == 54
+								Return New Bool[54]
+							Else
+								Return New Bool[53]
+							EndIf
+						EndIf
+					Else
+						If size > 50
+							If size == 52
+								Return New Bool[52]
+							Else
+								Return New Bool[51]
+							EndIf
+						Else
+							If size == 50
+								Return New Bool[50]
+							Else
+								Return New Bool[49]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			Else
+				If size > 40
+					If size > 44
+						If size > 46
+							If size == 48
+								Return New Bool[48]
+							Else
+								Return New Bool[47]
+							EndIf
+						Else
+							If size == 46
+								Return New Bool[46]
+							Else
+								Return New Bool[45]
+							EndIf
+						EndIf
+					Else
+						If size > 42
+							If size == 44
+								Return New Bool[44]
+							Else
+								Return New Bool[43]
+							EndIf
+						Else
+							If size == 42
+								Return New Bool[42]
+							Else
+								Return New Bool[41]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 36
+						If size > 38
+							If size == 40
+								Return New Bool[40]
+							Else
+								Return New Bool[39]
+							EndIf
+						Else
+							If size == 38
+								Return New Bool[38]
+							Else
+								Return New Bool[37]
+							EndIf
+						EndIf
+					Else
+						If size > 34
+							If size == 36
+								Return New Bool[36]
+							Else
+								Return New Bool[35]
+							EndIf
+						Else
+							If size == 34
+								Return New Bool[34]
+							Else
+								Return New Bool[33]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			EndIf
+		Else
+			If size > 16
+				If size > 24
+					If size > 28
+						If size > 30
+							If size == 32
+								Return New Bool[32]
+							Else
+								Return New Bool[31]
+							EndIf
+						Else
+							If size == 30
+								Return New Bool[30]
+							Else
+								Return New Bool[29]
+							EndIf
+						EndIf
+					Else
+						If size > 26
+							If size == 28
+								Return New Bool[28]
+							Else
+								Return New Bool[27]
+							EndIf
+						Else
+							If size == 26
+								Return New Bool[26]
+							Else
+								Return New Bool[25]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 20
+						If size > 22
+							If size == 24
+								Return New Bool[24]
+							Else
+								Return New Bool[23]
+							EndIf
+						Else
+							If size == 22
+								Return New Bool[22]
+							Else
+								Return New Bool[21]
+							EndIf
+						EndIf
+					Else
+						If size > 18
+							If size == 20
+								Return New Bool[20]
+							Else
+								Return New Bool[19]
+							EndIf
+						Else
+							If size == 18
+								Return New Bool[18]
+							Else
+								Return New Bool[17]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			Else
+				If size > 8
+					If size > 12
+						If size > 14
+							If size == 16
+								Return New Bool[16]
+							Else
+								Return New Bool[15]
+							EndIf
+						Else
+							If size == 14
+								Return New Bool[14]
+							Else
+								Return New Bool[13]
+							EndIf
+						EndIf
+					Else
+						If size > 10
+							If size == 12
+								Return New Bool[12]
+							Else
+								Return New Bool[11]
+							EndIf
+						Else
+							If size == 10
+								Return New Bool[10]
+							Else
+								Return New Bool[9]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 4
+						If size > 6
+							If size == 8
+								Return New Bool[8]
+							Else
+								Return New Bool[7]
+							EndIf
+						Else
+							If size == 6
+								Return New Bool[6]
+							Else
+								Return New Bool[5]
+							EndIf
+						EndIf
+					Else
+						If size > 2
+							If size == 4
+								Return New Bool[4]
+							Else
+								Return New Bool[3]
+							EndIf
+						Else
+							If size == 2
+								Return New Bool[2]
+							Else
+								Return New Bool[1]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			EndIf
+		EndIf
+	EndIf
+EndFunction
+
+Float[] Function FloatArray(Int size) Global
+	size = ClampInt(size, 1, 128)
+	
+	If size > 64
+		If size > 96
+			If size > 112
+				If size > 120
+					If size > 124
+						If size > 126
+							If size == 128
+								Return New Float[128]
+							Else
+								Return New Float[127]
+							EndIf
+						Else
+							If size == 126
+								Return New Float[126]
+							Else
+								Return New Float[125]
+							EndIf
+						EndIf
+					Else
+						If size > 122
+							If size == 124
+								Return New Float[124]
+							Else
+								Return New Float[123]
+							EndIf
+						Else
+							If size == 122
+								Return New Float[122]
+							Else
+								Return New Float[121]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 116
+						If size > 118
+							If size == 120
+								Return New Float[120]
+							Else
+								Return New Float[119]
+							EndIf
+						Else
+							If size == 118
+								Return New Float[118]
+							Else
+								Return New Float[117]
+							EndIf
+						EndIf
+					Else
+						If size > 114
+							If size == 116
+								Return New Float[116]
+							Else
+								Return New Float[115]
+							EndIf
+						Else
+							If size == 114
+								Return New Float[114]
+							Else
+								Return New Float[113]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			Else
+				If size > 104
+					If size > 108
+						If size > 110
+							If size == 112
+								Return New Float[112]
+							Else
+								Return New Float[111]
+							EndIf
+						Else
+							If size == 110
+								Return New Float[110]
+							Else
+								Return New Float[109]
+							EndIf
+						EndIf
+					Else
+						If size > 106
+							If size == 108
+								Return New Float[108]
+							Else
+								Return New Float[107]
+							EndIf
+						Else
+							If size == 106
+								Return New Float[106]
+							Else
+								Return New Float[105]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 100
+						If size > 102
+							If size == 104
+								Return New Float[104]
+							Else
+								Return New Float[103]
+							EndIf
+						Else
+							If size == 102
+								Return New Float[102]
+							Else
+								Return New Float[101]
+							EndIf
+						EndIf
+					Else
+						If size > 98
+							If size == 100
+								Return New Float[100]
+							Else
+								Return New Float[99]
+							EndIf
+						Else
+							If size == 98
+								Return New Float[98]
+							Else
+								Return New Float[97]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			EndIf
+		Else
+			If size > 80
+				If size > 88
+					If size > 92
+						If size > 94
+							If size == 96
+								Return New Float[96]
+							Else
+								Return New Float[95]
+							EndIf
+						Else
+							If size == 94
+								Return New Float[94]
+							Else
+								Return New Float[93]
+							EndIf
+						EndIf
+					Else
+						If size > 90
+							If size == 92
+								Return New Float[92]
+							Else
+								Return New Float[91]
+							EndIf
+						Else
+							If size == 90
+								Return New Float[90]
+							Else
+								Return New Float[89]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 84
+						If size > 86
+							If size == 88
+								Return New Float[88]
+							Else
+								Return New Float[87]
+							EndIf
+						Else
+							If size == 86
+								Return New Float[86]
+							Else
+								Return New Float[85]
+							EndIf
+						EndIf
+					Else
+						If size > 82
+							If size == 84
+								Return New Float[84]
+							Else
+								Return New Float[83]
+							EndIf
+						Else
+							If size == 82
+								Return New Float[82]
+							Else
+								Return New Float[81]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			Else
+				If size > 72
+					If size > 76
+						If size > 78
+							If size == 80
+								Return New Float[80]
+							Else
+								Return New Float[79]
+							EndIf
+						Else
+							If size == 78
+								Return New Float[78]
+							Else
+								Return New Float[77]
+							EndIf
+						EndIf
+					Else
+						If size > 74
+							If size == 76
+								Return New Float[76]
+							Else
+								Return New Float[75]
+							EndIf
+						Else
+							If size == 74
+								Return New Float[74]
+							Else
+								Return New Float[73]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 68
+						If size > 70
+							If size == 72
+								Return New Float[72]
+							Else
+								Return New Float[71]
+							EndIf
+						Else
+							If size == 70
+								Return New Float[70]
+							Else
+								Return New Float[69]
+							EndIf
+						EndIf
+					Else
+						If size > 66
+							If size == 68
+								Return New Float[68]
+							Else
+								Return New Float[67]
+							EndIf
+						Else
+							If size == 66
+								Return New Float[66]
+							Else
+								Return New Float[65]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			EndIf
+		EndIf
+	Else
+		If size > 32
+			If size > 48
+				If size > 56
+					If size > 60
+						If size > 62
+							If size == 64
+								Return New Float[64]
+							Else
+								Return New Float[63]
+							EndIf
+						Else
+							If size == 62
+								Return New Float[62]
+							Else
+								Return New Float[61]
+							EndIf
+						EndIf
+					Else
+						If size > 58
+							If size == 60
+								Return New Float[60]
+							Else
+								Return New Float[59]
+							EndIf
+						Else
+							If size == 58
+								Return New Float[58]
+							Else
+								Return New Float[57]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 52
+						If size > 54
+							If size == 56
+								Return New Float[56]
+							Else
+								Return New Float[55]
+							EndIf
+						Else
+							If size == 54
+								Return New Float[54]
+							Else
+								Return New Float[53]
+							EndIf
+						EndIf
+					Else
+						If size > 50
+							If size == 52
+								Return New Float[52]
+							Else
+								Return New Float[51]
+							EndIf
+						Else
+							If size == 50
+								Return New Float[50]
+							Else
+								Return New Float[49]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			Else
+				If size > 40
+					If size > 44
+						If size > 46
+							If size == 48
+								Return New Float[48]
+							Else
+								Return New Float[47]
+							EndIf
+						Else
+							If size == 46
+								Return New Float[46]
+							Else
+								Return New Float[45]
+							EndIf
+						EndIf
+					Else
+						If size > 42
+							If size == 44
+								Return New Float[44]
+							Else
+								Return New Float[43]
+							EndIf
+						Else
+							If size == 42
+								Return New Float[42]
+							Else
+								Return New Float[41]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 36
+						If size > 38
+							If size == 40
+								Return New Float[40]
+							Else
+								Return New Float[39]
+							EndIf
+						Else
+							If size == 38
+								Return New Float[38]
+							Else
+								Return New Float[37]
+							EndIf
+						EndIf
+					Else
+						If size > 34
+							If size == 36
+								Return New Float[36]
+							Else
+								Return New Float[35]
+							EndIf
+						Else
+							If size == 34
+								Return New Float[34]
+							Else
+								Return New Float[33]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			EndIf
+		Else
+			If size > 16
+				If size > 24
+					If size > 28
+						If size > 30
+							If size == 32
+								Return New Float[32]
+							Else
+								Return New Float[31]
+							EndIf
+						Else
+							If size == 30
+								Return New Float[30]
+							Else
+								Return New Float[29]
+							EndIf
+						EndIf
+					Else
+						If size > 26
+							If size == 28
+								Return New Float[28]
+							Else
+								Return New Float[27]
+							EndIf
+						Else
+							If size == 26
+								Return New Float[26]
+							Else
+								Return New Float[25]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 20
+						If size > 22
+							If size == 24
+								Return New Float[24]
+							Else
+								Return New Float[23]
+							EndIf
+						Else
+							If size == 22
+								Return New Float[22]
+							Else
+								Return New Float[21]
+							EndIf
+						EndIf
+					Else
+						If size > 18
+							If size == 20
+								Return New Float[20]
+							Else
+								Return New Float[19]
+							EndIf
+						Else
+							If size == 18
+								Return New Float[18]
+							Else
+								Return New Float[17]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			Else
+				If size > 8
+					If size > 12
+						If size > 14
+							If size == 16
+								Return New Float[16]
+							Else
+								Return New Float[15]
+							EndIf
+						Else
+							If size == 14
+								Return New Float[14]
+							Else
+								Return New Float[13]
+							EndIf
+						EndIf
+					Else
+						If size > 10
+							If size == 12
+								Return New Float[12]
+							Else
+								Return New Float[11]
+							EndIf
+						Else
+							If size == 10
+								Return New Float[10]
+							Else
+								Return New Float[9]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 4
+						If size > 6
+							If size == 8
+								Return New Float[8]
+							Else
+								Return New Float[7]
+							EndIf
+						Else
+							If size == 6
+								Return New Float[6]
+							Else
+								Return New Float[5]
+							EndIf
+						EndIf
+					Else
+						If size > 2
+							If size == 4
+								Return New Float[4]
+							Else
+								Return New Float[3]
+							EndIf
+						Else
+							If size == 2
+								Return New Float[2]
+							Else
+								Return New Float[1]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			EndIf
+		EndIf
+	EndIf
+EndFunction
+
+Int[] Function IntArray(Int size) Global
+	size = ClampInt(size, 1, 128)
+	
+	If size > 64
+		If size > 96
+			If size > 112
+				If size > 120
+					If size > 124
+						If size > 126
+							If size == 128
+								Return New Int[128]
+							Else
+								Return New Int[127]
+							EndIf
+						Else
+							If size == 126
+								Return New Int[126]
+							Else
+								Return New Int[125]
+							EndIf
+						EndIf
+					Else
+						If size > 122
+							If size == 124
+								Return New Int[124]
+							Else
+								Return New Int[123]
+							EndIf
+						Else
+							If size == 122
+								Return New Int[122]
+							Else
+								Return New Int[121]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 116
+						If size > 118
+							If size == 120
+								Return New Int[120]
+							Else
+								Return New Int[119]
+							EndIf
+						Else
+							If size == 118
+								Return New Int[118]
+							Else
+								Return New Int[117]
+							EndIf
+						EndIf
+					Else
+						If size > 114
+							If size == 116
+								Return New Int[116]
+							Else
+								Return New Int[115]
+							EndIf
+						Else
+							If size == 114
+								Return New Int[114]
+							Else
+								Return New Int[113]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			Else
+				If size > 104
+					If size > 108
+						If size > 110
+							If size == 112
+								Return New Int[112]
+							Else
+								Return New Int[111]
+							EndIf
+						Else
+							If size == 110
+								Return New Int[110]
+							Else
+								Return New Int[109]
+							EndIf
+						EndIf
+					Else
+						If size > 106
+							If size == 108
+								Return New Int[108]
+							Else
+								Return New Int[107]
+							EndIf
+						Else
+							If size == 106
+								Return New Int[106]
+							Else
+								Return New Int[105]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 100
+						If size > 102
+							If size == 104
+								Return New Int[104]
+							Else
+								Return New Int[103]
+							EndIf
+						Else
+							If size == 102
+								Return New Int[102]
+							Else
+								Return New Int[101]
+							EndIf
+						EndIf
+					Else
+						If size > 98
+							If size == 100
+								Return New Int[100]
+							Else
+								Return New Int[99]
+							EndIf
+						Else
+							If size == 98
+								Return New Int[98]
+							Else
+								Return New Int[97]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			EndIf
+		Else
+			If size > 80
+				If size > 88
+					If size > 92
+						If size > 94
+							If size == 96
+								Return New Int[96]
+							Else
+								Return New Int[95]
+							EndIf
+						Else
+							If size == 94
+								Return New Int[94]
+							Else
+								Return New Int[93]
+							EndIf
+						EndIf
+					Else
+						If size > 90
+							If size == 92
+								Return New Int[92]
+							Else
+								Return New Int[91]
+							EndIf
+						Else
+							If size == 90
+								Return New Int[90]
+							Else
+								Return New Int[89]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 84
+						If size > 86
+							If size == 88
+								Return New Int[88]
+							Else
+								Return New Int[87]
+							EndIf
+						Else
+							If size == 86
+								Return New Int[86]
+							Else
+								Return New Int[85]
+							EndIf
+						EndIf
+					Else
+						If size > 82
+							If size == 84
+								Return New Int[84]
+							Else
+								Return New Int[83]
+							EndIf
+						Else
+							If size == 82
+								Return New Int[82]
+							Else
+								Return New Int[81]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			Else
+				If size > 72
+					If size > 76
+						If size > 78
+							If size == 80
+								Return New Int[80]
+							Else
+								Return New Int[79]
+							EndIf
+						Else
+							If size == 78
+								Return New Int[78]
+							Else
+								Return New Int[77]
+							EndIf
+						EndIf
+					Else
+						If size > 74
+							If size == 76
+								Return New Int[76]
+							Else
+								Return New Int[75]
+							EndIf
+						Else
+							If size == 74
+								Return New Int[74]
+							Else
+								Return New Int[73]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 68
+						If size > 70
+							If size == 72
+								Return New Int[72]
+							Else
+								Return New Int[71]
+							EndIf
+						Else
+							If size == 70
+								Return New Int[70]
+							Else
+								Return New Int[69]
+							EndIf
+						EndIf
+					Else
+						If size > 66
+							If size == 68
+								Return New Int[68]
+							Else
+								Return New Int[67]
+							EndIf
+						Else
+							If size == 66
+								Return New Int[66]
+							Else
+								Return New Int[65]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			EndIf
+		EndIf
+	Else
+		If size > 32
+			If size > 48
+				If size > 56
+					If size > 60
+						If size > 62
+							If size == 64
+								Return New Int[64]
+							Else
+								Return New Int[63]
+							EndIf
+						Else
+							If size == 62
+								Return New Int[62]
+							Else
+								Return New Int[61]
+							EndIf
+						EndIf
+					Else
+						If size > 58
+							If size == 60
+								Return New Int[60]
+							Else
+								Return New Int[59]
+							EndIf
+						Else
+							If size == 58
+								Return New Int[58]
+							Else
+								Return New Int[57]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 52
+						If size > 54
+							If size == 56
+								Return New Int[56]
+							Else
+								Return New Int[55]
+							EndIf
+						Else
+							If size == 54
+								Return New Int[54]
+							Else
+								Return New Int[53]
+							EndIf
+						EndIf
+					Else
+						If size > 50
+							If size == 52
+								Return New Int[52]
+							Else
+								Return New Int[51]
+							EndIf
+						Else
+							If size == 50
+								Return New Int[50]
+							Else
+								Return New Int[49]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			Else
+				If size > 40
+					If size > 44
+						If size > 46
+							If size == 48
+								Return New Int[48]
+							Else
+								Return New Int[47]
+							EndIf
+						Else
+							If size == 46
+								Return New Int[46]
+							Else
+								Return New Int[45]
+							EndIf
+						EndIf
+					Else
+						If size > 42
+							If size == 44
+								Return New Int[44]
+							Else
+								Return New Int[43]
+							EndIf
+						Else
+							If size == 42
+								Return New Int[42]
+							Else
+								Return New Int[41]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 36
+						If size > 38
+							If size == 40
+								Return New Int[40]
+							Else
+								Return New Int[39]
+							EndIf
+						Else
+							If size == 38
+								Return New Int[38]
+							Else
+								Return New Int[37]
+							EndIf
+						EndIf
+					Else
+						If size > 34
+							If size == 36
+								Return New Int[36]
+							Else
+								Return New Int[35]
+							EndIf
+						Else
+							If size == 34
+								Return New Int[34]
+							Else
+								Return New Int[33]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			EndIf
+		Else
+			If size > 16
+				If size > 24
+					If size > 28
+						If size > 30
+							If size == 32
+								Return New Int[32]
+							Else
+								Return New Int[31]
+							EndIf
+						Else
+							If size == 30
+								Return New Int[30]
+							Else
+								Return New Int[29]
+							EndIf
+						EndIf
+					Else
+						If size > 26
+							If size == 28
+								Return New Int[28]
+							Else
+								Return New Int[27]
+							EndIf
+						Else
+							If size == 26
+								Return New Int[26]
+							Else
+								Return New Int[25]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 20
+						If size > 22
+							If size == 24
+								Return New Int[24]
+							Else
+								Return New Int[23]
+							EndIf
+						Else
+							If size == 22
+								Return New Int[22]
+							Else
+								Return New Int[21]
+							EndIf
+						EndIf
+					Else
+						If size > 18
+							If size == 20
+								Return New Int[20]
+							Else
+								Return New Int[19]
+							EndIf
+						Else
+							If size == 18
+								Return New Int[18]
+							Else
+								Return New Int[17]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			Else
+				If size > 8
+					If size > 12
+						If size > 14
+							If size == 16
+								Return New Int[16]
+							Else
+								Return New Int[15]
+							EndIf
+						Else
+							If size == 14
+								Return New Int[14]
+							Else
+								Return New Int[13]
+							EndIf
+						EndIf
+					Else
+						If size > 10
+							If size == 12
+								Return New Int[12]
+							Else
+								Return New Int[11]
+							EndIf
+						Else
+							If size == 10
+								Return New Int[10]
+							Else
+								Return New Int[9]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 4
+						If size > 6
+							If size == 8
+								Return New Int[8]
+							Else
+								Return New Int[7]
+							EndIf
+						Else
+							If size == 6
+								Return New Int[6]
+							Else
+								Return New Int[5]
+							EndIf
+						EndIf
+					Else
+						If size > 2
+							If size == 4
+								Return New Int[4]
+							Else
+								Return New Int[3]
+							EndIf
+						Else
+							If size == 2
+								Return New Int[2]
+							Else
+								Return New Int[1]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			EndIf
+		EndIf
+	EndIf
+EndFunction
+
+String[] Function StringArray(Int size) Global
+	size = ClampInt(size, 1, 128)
+	
+	If size > 64
+		If size > 96
+			If size > 112
+				If size > 120
+					If size > 124
+						If size > 126
+							If size == 128
+								Return New String[128]
+							Else
+								Return New String[127]
+							EndIf
+						Else
+							If size == 126
+								Return New String[126]
+							Else
+								Return New String[125]
+							EndIf
+						EndIf
+					Else
+						If size > 122
+							If size == 124
+								Return New String[124]
+							Else
+								Return New String[123]
+							EndIf
+						Else
+							If size == 122
+								Return New String[122]
+							Else
+								Return New String[121]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 116
+						If size > 118
+							If size == 120
+								Return New String[120]
+							Else
+								Return New String[119]
+							EndIf
+						Else
+							If size == 118
+								Return New String[118]
+							Else
+								Return New String[117]
+							EndIf
+						EndIf
+					Else
+						If size > 114
+							If size == 116
+								Return New String[116]
+							Else
+								Return New String[115]
+							EndIf
+						Else
+							If size == 114
+								Return New String[114]
+							Else
+								Return New String[113]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			Else
+				If size > 104
+					If size > 108
+						If size > 110
+							If size == 112
+								Return New String[112]
+							Else
+								Return New String[111]
+							EndIf
+						Else
+							If size == 110
+								Return New String[110]
+							Else
+								Return New String[109]
+							EndIf
+						EndIf
+					Else
+						If size > 106
+							If size == 108
+								Return New String[108]
+							Else
+								Return New String[107]
+							EndIf
+						Else
+							If size == 106
+								Return New String[106]
+							Else
+								Return New String[105]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 100
+						If size > 102
+							If size == 104
+								Return New String[104]
+							Else
+								Return New String[103]
+							EndIf
+						Else
+							If size == 102
+								Return New String[102]
+							Else
+								Return New String[101]
+							EndIf
+						EndIf
+					Else
+						If size > 98
+							If size == 100
+								Return New String[100]
+							Else
+								Return New String[99]
+							EndIf
+						Else
+							If size == 98
+								Return New String[98]
+							Else
+								Return New String[97]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			EndIf
+		Else
+			If size > 80
+				If size > 88
+					If size > 92
+						If size > 94
+							If size == 96
+								Return New String[96]
+							Else
+								Return New String[95]
+							EndIf
+						Else
+							If size == 94
+								Return New String[94]
+							Else
+								Return New String[93]
+							EndIf
+						EndIf
+					Else
+						If size > 90
+							If size == 92
+								Return New String[92]
+							Else
+								Return New String[91]
+							EndIf
+						Else
+							If size == 90
+								Return New String[90]
+							Else
+								Return New String[89]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 84
+						If size > 86
+							If size == 88
+								Return New String[88]
+							Else
+								Return New String[87]
+							EndIf
+						Else
+							If size == 86
+								Return New String[86]
+							Else
+								Return New String[85]
+							EndIf
+						EndIf
+					Else
+						If size > 82
+							If size == 84
+								Return New String[84]
+							Else
+								Return New String[83]
+							EndIf
+						Else
+							If size == 82
+								Return New String[82]
+							Else
+								Return New String[81]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			Else
+				If size > 72
+					If size > 76
+						If size > 78
+							If size == 80
+								Return New String[80]
+							Else
+								Return New String[79]
+							EndIf
+						Else
+							If size == 78
+								Return New String[78]
+							Else
+								Return New String[77]
+							EndIf
+						EndIf
+					Else
+						If size > 74
+							If size == 76
+								Return New String[76]
+							Else
+								Return New String[75]
+							EndIf
+						Else
+							If size == 74
+								Return New String[74]
+							Else
+								Return New String[73]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 68
+						If size > 70
+							If size == 72
+								Return New String[72]
+							Else
+								Return New String[71]
+							EndIf
+						Else
+							If size == 70
+								Return New String[70]
+							Else
+								Return New String[69]
+							EndIf
+						EndIf
+					Else
+						If size > 66
+							If size == 68
+								Return New String[68]
+							Else
+								Return New String[67]
+							EndIf
+						Else
+							If size == 66
+								Return New String[66]
+							Else
+								Return New String[65]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			EndIf
+		EndIf
+	Else
+		If size > 32
+			If size > 48
+				If size > 56
+					If size > 60
+						If size > 62
+							If size == 64
+								Return New String[64]
+							Else
+								Return New String[63]
+							EndIf
+						Else
+							If size == 62
+								Return New String[62]
+							Else
+								Return New String[61]
+							EndIf
+						EndIf
+					Else
+						If size > 58
+							If size == 60
+								Return New String[60]
+							Else
+								Return New String[59]
+							EndIf
+						Else
+							If size == 58
+								Return New String[58]
+							Else
+								Return New String[57]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 52
+						If size > 54
+							If size == 56
+								Return New String[56]
+							Else
+								Return New String[55]
+							EndIf
+						Else
+							If size == 54
+								Return New String[54]
+							Else
+								Return New String[53]
+							EndIf
+						EndIf
+					Else
+						If size > 50
+							If size == 52
+								Return New String[52]
+							Else
+								Return New String[51]
+							EndIf
+						Else
+							If size == 50
+								Return New String[50]
+							Else
+								Return New String[49]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			Else
+				If size > 40
+					If size > 44
+						If size > 46
+							If size == 48
+								Return New String[48]
+							Else
+								Return New String[47]
+							EndIf
+						Else
+							If size == 46
+								Return New String[46]
+							Else
+								Return New String[45]
+							EndIf
+						EndIf
+					Else
+						If size > 42
+							If size == 44
+								Return New String[44]
+							Else
+								Return New String[43]
+							EndIf
+						Else
+							If size == 42
+								Return New String[42]
+							Else
+								Return New String[41]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 36
+						If size > 38
+							If size == 40
+								Return New String[40]
+							Else
+								Return New String[39]
+							EndIf
+						Else
+							If size == 38
+								Return New String[38]
+							Else
+								Return New String[37]
+							EndIf
+						EndIf
+					Else
+						If size > 34
+							If size == 36
+								Return New String[36]
+							Else
+								Return New String[35]
+							EndIf
+						Else
+							If size == 34
+								Return New String[34]
+							Else
+								Return New String[33]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			EndIf
+		Else
+			If size > 16
+				If size > 24
+					If size > 28
+						If size > 30
+							If size == 32
+								Return New String[32]
+							Else
+								Return New String[31]
+							EndIf
+						Else
+							If size == 30
+								Return New String[30]
+							Else
+								Return New String[29]
+							EndIf
+						EndIf
+					Else
+						If size > 26
+							If size == 28
+								Return New String[28]
+							Else
+								Return New String[27]
+							EndIf
+						Else
+							If size == 26
+								Return New String[26]
+							Else
+								Return New String[25]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 20
+						If size > 22
+							If size == 24
+								Return New String[24]
+							Else
+								Return New String[23]
+							EndIf
+						Else
+							If size == 22
+								Return New String[22]
+							Else
+								Return New String[21]
+							EndIf
+						EndIf
+					Else
+						If size > 18
+							If size == 20
+								Return New String[20]
+							Else
+								Return New String[19]
+							EndIf
+						Else
+							If size == 18
+								Return New String[18]
+							Else
+								Return New String[17]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			Else
+				If size > 8
+					If size > 12
+						If size > 14
+							If size == 16
+								Return New String[16]
+							Else
+								Return New String[15]
+							EndIf
+						Else
+							If size == 14
+								Return New String[14]
+							Else
+								Return New String[13]
+							EndIf
+						EndIf
+					Else
+						If size > 10
+							If size == 12
+								Return New String[12]
+							Else
+								Return New String[11]
+							EndIf
+						Else
+							If size == 10
+								Return New String[10]
+							Else
+								Return New String[9]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 4
+						If size > 6
+							If size == 8
+								Return New String[8]
+							Else
+								Return New String[7]
+							EndIf
+						Else
+							If size == 6
+								Return New String[6]
+							Else
+								Return New String[5]
+							EndIf
+						EndIf
+					Else
+						If size > 2
+							If size == 4
+								Return New String[4]
+							Else
+								Return New String[3]
+							EndIf
+						Else
+							If size == 2
+								Return New String[2]
+							Else
+								Return New String[1]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			EndIf
+		EndIf
+	EndIf
+EndFunction
+
+bool function IsNumber(string Char) global
+	if Char == "0"
+		return true
+	elseif Char == "1"
+		return true
+	elseif Char == "2"
+		return true
+	elseif Char == "3"
+		return true
+	elseif Char == "4"
+		return true
+	elseif Char == "5"
+		return true
+	elseif Char == "6"
+		return true
+	elseif Char == "7"
+		return true
+	elseif Char == "8"
+		return true
+	elseif Char == "9"
+		return true
+	endif
+	return false
+endfunction
+
+string function GetVersionString(string modDesc) global
+	bool bRunning=true
+	int startpos=0
+	int vpos=0
+	int descLen = StringUtil.GetLength(modDesc)
+	while bRunning
+		vpos = StringUtil.Find(modDesc,"ersion",vpos)
+		if vpos > 0
+			if StringUtil.GetNthChar(modDesc,vpos - 1)=="V" || StringUtil.GetNthChar(modDesc,vpos - 1)=="v"
+				vpos+=6
+				while StringUtil.GetNthChar(modDesc,vpos)!=":" && StringUtil.GetNthChar(modDesc,vpos)!=" " && vpos<descLen
+					vpos+=1
+				endwhile
+				startpos=vpos
+				while (IsNumber(StringUtil.Substring(modDesc,vpos,1)) || StringUtil.Substring(modDesc,vpos,1) == ".") && vpos<descLen
+					vpos+=1
+					;BFVersion+=StringUtil.GetNthChar(modDesc,vpos)
+				endwhile
+				vpos-=1
+				if StringUtil.Substring(modDesc,vpos+1,1) == "b"
+					return "Beta " + StringUtil.Substring(modDesc,startpos,vpos - startpos)
+				else
+					return StringUtil.Substring(modDesc,startpos,vpos - startpos)
+				endif
+			endif
+		else
+			bRunning = false
+		endif
+	endWhile
+	return "Undefined"
+endfunction
+
+
+
+
+Form[] Function FormArray(Int size) Global
+	size = ClampInt(size, 1, 128)
+	
+	If size > 64
+		If size > 96
+			If size > 112
+				If size > 120
+					If size > 124
+						If size > 126
+							If size == 128
+								Return New Form[128]
+							Else
+								Return New Form[127]
+							EndIf
+						Else
+							If size == 126
+								Return New Form[126]
+							Else
+								Return New Form[125]
+							EndIf
+						EndIf
+					Else
+						If size > 122
+							If size == 124
+								Return New Form[124]
+							Else
+								Return New Form[123]
+							EndIf
+						Else
+							If size == 122
+								Return New Form[122]
+							Else
+								Return New Form[121]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 116
+						If size > 118
+							If size == 120
+								Return New Form[120]
+							Else
+								Return New Form[119]
+							EndIf
+						Else
+							If size == 118
+								Return New Form[118]
+							Else
+								Return New Form[117]
+							EndIf
+						EndIf
+					Else
+						If size > 114
+							If size == 116
+								Return New Form[116]
+							Else
+								Return New Form[115]
+							EndIf
+						Else
+							If size == 114
+								Return New Form[114]
+							Else
+								Return New Form[113]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			Else
+				If size > 104
+					If size > 108
+						If size > 110
+							If size == 112
+								Return New Form[112]
+							Else
+								Return New Form[111]
+							EndIf
+						Else
+							If size == 110
+								Return New Form[110]
+							Else
+								Return New Form[109]
+							EndIf
+						EndIf
+					Else
+						If size > 106
+							If size == 108
+								Return New Form[108]
+							Else
+								Return New Form[107]
+							EndIf
+						Else
+							If size == 106
+								Return New Form[106]
+							Else
+								Return New Form[105]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 100
+						If size > 102
+							If size == 104
+								Return New Form[104]
+							Else
+								Return New Form[103]
+							EndIf
+						Else
+							If size == 102
+								Return New Form[102]
+							Else
+								Return New Form[101]
+							EndIf
+						EndIf
+					Else
+						If size > 98
+							If size == 100
+								Return New Form[100]
+							Else
+								Return New Form[99]
+							EndIf
+						Else
+							If size == 98
+								Return New Form[98]
+							Else
+								Return New Form[97]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			EndIf
+		Else
+			If size > 80
+				If size > 88
+					If size > 92
+						If size > 94
+							If size == 96
+								Return New Form[96]
+							Else
+								Return New Form[95]
+							EndIf
+						Else
+							If size == 94
+								Return New Form[94]
+							Else
+								Return New Form[93]
+							EndIf
+						EndIf
+					Else
+						If size > 90
+							If size == 92
+								Return New Form[92]
+							Else
+								Return New Form[91]
+							EndIf
+						Else
+							If size == 90
+								Return New Form[90]
+							Else
+								Return New Form[89]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 84
+						If size > 86
+							If size == 88
+								Return New Form[88]
+							Else
+								Return New Form[87]
+							EndIf
+						Else
+							If size == 86
+								Return New Form[86]
+							Else
+								Return New Form[85]
+							EndIf
+						EndIf
+					Else
+						If size > 82
+							If size == 84
+								Return New Form[84]
+							Else
+								Return New Form[83]
+							EndIf
+						Else
+							If size == 82
+								Return New Form[82]
+							Else
+								Return New Form[81]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			Else
+				If size > 72
+					If size > 76
+						If size > 78
+							If size == 80
+								Return New Form[80]
+							Else
+								Return New Form[79]
+							EndIf
+						Else
+							If size == 78
+								Return New Form[78]
+							Else
+								Return New Form[77]
+							EndIf
+						EndIf
+					Else
+						If size > 74
+							If size == 76
+								Return New Form[76]
+							Else
+								Return New Form[75]
+							EndIf
+						Else
+							If size == 74
+								Return New Form[74]
+							Else
+								Return New Form[73]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 68
+						If size > 70
+							If size == 72
+								Return New Form[72]
+							Else
+								Return New Form[71]
+							EndIf
+						Else
+							If size == 70
+								Return New Form[70]
+							Else
+								Return New Form[69]
+							EndIf
+						EndIf
+					Else
+						If size > 66
+							If size == 68
+								Return New Form[68]
+							Else
+								Return New Form[67]
+							EndIf
+						Else
+							If size == 66
+								Return New Form[66]
+							Else
+								Return New Form[65]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			EndIf
+		EndIf
+	Else
+		If size > 32
+			If size > 48
+				If size > 56
+					If size > 60
+						If size > 62
+							If size == 64
+								Return New Form[64]
+							Else
+								Return New Form[63]
+							EndIf
+						Else
+							If size == 62
+								Return New Form[62]
+							Else
+								Return New Form[61]
+							EndIf
+						EndIf
+					Else
+						If size > 58
+							If size == 60
+								Return New Form[60]
+							Else
+								Return New Form[59]
+							EndIf
+						Else
+							If size == 58
+								Return New Form[58]
+							Else
+								Return New Form[57]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 52
+						If size > 54
+							If size == 56
+								Return New Form[56]
+							Else
+								Return New Form[55]
+							EndIf
+						Else
+							If size == 54
+								Return New Form[54]
+							Else
+								Return New Form[53]
+							EndIf
+						EndIf
+					Else
+						If size > 50
+							If size == 52
+								Return New Form[52]
+							Else
+								Return New Form[51]
+							EndIf
+						Else
+							If size == 50
+								Return New Form[50]
+							Else
+								Return New Form[49]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			Else
+				If size > 40
+					If size > 44
+						If size > 46
+							If size == 48
+								Return New Form[48]
+							Else
+								Return New Form[47]
+							EndIf
+						Else
+							If size == 46
+								Return New Form[46]
+							Else
+								Return New Form[45]
+							EndIf
+						EndIf
+					Else
+						If size > 42
+							If size == 44
+								Return New Form[44]
+							Else
+								Return New Form[43]
+							EndIf
+						Else
+							If size == 42
+								Return New Form[42]
+							Else
+								Return New Form[41]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 36
+						If size > 38
+							If size == 40
+								Return New Form[40]
+							Else
+								Return New Form[39]
+							EndIf
+						Else
+							If size == 38
+								Return New Form[38]
+							Else
+								Return New Form[37]
+							EndIf
+						EndIf
+					Else
+						If size > 34
+							If size == 36
+								Return New Form[36]
+							Else
+								Return New Form[35]
+							EndIf
+						Else
+							If size == 34
+								Return New Form[34]
+							Else
+								Return New Form[33]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			EndIf
+		Else
+			If size > 16
+				If size > 24
+					If size > 28
+						If size > 30
+							If size == 32
+								Return New Form[32]
+							Else
+								Return New Form[31]
+							EndIf
+						Else
+							If size == 30
+								Return New Form[30]
+							Else
+								Return New Form[29]
+							EndIf
+						EndIf
+					Else
+						If size > 26
+							If size == 28
+								Return New Form[28]
+							Else
+								Return New Form[27]
+							EndIf
+						Else
+							If size == 26
+								Return New Form[26]
+							Else
+								Return New Form[25]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 20
+						If size > 22
+							If size == 24
+								Return New Form[24]
+							Else
+								Return New Form[23]
+							EndIf
+						Else
+							If size == 22
+								Return New Form[22]
+							Else
+								Return New Form[21]
+							EndIf
+						EndIf
+					Else
+						If size > 18
+							If size == 20
+								Return New Form[20]
+							Else
+								Return New Form[19]
+							EndIf
+						Else
+							If size == 18
+								Return New Form[18]
+							Else
+								Return New Form[17]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			Else
+				If size > 8
+					If size > 12
+						If size > 14
+							If size == 16
+								Return New Form[16]
+							Else
+								Return New Form[15]
+							EndIf
+						Else
+							If size == 14
+								Return New Form[14]
+							Else
+								Return New Form[13]
+							EndIf
+						EndIf
+					Else
+						If size > 10
+							If size == 12
+								Return New Form[12]
+							Else
+								Return New Form[11]
+							EndIf
+						Else
+							If size == 10
+								Return New Form[10]
+							Else
+								Return New Form[9]
+							EndIf
+						EndIf
+					EndIf
+				Else
+					If size > 4
+						If size > 6
+							If size == 8
+								Return New Form[8]
+							Else
+								Return New Form[7]
+							EndIf
+						Else
+							If size == 6
+								Return New Form[6]
+							Else
+								Return New Form[5]
+							EndIf
+						EndIf
+					Else
+						If size > 2
+							If size == 4
+								Return New Form[4]
+							Else
+								Return New Form[3]
+							EndIf
+						Else
+							If size == 2
+								Return New Form[2]
+							Else
+								Return New Form[1]
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			EndIf
+		EndIf
+	EndIf
+EndFunction

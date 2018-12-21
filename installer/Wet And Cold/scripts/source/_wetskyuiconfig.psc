@@ -2,122 +2,120 @@ Scriptname _WetSkyUIConfig extends SKI_ConfigBase
 
 ;====================================================================================
 
-;IMPORTANT: All strings that start with "$" are automatically translated by the text files in "interface\translations\wetandcold_YOURLANGUAGE.txt"
-
 _WetQuestScript Property _WetQuest Auto
 
-String[] Pages
-String[] StatusList
-String[] ModeList
-String[] BreathPlayerList
-String[] BlindPlayerList
-String[] GoHomeNPCList
-String[] RainGearNPCList
-String[] ColdGearNPCList
 String[] AshGearNPCList
+String[] BlindPlayerList
+String[] BreathPlayerList
+String[] ColdGearNPCList
+String[] GoHomeNPCList
+String[] ModeList
+String[] Pages
 String[] PurchaseList
+String[] RainGearNPCList
+String[] StatusList
 
-Int StatusOption
-Int DripPlayerOption
-Int DripActorOption
-Int FootWetPlayerOption
-Int FootWetActorOption
-Int BreathPlayerOption
-Int BreathActorOption
-Int DustPlayerOption
-Int DustActorOption
-Int RainBlindPlayerOption
-Int GoHomeNPCOption
-Int RainGearNPCOption
-Int ColdGearNPCOption
+Int AshCoversOption
+Int AshGearFollowerOption
 Int AshGearNPCOption
-Int StrongWindsOption
+Int AshGogglesOption
 Int BlizzBlindNPCOption
 Int BlizzBlindPlayerOption
-Int RainGearFollowerOption
-Int ColdGearFollowerOption
-Int AshGearFollowerOption
-Int SurvivalGearNPCOption
-Int SnowyPlayerOption
-Int SnowyActorOption
-Int WateryEyesPlayerOption
-Int ColdHoodsOption
-Int ColdGlovesOption
+Int BreathActorOption
+Int BreathPlayerOption
 Int ColdCloaksOption
 Int ColdCoversOption
-Int WetHoodsOption
-Int WetCloaksOption
-Int SurvBPOption
-Int SurvModItemsOption
+Int ColdGearFollowerOption
+Int ColdGearNPCOption
+Int ColdGlovesOption
+Int ColdHoodsOption
+Int DripActorOption
+Int DripPlayerOption
+Int DustActorOption
+Int DustPlayerOption
+Int FootWetActorOption
+Int FootWetPlayerOption
+Int GoHomeNPCOption
 Int ModeOption
-Int AshGogglesOption
-Int AshCoversOption
-Int PurchaseColdCloakOption
-Int PurchaseColdHoodOption
-Int PurchaseColdGloveOption
-Int PurchaseColdFaceCoverOption
-Int PurchaseRainHoodOption
-Int PurchaseRainCloakOption
-Int PurchaseSurvivalBPOption
 Int PurchaseAshFaceCoverOption
 Int PurchaseAshGoggleOption
-
-Int Status = 1
-Int Mode
-Int BreathPlayer
-Int RainBlindPlayer
-Int BlizzBlindPlayer
-Int GoHomeNPC
-Int RainGearNPC
-Int ColdGearNPC
+Int PurchaseColdCloakOption
+Int PurchaseColdFaceCoverOption
+Int PurchaseColdGloveOption
+Int PurchaseColdHoodOption
+Int PurchaseRainCloakOption
+Int PurchaseRainHoodOption
+Int PurchaseSurvivalBPOption
+Int RainBlindPlayerOption
+Int RainGearFollowerOption
+Int RainGearNPCOption
+Int SnowyActorOption
+Int SnowyPlayerOption
+Int StatusOption
+Int StrongWindsOption
+Int SurvBPOption
+Int SurvivalGearNPCOption
+Int SurvModItemsOption
+Int WateryEyesPlayerOption
+Int WetCloaksOption
+Int WetHoodsOption
 Int AshGearNPC
-Int PurchaseColdCloak
-Int PurchaseColdHood
-Int PurchaseColdGlove
-Int PurchaseColdFaceCover
-Int PurchaseRainHood
-Int PurchaseRainCloak
-Int PurchaseSurvivalBP
+Int BlizzBlindPlayer
+Int BreathPlayer
+Int ColdGearNPC
+Int GoHomeNPC
+Int Mode
 Int PurchaseAshFaceCover
 Int PurchaseAshGoggle
+Int PurchaseColdCloak
+Int PurchaseColdFaceCover
+Int PurchaseColdGlove
+Int PurchaseColdHood
+Int PurchaseRainCloak
+Int PurchaseRainHood
+Int PurchaseSurvivalBP
+Int RainBlindPlayer
+Int RainGearNPC
+Int Status = 1
 
-Bool StrongWinds
-Bool DripPlayer
-Bool DripActor
-Bool FootWetPlayer
-Bool FootWetActor
-Bool DustPlayer
-Bool DustActor
-Bool SnowyPlayer
-Bool SnowyActor
-Bool BreathActor
-Bool BlizzBlindNPC
-Bool SurvivalGearNPC
-Bool RainGearFollower
-Bool ColdGearFollower
+Bool AshCovers
 Bool AshGearFollower
-Bool WateryEyesPlayer
-Bool ColdHoods
+Bool AshGoggles
+Bool BlizzBlindNPC
+Bool BreathActor
 Bool ColdCloaks
-Bool ColdGloves
 Bool ColdCovers
-Bool WetHoods
-Bool WetCloaks
-Bool SurvBP
-Bool SurvModItems
-Bool PurchaseColdCloakSet
-Bool PurchaseColdHoodSet
-Bool PurchaseColdGloveSet
-Bool PurchaseColdFaceCoverSet
-Bool PurchaseRainHoodSet
-Bool PurchaseRainCloakSet
-Bool PurchaseSurvivalBPSet
+Bool ColdGearFollower
+Bool ColdGloves
+Bool ColdHoods
+Bool DripActor
+Bool DripPlayer
+Bool DustActor
+Bool DustPlayer
+Bool FootWetActor
+Bool FootWetPlayer
 Bool PurchaseAshFaceCoverSet
 Bool PurchaseAshGoggleSet
-Bool AshGoggles
-Bool AshCovers
+Bool PurchaseColdCloakSet
+Bool PurchaseColdFaceCoverSet
+Bool PurchaseColdGloveSet
+Bool PurchaseColdHoodSet
+Bool PurchaseRainCloakSet
+Bool PurchaseRainHoodSet
+Bool PurchaseSurvivalBPSet
+Bool RainGearFollower
+Bool SnowyActor
+Bool SnowyPlayer
+Bool StrongWinds
+Bool SurvBP
+Bool SurvivalGearNPC
+Bool SurvModItems
+Bool WateryEyesPlayer
+Bool WetCloaks
+Bool WetHoods
 
 Actor targ
+
 
 ;====================================================================================
 
@@ -237,10 +235,8 @@ Function ApplySettings()
 	Else
 		_WetQuest._WetWindToggle.SetValue(0)
 	EndIf
-
 	_WetQuest.FollowerHoodOn = RainGearFollower
 	_WetQuest.FollowerColdOn = ColdGearFollower
-
 	If SurvivalGearNPC
 		_WetQuest.SurvGearOn = True
 		_WetQuest._WetSurvGearToggle.SetValue(1)
@@ -248,7 +244,6 @@ Function ApplySettings()
 		_WetQuest.SurvGearOn = False
 		_WetQuest._WetSurvGearToggle.SetValue(0)
 	EndIf
-
 	_WetQuest.ColdHoodsOn = ColdHoods
 	_WetQuest.ColdCloaksOn = ColdCloaks
 	_WetQuest.ColdGlovesOn = ColdGloves
@@ -257,7 +252,6 @@ Function ApplySettings()
 	_WetQuest.WetCloaksOn = WetCloaks
 	_WetQuest.SurvBPOn = SurvBP
 	_WetQuest.SurvModItemsOn = SurvModItems
-
 	If PurchaseColdCloak == 1 && !PurchaseColdCloakSet
 		_WetQuest.LItemMiscVendorMiscItems75.AddForm(_WetQuest._WetColdCloakLItem, 1, 1)
 		_WetQuest.LItemMiscVendorMiscItems75.AddForm(_WetQuest._WetColdCloakLItem, 1, 1)
@@ -334,7 +328,6 @@ Function ApplySettings()
 		_WetQuest.DLC2LItemMiscVendorArmor75.AddForm(_WetQuest._WetAshGoggleLItem, 1, 1)
 		PurchaseAshGoggleSet = True
 	EndIf
-
 	If Mode == 0
 		_WetQuest._WetWinterToggle.SetValue(0)
 	ElseIf Mode == 1
@@ -342,7 +335,6 @@ Function ApplySettings()
 	Else
 		_WetQuest._WetWinterToggle.SetValue(1)
 	EndIf
-
 	If AshGearNPC == 0
 		_WetQuest._WetAshGearToggle.SetValue(0)
 	ElseIf AshGearNPC == 1
@@ -352,10 +344,8 @@ Function ApplySettings()
 		_WetQuest._WetAshGearToggle.SetValue(1)
 		_WetQuest.AshFollowersOnly = True
 	EndIf
- 
 	_WetQuest.GogglesOn = AshGoggles
 	_WetQuest.FaceCoversOn = AshCovers
-
 	If DustPlayer
 		_WetQuest._WetDustPlayerToggle.SetValue(1)
 	Else
@@ -366,15 +356,12 @@ Function ApplySettings()
 	Else
 		_WetQuest._WetDustActorToggle.SetValue(0)
 	EndIf
-
 	_WetQuest.FollowerAshOn = AshGearFollower
-
 	If WateryEyesPlayer
 		_WetQuest._WetWateryEyesToggle.SetValue(1)
 	Else
 		_WetQuest._WetWateryEyesToggle.SetValue(0)
 	EndIf
-
 	If Status == 1
 		_WetQuest.EnableMod()
 	Else
@@ -382,61 +369,51 @@ Function ApplySettings()
 	EndIf
 EndFunction
 
+
 ;====================================================================================
 
 Event OnConfigInit()
 	ModName = "$Wet and Cold"
-
 	Pages = New String[3]
 	Pages[0] = "$Wet"
 	Pages[1] = "$Cold"
 	Pages[2] = "$Ashes/Survival"
-
 	StatusList = New String[2]
 	StatusList[0] = "$Disabled"
 	StatusList[1] = "$Enabled"
-	
 	ModeList = New String[3]
 	ModeList[0] = "$Default"
 	ModeList[1] = "$Summer"
 	ModeList[2] = "$Winter"
-
 	BreathPlayerList = New String[3]
 	BreathPlayerList[0] = "$Disabled"
 	BreathPlayerList[1] = "$1st/3rd Person"
 	BreathPlayerList[2] = "$3rd Person"
-
 	BlindPlayerList = New String[3]
 	BlindPlayerList[0] = "$Disabled"
 	BlindPlayerList[1] = "$Full"
 	BlindPlayerList[2] = "$Blur"
-
 	GoHomeNPCList = New String[3]
 	GoHomeNPCList[0] = "$Disabled"
 	GoHomeNPCList[1] = "$All Civilians"
 	GoHomeNPCList[2] = "$Workers Ignore Rain"
-
 	RainGearNPCList = New String[4]
 	RainGearNPCList[0] = "$Disabled"
 	RainGearNPCList[1] = "$All Races"
 	RainGearNPCList[2] = "$No Argonians"
 	RainGearNPCList[3] = "$Followers Only"
-
 	ColdGearNPCList = New String[4]
 	ColdGearNPCList[0] = "$Disabled"
 	ColdGearNPCList[1] = "$All Races"
 	ColdGearNPCList[2] = "$No Nords 6AM-8PM"
 	ColdGearNPCList[3] = "$Followers Only"
-
 	AshGearNPCList = New String[3]
 	AshGearNPCList[0] = "$Disabled"
 	AshGearNPCList[1] = "$Enabled"
 	AshGearNPCList[2] = "$Followers Only"
-
 	PurchaseList = New String[2]
 	PurchaseList[0] = "$No Leveled Lists"
 	PurchaseList[1] = "$Add to Leveled Lists"
-
 	If _WetQuest._WetDripPlayerToggle.GetValue() as Int == 1
 		DripPlayer = True
 	Else
@@ -528,10 +505,8 @@ Event OnConfigInit()
 	Else
 		ColdGearNPC = 3
 	EndIf
-
 	RainGearFollower = _WetQuest.FollowerHoodOn
 	ColdGearFollower = _WetQuest.FollowerColdOn
-
 	If _WetQuest.SurvGearOn && _WetQuest._WetSurvGearToggle.GetValue() as Int == 1
 		SurvivalGearNPC = True
 	Else
@@ -545,11 +520,9 @@ Event OnConfigInit()
 	WetCloaks = _WetQuest.WetCloaksOn
 	SurvBP = _WetQuest.SurvBPOn
 	SurvModItems = _WetQuest.SurvModItemsOn
-
 	If _WetQuest._WetWinterToggle.GetValue() as Int == 1
 		Mode = 2
 	EndIf
-
 	If _WetQuest._WetDustPlayerToggle.GetValue() as Int == 1
 		DustPlayer = True
 	Else
@@ -567,18 +540,16 @@ Event OnConfigInit()
 	Else
 		AshGearNPC = 2
 	EndIf
-
 	AshGearFollower = _WetQuest.FollowerAshOn
-
 	If _WetQuest._WetWateryEyesToggle.GetValue() as Int == 1
 		WateryEyesPlayer = True
 	Else
 		WateryEyesPlayer = False
 	EndIf
-
 	AshGoggles = _WetQuest.GogglesOn
 	AshCovers = _WetQuest.FaceCoversOn
 EndEvent
+
 
 ;====================================================================================
 
@@ -612,9 +583,7 @@ Event OnPageReset(String Page)
 				WetCloaksOption = AddToggleOption("$Cloaks", false, OPTION_FLAG_DISABLED)
 				RainGearFollowerOption = AddToggleOption("$Followers", false, OPTION_FLAG_DISABLED)
 			EndIf
-
 			SetCursorPosition(1)
-
 			ModeOption = AddMenuOption("$Mode:", ModeList[Mode])
 			AddEmptyOption()
 			AddHeaderOption("$NPCs")
@@ -626,7 +595,6 @@ Event OnPageReset(String Page)
 			PurchaseRainHoodOption = AddTextOption("", PurchaseList[PurchaseRainHood])
 			PurchaseRainCloakOption = AddTextOption("", PurchaseList[PurchaseRainCloak])
 		EndIf
-
 	ElseIf Page == "$Cold"
 		SetCursorFillMode(TOP_TO_BOTTOM)
 		If Status == 1
@@ -644,7 +612,7 @@ Event OnPageReset(String Page)
 				If _WetQuest._WetWCAshInstalled.GetValue() as Int == 1
 					ColdCoversOption = AddToggleOption("$Face Covers", ColdCovers)
 				Else
-					ColdCoversOption = AddToggleOption("$Face Covers", false, OPTION_FLAG_DISABLED)			
+					ColdCoversOption = AddToggleOption("$Face Covers", false, OPTION_FLAG_DISABLED)
 				EndIf
 				If ColdGearNPC == 3
 					ColdGearFollower = True
@@ -657,9 +625,7 @@ Event OnPageReset(String Page)
 				ColdCoversOption = AddToggleOption("$Face Covers", false, OPTION_FLAG_DISABLED)
 				ColdGearFollowerOption = AddToggleOption("$Followers", false, OPTION_FLAG_DISABLED)
 			EndIf
-
 			SetCursorPosition(1)
-			
 			AddHeaderOption("$NPCs")
 			BreathActorOption = AddToggleOption("$Breaths", BreathActor)
 			BlizzBlindNPCOption = AddToggleOption("$Blizzard Blind", BlizzBlindNPC)
@@ -674,7 +640,6 @@ Event OnPageReset(String Page)
 		Else
 			StatusOption = AddMenuOption("$Wet and Cold Status:", StatusList[Status], OPTION_FLAG_DISABLED)
 		EndIf
-
 	ElseIf Page == "$Ashes/Survival"
 		SetCursorFillMode(TOP_TO_BOTTOM)
 		If Status == 1
@@ -718,9 +683,7 @@ Event OnPageReset(String Page)
 				SurvBPOption = AddToggleOption("$Backpacks", false, OPTION_FLAG_DISABLED)
 				SurvModItemsOption = AddToggleOption("$Waterskins", false, OPTION_FLAG_DISABLED)
 			EndIf
-
 			SetCursorPosition(1)
-			
 			AddHeaderOption("$NPCs")
 			If _WetQuest._WetWCAshInstalled.GetValue() as Int == 1
 				DustActorOption = AddToggleOption("$Dusty", DustActor)
@@ -746,6 +709,7 @@ Event OnPageReset(String Page)
 	EndIf
 EndEvent
 
+
 ;====================================================================================
 
 Function CheckGearSelection()
@@ -762,6 +726,7 @@ Function CheckGearSelection()
 		AshGearNPC = 0
 	EndIf
 EndFunction
+
 
 Event OnOptionSelect(Int Option)
 	If Option == DripPlayerOption
@@ -934,6 +899,7 @@ Event OnOptionSelect(Int Option)
 	EndIf
 EndEvent
 
+
 ;====================================================================================
 
 Function CheckGearSelectionMenu()
@@ -960,6 +926,7 @@ Function CheckGearSelectionMenu()
 		AshCovers = True
 	EndIf
 EndFunction
+
 
 Event OnOptionMenuOpen(Int Option)
 	If Option == StatusOption
@@ -1000,6 +967,7 @@ Event OnOptionMenuOpen(Int Option)
 		SetMenuDialogDefaultIndex(1)
 	EndIf
 EndEvent
+
 
 Event OnOptionMenuAccept(Int Option, Int Index)
 	If Option == StatusOption
@@ -1057,6 +1025,7 @@ Event OnOptionMenuAccept(Int Option, Int Index)
 	ForcePageReset()
 EndEvent
 
+
 ;====================================================================================
 
 Event OnOptionHighlight(Int Option)
@@ -1104,6 +1073,7 @@ Event OnOptionHighlight(Int Option)
 		SetInfoText("$WCWateryEyes")
 	EndIf
 EndEvent
+
 
 Event OnConfigClose()
 	ApplySettings()

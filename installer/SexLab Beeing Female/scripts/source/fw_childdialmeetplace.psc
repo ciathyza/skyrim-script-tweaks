@@ -1,24 +1,14 @@
-;/ Decompiled by Champollion V1.0.1
-Source   : FW_ChildDialMeetPlace.psc
-Modified : 2015-02-23 08:47:31
-Compiled : 2017-01-15 06:26:04
-User     : admin
-Computer : PATRICK
-/;
-scriptName FW_ChildDialMeetPlace extends TopicInfo hidden
+;BEGIN FRAGMENT CODE - Do not edit anything between this and the end comment
+;NEXT FRAGMENT INDEX 0
+Scriptname FW_ChildDialMeetPlace Extends TopicInfo Hidden
 
-;-- Properties --------------------------------------
+;BEGIN FRAGMENT Fragment_0
+Function Fragment_0(ObjectReference akSpeakerRef)
+Actor akSpeaker = akSpeakerRef as Actor
+;BEGIN CODE
+(akspeaker as FWChildActor).Order_MeetPlace()
+;END CODE
+EndFunction
+;END FRAGMENT
 
-;-- Variables ---------------------------------------
-
-;-- Functions ---------------------------------------
-
-; Skipped compiler generated GotoState
-
-function Fragment_0(ObjectReference akSpeakerRef)
-
-	actor akSpeaker = akSpeakerRef as actor
-	(akSpeaker as fwchildactor).Order_MeetPlace()
-endFunction
-
-; Skipped compiler generated GetState
+;END FRAGMENT CODE - Do not edit anything between this and the begin comment

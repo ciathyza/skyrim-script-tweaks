@@ -1,51 +1,33 @@
-;/ Decompiled by Champollion V1.0.1
-Source   : BFA_AbilityEffectPMSFaint.psc
-Modified : 2016-12-06 03:52:20
-Compiled : 2017-01-15 06:28:43
-User     : admin
-Computer : PATRICK
-/;
-scriptName BFA_AbilityEffectPMSFaint extends activemagiceffect
+﻿Scriptname BFA_AbilityEffectPMSFaint extends activemagiceffect  
 
-;-- Properties --------------------------------------
-
-;-- Variables ---------------------------------------
 actor PlayerRef
 
-;-- Functions ---------------------------------------
-
-; Skipped compiler generated GetState
-
-function OnEffectStart(actor target, actor caster)
-
+Event OnEffectStart(Actor target, Actor caster)
 	PlayerRef = target
-	if PlayerRef
-		PlayerRef.ModActorValue("Carryweight", -50.0000)
-		PlayerRef.ModActorValue("Stamina", -80.0000)
-		PlayerRef.ModActorValue("StaminaRateMult", -20.0000)
-		self.RegisterForSingleUpdateGameTime(2.00000)
-	else
-		self.Dispel()
-	endIf
-endFunction
+	
+	If PlayerRef
+		PlayerRef.ModActorValue("Carryweight", -50)
+		PlayerRef.ModActorValue("Stamina", -80)
+		PlayerRef.ModActorValue("StaminaRateMult", -20)
+		RegisterForSingleUpdateGameTime(2)
+	Else
+		Dispel()
+	EndIf
+EndEvent
 
-function OnEffectFinish(actor target, actor caster)
+Event onUpdateGameTime()
+	If PlayerRef
+		PlayerRef.DamageActorValue("Stamina", (PlayerRef.GetBaseActorValue("Stamina") / 100) * 20);
+		RegisterForSingleUpdateGameTime(2)
+	Else
+		Dispel()
+	EndIf
+EndEvent
 
-	if PlayerRef
-		PlayerRef.ModActorValue("Carryweight", 50.0000)
-		PlayerRef.ModActorValue("Stamina", 80.0000)
-		PlayerRef.ModActorValue("StaminaRateMult", 20.0000)
-	endIf
-endFunction
-
-; Skipped compiler generated GotoState
-
-function onUpdateGameTime()
-
-	if PlayerRef
-		PlayerRef.DamageActorValue("Stamina", PlayerRef.GetBaseActorValue("Stamina") / 100.000 * 20.0000)
-		self.RegisterForSingleUpdateGameTime(2.00000)
-	else
-		self.Dispel()
-	endIf
-endFunction
+Event OnEffectFinish(Actor target, Actor caster)
+	If PlayerRef
+		PlayerRef.ModActorValue("Carryweight", 50)
+		PlayerRef.ModActorValue("Stamina", 80)
+		PlayerRef.ModActorValue("StaminaRateMult", 20)
+	EndIf
+EndEvent

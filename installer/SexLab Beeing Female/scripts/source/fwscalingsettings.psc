@@ -1,156 +1,125 @@
-;/ Decompiled by Champollion V1.0.1
-Source   : FWScalingSettings.psc
-Modified : 2016-12-06 03:52:45
-Compiled : 2017-01-18 08:35:17
-User     : admin
-Computer : PATRICK
-/;
-scriptName FWScalingSettings
+﻿Scriptname FWScalingSettings   
 
-;-- Properties --------------------------------------
+; Node Set
+; 0 = Belly
+; 1 = Breasts
 
-;-- Variables ---------------------------------------
-
-;-- Functions ---------------------------------------
-
-Float function Immediately(Int NodeSet, Int PhaseID) global
-
+float function Realistic(int NodeSet, int PhaseID) global
 	if NodeSet == 0
-		if PhaseID == 0
-			return 0.500000
+		If PhaseID == 0
+			Return 0.15
 		elseIf PhaseID == 1
-			return 0.200000
+			Return 0.50
 		elseIf PhaseID == 2
-			return 0.300000
-		endIf
-	elseIf NodeSet == 1
-		if PhaseID == 0
-			return 0.700000
+			Return 0.35
+		EndIf
+	ElseIf NodeSet == 1
+		If PhaseID == 0
+			Return 0.05
 		elseIf PhaseID == 1
-			return 0.150000
-		elseIf PhaseID == 2
-			return 0.150000
-		endIf
-	endIf
+			Return 0.2
+		elseif PhaseID == 2
+			Return 0.75
+		EndIf
+	EndIf
 endFunction
 
-Float function Belly(Int NodeSet, Int PhaseID) global
+float function Linear(int NodeSet, int PhaseID) global
+	If NodeSet == 0
+		If PhaseID == 0
+			Return 0.33
+		elseIf PhaseID == 1
+			Return 0.33
+		elseIf PhaseID == 2
+			Return 0.34
+		EndIf
+	ElseIf NodeSet == 1
+		If PhaseID == 0
+			Return 0.33
+		elseIf PhaseID == 1
+			Return 0.33
+		elseif PhaseID == 2
+			Return 0.34
+		EndIf
+	EndIf
+endFunction
 
+float function Immediately(int NodeSet, int PhaseID) global
+	If NodeSet == 0
+		If PhaseID == 0
+			Return 0.50
+		elseIf PhaseID == 1
+			Return 0.20
+		elseIf PhaseID == 2
+			Return 0.30
+		EndIf
+	ElseIf NodeSet == 1
+		If PhaseID == 0
+			Return 0.70
+		elseIf PhaseID == 1
+			Return 0.15
+		elseif PhaseID == 2
+			Return 0.15
+		EndIf
+	EndIf
+endFunction
+
+float function Breasts(int NodeSet, int PhaseID) global
 	if NodeSet == 0
-		if PhaseID == 0
-			return 0.250000
+		If PhaseID == 0
+			Return 0.01
 		elseIf PhaseID == 1
-			return 0.350000
+			Return 0.05
 		elseIf PhaseID == 2
-			return 0.400000
-		endIf
-	elseIf NodeSet == 1
-		if PhaseID == 0
-			return 0.0500000
+			Return 0.94
+		EndIf
+	ElseIf NodeSet == 1
+		If PhaseID == 0
+			Return 0.20
 		elseIf PhaseID == 1
-			return 0.100000
-		elseIf PhaseID == 2
-			return 0.850000
-		endIf
-	endIf
+			Return 0.35
+		elseif PhaseID == 2
+			Return 0.45
+		EndIf
+	EndIf
 endFunction
 
-Float function Breasts(Int NodeSet, Int PhaseID) global
-
+float function Belly(int NodeSet, int PhaseID) global
 	if NodeSet == 0
-		if PhaseID == 0
-			return 0.0100000
+		If PhaseID == 0
+			Return 0.25
 		elseIf PhaseID == 1
-			return 0.0500000
+			Return 0.35
 		elseIf PhaseID == 2
-			return 0.940000
-		endIf
-	elseIf NodeSet == 1
-		if PhaseID == 0
-			return 0.200000
+			Return 0.40
+		EndIf
+	ElseIf NodeSet == 1
+		If PhaseID == 0
+			Return 0.05
 		elseIf PhaseID == 1
-			return 0.350000
-		elseIf PhaseID == 2
-			return 0.450000
-		endIf
-	endIf
+			Return 0.10
+		elseif PhaseID == 2
+			Return 0.85
+		EndIf
+	EndIf
 endFunction
 
-Float function Realistic(Int NodeSet, Int PhaseID) global
-
+float function Late(int NodeSet, int PhaseID) global
 	if NodeSet == 0
-		if PhaseID == 0
-			return 0.150000
+		If PhaseID == 0
+			Return 0.05
 		elseIf PhaseID == 1
-			return 0.500000
+			Return 0.05
 		elseIf PhaseID == 2
-			return 0.350000
-		endIf
-	elseIf NodeSet == 1
-		if PhaseID == 0
-			return 0.0500000
+			Return 0.90
+		EndIf
+	ElseIf NodeSet == 1
+		If PhaseID == 0
+			Return 0.05
 		elseIf PhaseID == 1
-			return 0.200000
-		elseIf PhaseID == 2
-			return 0.750000
-		endIf
-	endIf
-endFunction
-
-Float function Linear(Int NodeSet, Int PhaseID) global
-
-	if NodeSet == 0
-		if PhaseID == 0
-			return 0.330000
-		elseIf PhaseID == 1
-			return 0.330000
-		elseIf PhaseID == 2
-			return 0.340000
-		endIf
-	elseIf NodeSet == 1
-		if PhaseID == 0
-			return 0.330000
-		elseIf PhaseID == 1
-			return 0.330000
-		elseIf PhaseID == 2
-			return 0.340000
-		endIf
-	endIf
-endFunction
-
-Float function Late(Int NodeSet, Int PhaseID) global
-
-	if NodeSet == 0
-		if PhaseID == 0
-			return 0.0500000
-		elseIf PhaseID == 1
-			return 0.0500000
-		elseIf PhaseID == 2
-			return 0.900000
-		endIf
-	elseIf NodeSet == 1
-		if PhaseID == 0
-			return 0.0500000
-		elseIf PhaseID == 1
-			return 0.0800000
-		elseIf PhaseID == 2
-			return 0.870000
-		endIf
-	endIf
-endFunction
-
-; Skipped compiler generated GetState
-
-; Skipped compiler generated GotoState
-
-function onEndState()
-{Event received when this state is switched away from}
-
-	; Empty function
-endFunction
-
-function onBeginState()
-{Event received when this state is switched to}
-
-	; Empty function
+			Return 0.08
+		elseif PhaseID == 2
+			Return 0.87
+		EndIf
+	EndIf
 endFunction

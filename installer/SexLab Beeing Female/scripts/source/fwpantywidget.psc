@@ -1,238 +1,206 @@
-;/ Decompiled by Champollion V1.0.1
-Source   : FWPantyWidget.psc
-Modified : 2017-01-13 12:05:24
-Compiled : 2017-01-18 08:35:22
-User     : admin
-Computer : PATRICK
-/;
-scriptName FWPantyWidget extends ski_widgetbase
+﻿Scriptname FWPantyWidget extends ski_widgetbase
 
-;-- Properties --------------------------------------
-String property Script_Name
-{Set this script name}
-	String function get()
+int property CFG_PosX auto hidden
+int property CFG_PosY auto hidden
+bool property CFG_Enabled auto hidden
+int property CFG_Alpha auto hidden
+string property CFG_HAnchor auto hidden
+string property CFG_VAnchor auto hidden
 
-		return _scriptName
-	endFunction
-	function set(String value)
+FWSystem property System auto
+string _swfName = ""
+string _scriptName = ""
+int _widgetAlpha = 100
+bool _shown = false
 
-		_scriptName = value
-	endFunction
-endproperty
-Int property STATUS_BLOODY
-	Int function get()
+int property STATUS_NORMAL = 0 autoReadOnly
+int property STATUS_NEEDED = 1 autoReadOnly
+int property STATUS_BLOODY = 2 autoReadOnly
 
-		return 2
-	endFunction
-endproperty
-fwsystem property System auto
-Bool property CFG_Enabled auto hidden
-Int property STATUS_NEEDED
-	Int function get()
-
-		return 1
-	endFunction
-endproperty
-Int property CFG_Alpha auto hidden
-Int property STATUS_NORMAL
-	Int function get()
-
-		return 0
-	endFunction
-endproperty
-Int property Icon hidden
-	Int function get()
-
-		return ui.GetInt(self.HUD_MENU, self.WidgetRoot + ".getIcon")
-	endFunction
-	function set(Int value)
-
-		ui.InvokeInt(self.HUD_MENU, self.WidgetRoot + ".setIcon", value)
-	endFunction
-endproperty
-Bool property Shown hidden
-{Set to true to show the widget}
-	Bool function get()
-
-		return _shown
-	endFunction
-	function set(Bool value)
-
-		if value == true && CFG_Enabled as Bool
-			self.ShowWidget()
-		elseIf value == false
-			self.HideWidget()
-		endIf
-		_shown = value
-	endFunction
-endproperty
-String property CFG_HAnchor auto hidden
-String property SWF_Name
-{Set the SWF Filename like 'Widget.swf'}
-	String function get()
-
+string property SWF_Name
+	{Set the SWF Filename like 'Widget.swf'}
+	string function get()
 		return _swfName
 	endFunction
-	function set(String value)
 
+	function set(string value)
 		_swfName = value
 	endFunction
-endproperty
-Int property CFG_PosX auto hidden
-String property CFG_VAnchor auto hidden
-Int property CFG_PosY auto hidden
+endProperty
 
-;-- Variables ---------------------------------------
-String _swfName = ""
-Int _widgetAlpha = 100
-String _scriptName = ""
-Bool _shown = false
+string property Script_Name
+	{Set this script name}
+	string function get()
+		return _scriptName
+	endFunction
 
-;-- Functions ---------------------------------------
+	function set(string value)
+		_scriptName = value
+	endFunction
+endProperty
 
-Float function GetHeight()
+bool property Shown hidden
+	{Set to true to show the widget}
+	bool function get()
+		return _shown
+	endFunction
 
-	if self.Ready
-		return ui.GetFloat(self.HUD_MENU, self.WidgetRoot + ".Height")
-	endIf
-	return 0.000000
+	function set(bool value)
+		if value == true && CFG_Enabled
+			ShowWidget()
+		elseif value == false
+			HideWidget()
+		endif
+		_shown = value
+	endFunction
+endProperty
+
+int property Icon hidden
+	int function get()
+		return UI.GetInt(HUD_MENU, WidgetRoot + ".getIcon")
+	endFunction
+	function set(int value)
+		UI.InvokeInt(HUD_MENU, WidgetRoot + ".setIcon", value)
+	endFunction
+endProperty
+	
+	
+
+
+
+
+function Upgrade(int oldVersion, int newVersion)
+	System = Game.GetFormFromFile(0xD62, "BeeingFemale.esm") as FWSystem
 endFunction
 
-String function GetWidgetType()
+event OnWidgetReset()
+	parent.OnWidgetReset()
+	X = CFG_PosX
+	Y = CFG_PosY
+	HAnchor = CFG_HAnchor
+	VAnchor = CFG_VAnchor
+	Alpha = 0.0
+endEvent
 
-	return _scriptName
-endFunction
-
-function UpdateContent()
-
-	self.X = CFG_PosX as Float
-	self.Y = CFG_PosY as Float
-	self.HAnchor = CFG_HAnchor
-	self.VAnchor = CFG_VAnchor
-	if System == none
-		debug.Trace("FWPantyWidget::UpdateContent - System is none", 0)
-	endIf
-	if System.Sanitary_Napkin_Bloody == none
-		debug.Trace("FWPantyWidget::UpdateContent - Sanitary_Napkin_Bloody is none", 0)
-	endIf
-	if System.Tampon_Bloody == none
-		debug.Trace("FWPantyWidget::UpdateContent - Tampon_Bloody is none", 0)
-	endIf
-	if System.Sanitary_Napkin_Normal == none
-		debug.Trace("FWPantyWidget::UpdateContent - Sanitary_Napkin_Normal is none", 0)
-	endIf
-	if System.Tampon_Normal == none
-		debug.Trace("FWPantyWidget::UpdateContent - Tampon_Normal is none", 0)
-	endIf
-	if System != none
-		if System.Player as Bool && System.GlobalMenstruating.GetValueInt() == 1
-			if game.GetPlayer().GetWornForm(System.Sanitary_Napkin_Bloody.GetSlotMask()) == System.Sanitary_Napkin_Bloody as form
-				self.Icon = self.STATUS_BLOODY
-				self.Shown = true
-			elseIf game.GetPlayer().GetWornForm(System.Tampon_Bloody.GetSlotMask()) == System.Tampon_Bloody as form
-				self.Icon = self.STATUS_BLOODY
-				self.Shown = true
-			elseIf System.Player.currentState == 3
-				if game.GetPlayer().GetWornForm(System.Sanitary_Napkin_Normal.GetSlotMask()) == System.Sanitary_Napkin_Normal as form
-					self.Icon = self.STATUS_NORMAL
-					self.Shown = false
-				elseIf game.GetPlayer().GetWornForm(System.Tampon_Normal.GetSlotMask()) == System.Tampon_Normal as form
-					self.Icon = self.STATUS_NORMAL
-					self.Shown = false
-				else
-					self.Icon = self.STATUS_NEEDED
-					self.Shown = true
-				endIf
-			else
-				self.Icon = self.STATUS_NORMAL
-				self.Shown = false
-			endIf
-		else
-			self.Icon = self.STATUS_NORMAL
-			self.Shown = false
-		endIf
-	endIf
-endFunction
-
-function OnUpdateGameTime()
-
-	self.UpdateContent()
-	self.RegisterForSingleUpdateGameTime(1.00000)
-endFunction
-
-function OnWidgetLoad()
-
-	self.Shown = false
+event OnWidgetLoad()
+	Shown = false
 	parent.OnWidgetLoad()
-	self.OnWidgetReset()
-	if self.GetType() == 77
-		self.RegisterForSingleUpdateGameTime(1.00000)
-	endIf
-	self.UpdateContent()
-endFunction
+	OnWidgetReset()
+	if GetType()==77
+		RegisterForSingleUpdateGameTime(1)
+	endif
+	UpdateContent()
+endEvent
 
-function ShowWidget()
+Event OnUpdateGameTime()
+	UpdateContent()
+	RegisterForSingleUpdateGameTime(1)
+endEvent
 
-	if self.Ready && CFG_Enabled as Bool
-		utility.Wait(0.100000)
-		self.FadeTo(CFG_Alpha as Float, 0.0100000)
-		if _shown == false
-			self.Flash()
-		endIf
+function showWidget()
+	if(Ready && CFG_Enabled)
+		Utility.Wait(0.1) ; Wait until leaving menu
+		FadeTo(CFG_Alpha,0.01)
+		if(_shown==false)
+			Flash()
+		endif
 		_shown = true
 	endIf
 endFunction
 
-function Upgrade(Int oldVersion, Int newVersion)
-
-	System = game.GetFormFromFile(3426, "BeeingFemale.esm") as fwsystem
-endFunction
-
-; Skipped compiler generated GotoState
-
-Float[] function GetDimensions()
-{Return the dimensions of the widget (width,height).}
-
-	Float[] dim = new Float[2]
-	dim[0] = self.GetWidth()
-	dim[1] = self.GetHeight()
-	return dim
-endFunction
-
-function OnWidgetReset()
-
-	parent.OnWidgetReset()
-	self.X = CFG_PosX as Float
-	self.Y = CFG_PosY as Float
-	self.HAnchor = CFG_HAnchor
-	self.VAnchor = CFG_VAnchor
-	self.Alpha = 0.000000
-endFunction
-
 function Flash()
-
-	ui.Invoke(self.HUD_MENU, self.WidgetRoot + ".startFlash")
+	UI.Invoke(HUD_MENU, WidgetRoot + ".startFlash")
 endFunction
 
-; Skipped compiler generated GetState
-
-function HideWidget()
-
-	if self.Ready
-		self.FadeTo(0.000000, 3.00000)
+function hideWidget()
+	if(Ready)
+		FadeTo(0, 3.0)
 	endIf
 	_shown = false
 endFunction
 
-Float function GetWidth()
-
-	if self.Ready
-		return ui.GetFloat(self.HUD_MENU, self.WidgetRoot + ".Width")
+float function GetWidth()
+	if (Ready)
+		return UI.GetFloat(HUD_MENU, WidgetRoot + ".Width")
 	endIf
-	return 0.000000
+	return 0.0
 endFunction
 
-String function GetWidgetSource()
+float function GetHeight()
+	if (Ready)
+		return UI.GetFloat(HUD_MENU, WidgetRoot + ".Height")
+	endIf
+	return 0.0
+endFunction
 
-	return "BeeingFemale/" + _swfName
+float[] function GetDimensions()
+	{Return the dimensions of the widget (width,height).}
+	float[] dim = new float[2]
+	dim[0] = GetWidth()
+	dim[1] = GetHeight()
+	return dim
+endFunction
+
+String Function GetWidgetSource()
+	return "BeeingFemale/"+_swfName
+EndFunction
+
+String Function GetWidgetType()
+	return _scriptName
+EndFunction
+
+function UpdateContent()
+	X = CFG_PosX
+	Y = CFG_PosY
+	HAnchor = CFG_HAnchor
+	VAnchor = CFG_VAnchor
+	
+	if System==none
+		Debug.Trace("FWPantyWidget::UpdateContent - System is none")
+	endif
+	if System.Sanitary_Napkin_Bloody == none
+		Debug.Trace("FWPantyWidget::UpdateContent - Sanitary_Napkin_Bloody is none")
+	endif
+	if System.Tampon_Bloody == none
+		Debug.Trace("FWPantyWidget::UpdateContent - Tampon_Bloody is none")
+	endif
+	if System.Sanitary_Napkin_Normal == none
+		Debug.Trace("FWPantyWidget::UpdateContent - Sanitary_Napkin_Normal is none")
+	endif
+	if System.Tampon_Normal == none
+		Debug.Trace("FWPantyWidget::UpdateContent - Tampon_Normal is none")
+	endif
+	
+	if System!=none
+	if System.Player && System.GlobalMenstruating.GetValueInt()==1 ; Check if female player
+		if Game.GetPlayer().GetWornForm(System.Sanitary_Napkin_Bloody.GetSlotMask()) == System.Sanitary_Napkin_Bloody
+			Icon = STATUS_BLOODY
+			Shown = true
+		elseif Game.GetPlayer().GetWornForm(System.Tampon_Bloody.GetSlotMask())  == System.Tampon_Bloody
+			Icon = STATUS_BLOODY
+			Shown = true
+		elseif System.Player.currentState == 3 ; If menstruating
+			if Game.GetPlayer().GetWornForm(System.Sanitary_Napkin_Normal.GetSlotMask()) == System.Sanitary_Napkin_Normal
+				; Wearing normal panties
+				Icon = STATUS_NORMAL
+				Shown = false
+			elseif Game.GetPlayer().GetWornForm(System.Tampon_Normal.GetSlotMask()) == System.Tampon_Normal
+				; Wearing Tampon
+				Icon = STATUS_NORMAL
+				Shown = false
+			else
+				; menstruating and no panties wearing - show the missing icon
+				Icon = STATUS_NEEDED
+				Shown = true
+			endif
+		else
+			; Not menstruating and no bloody panties wearing
+			Icon = STATUS_NORMAL
+			Shown = false
+		endif
+	else
+		Icon = STATUS_NORMAL
+		Shown = false
+	endif
+	endif
 endFunction
