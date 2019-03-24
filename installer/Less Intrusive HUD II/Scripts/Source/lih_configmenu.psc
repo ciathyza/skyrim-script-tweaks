@@ -244,7 +244,7 @@ String isClip
 Event OnConfigInit()
 	setPages()
 	OnGameReload()
-	LoadPreset_New()
+	LoadPresetFISS()
 endEvent
 
 
@@ -259,8 +259,8 @@ endEvent
 
 Event OnPageReset(String a_page)
 	if a_page == ""
-		LoadCustomContent("exported/lihud_splash.swf", 0.000000, 0.000000)
-		return 
+		LoadCustomContent("exported/lihud_splash.swf", 0.0, 0.0)
+		return
 	else
 		UnloadCustomContent()
 	endIf
@@ -600,13 +600,44 @@ endEvent
 
 
 ; -------------------------------------------------------------------------------------------------
+; MCM Helpers
+; -------------------------------------------------------------------------------------------------
+
+function toggle(globalvariable value)
+	if value.GetValueInt() == 0
+		value.SetValueInt(1)
+	else
+		value.SetValueInt(0)
+	endIf
+endFunction
+
+
+function toggle2(globalvariable value)
+	if value.GetValueInt() == 0
+		value.SetValueInt(2)
+	else
+		value.SetValueInt(0)
+	endIf
+endFunction
+
+
+function toggle3(globalvariable value)
+	if value.GetValueInt() == 0
+		value.SetValueInt(3)
+	else
+		value.SetValueInt(0)
+	endIf
+endFunction
+
+
+; -------------------------------------------------------------------------------------------------
 ; Events
 ; -------------------------------------------------------------------------------------------------
 
 function OnGameReload()
 	parent.OnGameReload()
-	show("_root.HUDDummy", 0 as Bool)
-	show("_root.HUDMovieBaseInstance", 0 as Bool)
+	show("_root.HUDDummy", false)
+	show("_root.HUDMovieBaseInstance", false)
 	_LIH_SelectedItem = "None"
 	_LIH_SelectedDesc = "None"
 	_LIH_Reset.SetValueInt(0)
@@ -622,9 +653,9 @@ function OnGameReload()
 			ResetDefaults()
 		endIf
 		_LIH_Version.SetValue(_Version)
-		debug.Notification("Updating to HUD version " + _Version as String)
+		notification("Updating to HUD version " + _Version as String)
 	else
-		debug.Notification("Initializing HUD version " + _Version as String)
+		notification("Initializing HUD version " + _Version as String)
 		ApplySettings()
 	endIf
 endFunction
@@ -639,6 +670,13 @@ function setPages()
 	Pages[0] = "General Settings"
 	Pages[1] = "HUD Visibility"
 	Pages[2] = "HUD Position"
+endFunction
+
+
+function notification(String text)
+	if _LIH_DebugVisible.GetValueInt() == 1
+		debug.Notification(text)
+	endIf
 endFunction
 
 
@@ -662,6 +700,12 @@ function setHUDString(String element, String attribute, String value) global
 endFunction
 
 
+function show(String clip, Bool visible)
+	isClip = clip
+	LIH_ConfigMenu.setHUDBool(isClip, "_visible", visible)
+endFunction
+
+
 function hide(String clip, Bool visible)
 	isClip = clip
 	if visible == true
@@ -673,340 +717,539 @@ function hide(String clip, Bool visible)
 endFunction
 
 
+function  setHUDNum(String element, String attribute, Float value)
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance." + element, "_" + attribute, value)
+endFunction
+
+
+function  setDummyHUDNum(String element, String attribute, Float value)
+		LIH_ConfigMenu.setHUDNumber("_root.HUDDummy." + element, "_" + attribute, value)
+endFunction
+
+
+; -------------------------------------------------------------------------------------------------
+; HUD Element Management Functions
+; -------------------------------------------------------------------------------------------------
+
+function ApplySettings()
+	if _LIH_Enabled.GetValueInt() > 0 && _LIH_Reset.GetValueInt() < 1
+		notification("Applying HUD settings...")
+		LIH_MainInstance.reset()
+		ApplyChanges()
+		if _LIH_Default.GetValueInt() == 2
+			notification("Restoring saved HUD position...")
+		else
+			notification("Restoring default HUD position...")
+		endIf
+		ApplyHUD()
+	endIf
+
+	if _LIH_Enabled.GetValueInt() == 0 && _LIH_Default.GetValueInt() > 0
+		notification("Disabling mod...")
+		LIH_MainInstance.deactivate()
+		_LIH_Default.SetValueInt(1)
+		_LIH_Reset.SetValueInt(1)
+	endIf
+
+	if _LIH_Reset.GetValueInt() == 1
+		notification("Restoring default HUD values...")
+		ResetDefaults()
+	elseIf _LIH_Load.GetValueInt() > 0
+		if _LIH_Load.GetValueInt() == 2
+			notification("Saved preset HUD values.")
+		else
+			notification("Restored saved HUD values.")
+		endif
+
+		if _LIH_Load.GetValueInt() == 2
+			SavePresetFISS()
+		elseif _LIH_Load.GetValueInt() == 3
+			LoadPresetFISS()
+		else
+			LoadPreset()
+		endif
+	endIf
+endFunction
+
+
+function ToggleHUD()
+	if _LIH_Toggle.GetValueInt() > 0
+		_LIH_Toggle.SetValueInt(0)
+		_LIH_Selected.SetValueInt(0)
+		notification("Exiting HUD Edit Mode...")
+		show("_root.HUDDummy", 0 as Bool)
+		show("_root.HUDDummy.guideLines_mc", 0 as Bool)
+		show("_root.HUDDummy.ApplyChanges", 0 as Bool)
+	else
+		LoadDummy()
+		_LIH_Toggle.SetValueInt(1)
+		_LIH_Selected.SetValueInt(1)
+		notification("Entering HUD Edit Mode...")
+		show("_root.HUDDummy", 1 as Bool)
+		show("_root.HUDDummy.guideLines_mc", 1 as Bool)
+		show("_root.HUDDummy.ApplyChanges", 1 as Bool)
+		CheckItem()
+	endIf
+endFunction
+
+
+function ResetDefaults()
+	_LIH_UndiscoveredMarkersVisible.SetValueInt(1)
+	_LIH_LocationMarkersVisible.SetValueInt(1)
+	_LIH_EnemyMarkersVisible.SetValueInt(1)
+	_LIH_PlayerSetMarkerVisible.SetValueInt(1)
+	_LIH_QuestDoorMarkersVisible.SetValueInt(1)
+	_LIH_QuestMarkersVisible.SetValueInt(1)
+	_LIH_AltHealthBarVisible.SetValueInt(0)
+	_LIH_EnchantmentAlpha.SetValueInt(100)
+	_LIH_ItemAlpha.SetValueInt(100)
+	_LIH_InfoAlpha.SetValueInt(100)
+	_LIH_SeparatorAlpha.SetValueInt(100)
+	_LIH_SubtitleAlpha.SetValueInt(100)
+	_LIH_ArrowsAlpha.SetValueInt(100)
+	_LIH_CrosshairAlpha.SetValueInt(100)
+	_LIH_SneakCrosshairAlpha.SetValueInt(100)
+	_LIH_MagickaR.SetValueInt(0)
+	_LIH_HealthR.SetValueInt(0)
+	_LIH_StaminaR.SetValueInt(0)
+	_LIH_EnchantLR.SetValueInt(0)
+	_LIH_EnchantRR.SetValueInt(0)
+	_LIH_MagickaX.SetValue(_LIH_DefMagickaX.Getvalue())
+	_LIH_MagickaY.SetValue(_LIH_DefMagickaY.Getvalue())
+	_LIH_MagickaS.SetValueInt(100)
+	_LIH_MagickaAlpha.SetValueInt(100)
+	_LIH_HealthX.SetValue(_LIH_DefHealthX.Getvalue())
+	_LIH_HealthY.SetValue(_LIH_DefHealthY.Getvalue())
+	_LIH_HealthS.SetValueInt(100)
+	_LIH_HealthAlpha.SetValueInt(100)
+	_LIH_StaminaX.SetValue(_LIH_DefStaminaX.Getvalue())
+	_LIH_StaminaY.SetValue(_LIH_DefStaminaY.Getvalue())
+	_LIH_StaminaS.SetValueInt(100)
+	_LIH_StaminaAlpha.SetValueInt(100)
+	_LIH_CompassX.SetValue(_LIH_DefCompassX.Getvalue())
+	_LIH_CompassY.SetValue(_LIH_DefCompassY.Getvalue())
+	_LIH_CompassS.SetValueInt(100)
+	_LIH_EnemyHealthX.SetValue(_LIH_DefEnemyHealthX.Getvalue())
+	_LIH_EnemyHealthY.SetValue(_LIH_DefEnemyHealthY.Getvalue())
+	_LIH_EnemyHealthS.SetValueInt(100)
+	_LIH_ArrowsX.SetValue(_LIH_DefArrowsX.Getvalue())
+	_LIH_ArrowsY.SetValue(_LIH_DefArrowsY.Getvalue())
+	_LIH_ArrowsS.SetValueInt(100)
+	_LIH_StealthMeterX.SetValue(_LIH_DefStealthMeterX.Getvalue())
+	_LIH_StealthMeterY.SetValue(_LIH_DefStealthMeterY.Getvalue())
+	_LIH_StealthMeterS.SetValueInt(58)
+	_LIH_CrosshairX.SetValue(_LIH_DefCrosshairX.Getvalue())
+	_LIH_CrosshairY.SetValue(_LIH_DefCrosshairY.Getvalue())
+	_LIH_CrosshairS.SetValueInt(31)
+	_LIH_SneakCrosshairX.SetValue(_LIH_DefSneakCrosshairX.Getvalue())
+	_LIH_SneakCrosshairY.SetValue(_LIH_DefSneakCrosshairY.Getvalue())
+	_LIH_SneakCrosshairS.SetValueInt(31)
+	_LIH_EnchantLX.SetValue(_LIH_DefEnchantLX.Getvalue())
+	_LIH_EnchantLY.SetValue(_LIH_DefEnchantLY.Getvalue())
+	_LIH_EnchantLS.SetValueInt(100)
+	_LIH_EnchantRX.SetValue(_LIH_DefEnchantRX.Getvalue())
+	_LIH_EnchantRY.SetValue(_LIH_DefEnchantRY.Getvalue())
+	_LIH_EnchantRS.SetValueInt(100)
+	_LIH_HUDMsgX.SetValue(_LIH_DefHUDMsgX.Getvalue())
+	_LIH_HUDMsgY.SetValue(_LIH_DefHUDMsgY.Getvalue())
+	_LIH_HUDMsgS.SetValueInt(100)
+	_LIH_LocationX.SetValue(_LIH_DefLocationX.Getvalue())
+	_LIH_LocationY.SetValue(_LIH_DefLocationY.Getvalue())
+	_LIH_LocationS.SetValueInt(100)
+	_LIH_ActivateButtonX.SetValue(_LIH_DefActivateButtonX.Getvalue())
+	_LIH_ActivateButtonY.SetValue(_LIH_DefActivateButtonY.Getvalue())
+	_LIH_ActivateButtonS.SetValueInt(100)
+	_LIH_NameX.SetValue(_LIH_DefNameX.Getvalue())
+	_LIH_NameY.SetValue(_LIH_DefNameY.Getvalue())
+	_LIH_NameS.SetValueInt(100)
+	_LIH_GrayBarX.SetValue(_LIH_DefGrayBarX.Getvalue())
+	_LIH_GrayBarY.SetValue(_LIH_DefGrayBarY.Getvalue())
+	_LIH_GrayBarS.SetValueInt(100)
+	_LIH_InfoX.SetValue(_LIH_DefInfoX.Getvalue())
+	_LIH_InfoY.SetValue(_LIH_DefInfoY.Getvalue())
+	_LIH_InfoS.SetValueInt(100)
+	_LIH_SubtitleX.SetValue(_LIH_DefSubtitleX.Getvalue())
+	_LIH_SubtitleY.SetValue(_LIH_DefSubtitleY.Getvalue())
+	_LIH_SubtitleS.SetValueInt(100)
+	_LIH_ItemLeadingAlpha.SetValue(0 as Float)
+	_LIH_SubtitleLeadingAlpha.SetValue(0 as Float)
+	_LIH_FavorBackButtonX.SetValue(_LIH_DefFavorBackButtonX.Getvalue())
+	_LIH_FavorBackButtonY.SetValue(_LIH_DefFavorBackButtonY.Getvalue())
+	_LIH_FavorBackButtonS.SetValueInt(100)
+	_LIH_LevelUpX.SetValue(_LIH_DefLevelUpX.Getvalue())
+	_LIH_LevelUpY.SetValue(_LIH_DefLevelUpY.Getvalue())
+	_LIH_LevelUpS.SetValueInt(100)
+	_LIH_ObjectivesX.SetValue(_LIH_DefObjectivesX.Getvalue())
+	_LIH_ObjectivesY.SetValue(_LIH_DefObjectivesY.Getvalue())
+	_LIH_ObjectivesS.SetValueInt(100)
+	_LIH_ShoutsX.SetValue(_LIH_DefShoutsX.Getvalue())
+	_LIH_ShoutsY.SetValue(_LIH_DefShoutsY.Getvalue())
+	_LIH_ShoutsS.SetValueInt(100)
+	_LIH_AnimLetterX.SetValue(_LIH_DefAnimLetterX.Getvalue())
+	_LIH_AnimLetterY.SetValue(_LIH_DefAnimLetterY.Getvalue())
+	_LIH_AnimLetterS.SetValueInt(100)
+	_LIH_ArrowsAlign.SetValueInt(0)
+	_LIH_SubtitlesAlign.SetValueInt(50)
+	_LIH_LocationAlign.SetValueInt(100)
+	_LIH_HUDMsgAlign.SetValueInt(0)
+	_LIH_InfoAlign.SetValueInt(50)
+
+	if _LIH_Default.GetValueInt() == 1 && _LIH_Reset.GetValueInt() == 1
+		_LIH_Default.SetValueInt(0)
+		notification("Uninstalling mod...")
+		_LIH_AltHealthBarVisible.SetValueInt(0)
+		_LIH_SneakCrosshairAlpha.SetValueInt(100)
+		_LIH_SneakCrosshairVisible.SetValueInt(0)
+		_LIH_ActivateButtonVisible.SetValueInt(1)
+		_LIH_AltCrosshairVisible.SetValueInt(0)
+		_LIH_AltSneakMeterVisible.SetValueInt(0)
+		_LIH_SneakTextVisible.SetValueInt(1)
+		_LIH_SlimCompassVisible.SetValueInt(0)
+		ApplyChanges()
+		ApplyHUD()
+	endIf
+
+	_LIH_Reset.SetValueInt(0)
+	ApplySettings()
+endFunction
+
+
 function ResetItem()
 	if _LIH_SelectedItem == "Magica"
 		_LIH_MagickaX.SetValue(_LIH_DefMagickaX.Getvalue())
 		_LIH_MagickaY.SetValue(_LIH_DefMagickaY.Getvalue())
 		_LIH_MagickaS.SetValueInt(100)
 		_LIH_MagickaR.SetValueInt(0)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Magica", "_x", _LIH_MagickaX.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Magica", "_y", _LIH_MagickaY.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Magica", "_xscale", _LIH_MagickaS.GetValueInt() as Float)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Magica", "_yscale", _LIH_MagickaS.GetValueInt() as Float)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Magica", "_rotation", _LIH_MagickaR.GetValueInt() as Float)
+		setHUDNum("Magica", "x", _LIH_MagickaX.Getvalue())
+		setHUDNum("Magica", "y", _LIH_MagickaY.Getvalue())
+		setHUDNum("Magica", "xscale", _LIH_MagickaS.GetValueInt() as Float)
+		setHUDNum("Magica", "yscale", _LIH_MagickaS.GetValueInt() as Float)
+		setHUDNum("Magica", "rotation", _LIH_MagickaR.GetValueInt() as Float)
 	elseIf _LIH_SelectedItem == "Health"
 		_LIH_HealthX.SetValue(_LIH_DefHealthX.Getvalue())
 		_LIH_HealthY.SetValue(_LIH_DefHealthY.Getvalue())
 		_LIH_HealthS.SetValueInt(100)
 		_LIH_HealthR.SetValueInt(0)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Health", "_x", _LIH_HealthX.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Health", "_y", _LIH_HealthY.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Health", "_xscale", _LIH_HealthS.GetValueInt() as Float)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Health", "_yscale", _LIH_HealthS.GetValueInt() as Float)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Health", "_rotation", _LIH_HealthR.GetValueInt() as Float)
+		setHUDNum("Health", "x", _LIH_HealthX.Getvalue())
+		setHUDNum("Health", "y", _LIH_HealthY.Getvalue())
+		setHUDNum("Health", "xscale", _LIH_HealthS.GetValueInt() as Float)
+		setHUDNum("Health", "yscale", _LIH_HealthS.GetValueInt() as Float)
+		setHUDNum("Health", "rotation", _LIH_HealthR.GetValueInt() as Float)
 	elseIf _LIH_SelectedItem == "Stamina"
 		_LIH_StaminaX.SetValue(_LIH_DefStaminaX.Getvalue())
 		_LIH_StaminaY.SetValue(_LIH_DefStaminaY.Getvalue())
 		_LIH_StaminaS.SetValueInt(100)
 		_LIH_StaminaR.SetValueInt(0)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Stamina", "_x", _LIH_StaminaX.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Stamina", "_y", _LIH_StaminaY.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Stamina", "_xscale", _LIH_StaminaS.GetValueInt() as Float)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Stamina", "_yscale", _LIH_StaminaS.GetValueInt() as Float)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Stamina", "_rotation", _LIH_StaminaR.GetValueInt() as Float)
+		setHUDNum("Stamina", "x", _LIH_StaminaX.Getvalue())
+		setHUDNum("Stamina", "y", _LIH_StaminaY.Getvalue())
+		setHUDNum("Stamina", "xscale", _LIH_StaminaS.GetValueInt() as Float)
+		setHUDNum("Stamina", "yscale", _LIH_StaminaS.GetValueInt() as Float)
+		setHUDNum("Stamina", "rotation", _LIH_StaminaR.GetValueInt() as Float)
 	elseIf _LIH_SelectedItem == "CompassShoutMeterHolder"
 		_LIH_CompassX.SetValue(_LIH_DefCompassX.Getvalue())
 		_LIH_CompassY.SetValue(_LIH_DefCompassY.Getvalue())
 		_LIH_CompassS.SetValueInt(100)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.CompassShoutMeterHolder", "_x", _LIH_CompassX.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.CompassShoutMeterHolder", "_y", _LIH_CompassY.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.CompassShoutMeterHolder", "_xscale", _LIH_CompassS.GetValueInt() as Float)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.CompassShoutMeterHolder", "_yscale", _LIH_CompassS.GetValueInt() as Float)
+		setHUDNum("CompassShoutMeterHolder", "x", _LIH_CompassX.Getvalue())
+		setHUDNum("CompassShoutMeterHolder", "y", _LIH_CompassY.Getvalue())
+		setHUDNum("CompassShoutMeterHolder", "xscale", _LIH_CompassS.GetValueInt() as Float)
+		setHUDNum("CompassShoutMeterHolder", "yscale", _LIH_CompassS.GetValueInt() as Float)
 	elseIf _LIH_SelectedItem == "EnemyHealth_mc"
 		_LIH_EnemyHealthX.SetValue(_LIH_DefEnemyHealthX.Getvalue())
 		_LIH_EnemyHealthY.SetValue(_LIH_DefEnemyHealthY.Getvalue())
 		_LIH_EnemyHealthS.SetValueInt(100)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.EnemyHealth_mc", "_x", _LIH_EnemyHealthX.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.EnemyHealth_mc", "_y", _LIH_EnemyHealthY.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.EnemyHealth_mc", "_xscale", _LIH_EnemyHealthS.GetValueInt() as Float)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.EnemyHealth_mc", "_yscale", _LIH_EnemyHealthS.GetValueInt() as Float)
+		setHUDNum("EnemyHealth_mc", "x", _LIH_EnemyHealthX.Getvalue())
+		setHUDNum("EnemyHealth_mc", "y", _LIH_EnemyHealthY.Getvalue())
+		setHUDNum("EnemyHealth_mc", "xscale", _LIH_EnemyHealthS.GetValueInt() as Float)
+		setHUDNum("EnemyHealth_mc", "yscale", _LIH_EnemyHealthS.GetValueInt() as Float)
 	elseIf _LIH_SelectedItem == "ArrowInfoInstance"
 		_LIH_ArrowsX.SetValue(_LIH_DefArrowsX.Getvalue())
 		_LIH_ArrowsY.SetValue(_LIH_DefArrowsY.Getvalue())
 		_LIH_ArrowsS.SetValueInt(100)
 		_LIH_ArrowsAlign.SetValueInt(0)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.ArrowInfoInstance", "_x", _LIH_ArrowsX.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.ArrowInfoInstance", "_y", _LIH_ArrowsY.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.ArrowInfoInstance", "_xscale", _LIH_ArrowsS.GetValueInt() as Float)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.ArrowInfoInstance", "_yscale", _LIH_ArrowsS.GetValueInt() as Float)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.ArrowsAlign", "_alpha", _LIH_ArrowsAlign.GetValueInt() as Float)
+		setHUDNum("ArrowInfoInstance", "x", _LIH_ArrowsX.Getvalue())
+		setHUDNum("ArrowInfoInstance", "y", _LIH_ArrowsY.Getvalue())
+		setHUDNum("ArrowInfoInstance", "xscale", _LIH_ArrowsS.GetValueInt() as Float)
+		setHUDNum("ArrowInfoInstance", "yscale", _LIH_ArrowsS.GetValueInt() as Float)
+		setDummyHUDNum("ArrowsAlign", "alpha", _LIH_ArrowsAlign.GetValueInt() as Float)
 	elseIf _LIH_SelectedItem == "StealthMeterInstance"
 		_LIH_StealthMeterX.SetValue(_LIH_DefStealthMeterX.Getvalue())
 		_LIH_StealthMeterY.SetValue(_LIH_DefStealthMeterY.Getvalue())
 		_LIH_StealthMeterS.SetValueInt(58)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.StealthMeterInstance", "_x", _LIH_StealthMeterX.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.StealthMeterInstance", "_y", _LIH_StealthMeterY.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.StealthMeterInstance", "_xscale", _LIH_StealthMeterS.GetValueInt() as Float)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.StealthMeterInstance", "_yscale", _LIH_StealthMeterS.GetValueInt() as Float)
+		setHUDNum("StealthMeterInstance", "x", _LIH_StealthMeterX.Getvalue())
+		setHUDNum("StealthMeterInstance", "y", _LIH_StealthMeterY.Getvalue())
+		setHUDNum("StealthMeterInstance", "xscale", _LIH_StealthMeterS.GetValueInt() as Float)
+		setHUDNum("StealthMeterInstance", "yscale", _LIH_StealthMeterS.GetValueInt() as Float)
 	elseIf _LIH_SelectedItem == "Crosshair"
 		_LIH_CrosshairX.SetValue(_LIH_DefCrosshairX.Getvalue())
 		_LIH_CrosshairY.SetValue(_LIH_DefCrosshairY.Getvalue())
 		_LIH_CrosshairS.SetValueInt(31)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Crosshair", "_x", _LIH_CrosshairX.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Crosshair", "_y", _LIH_CrosshairY.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Crosshair", "_xscale", _LIH_CrosshairS.GetValueInt() as Float)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Crosshair", "_yscale", _LIH_CrosshairS.GetValueInt() as Float)
+		setHUDNum("Crosshair", "x", _LIH_CrosshairX.Getvalue())
+		setHUDNum("Crosshair", "y", _LIH_CrosshairY.Getvalue())
+		setHUDNum("Crosshair", "xscale", _LIH_CrosshairS.GetValueInt() as Float)
+		setHUDNum("Crosshair", "yscale", _LIH_CrosshairS.GetValueInt() as Float)
 	elseIf _LIH_SelectedItem == "SneakCrosshair"
 		_LIH_SneakCrosshairX.SetValue(_LIH_DefSneakCrosshairX.Getvalue())
 		_LIH_SneakCrosshairY.SetValue(_LIH_DefSneakCrosshairY.Getvalue())
 		_LIH_SneakCrosshairS.SetValueInt(31)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.SneakCrosshair", "_x", _LIH_SneakCrosshairX.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.SneakCrosshair", "_y", _LIH_SneakCrosshairY.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.SneakCrosshair", "_xscale", _LIH_SneakCrosshairS.GetValueInt() as Float)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.SneakCrosshair", "_yscale", _LIH_SneakCrosshairS.GetValueInt() as Float)
+		setHUDNum("SneakCrosshair", "x", _LIH_SneakCrosshairX.Getvalue())
+		setHUDNum("SneakCrosshair", "y", _LIH_SneakCrosshairY.Getvalue())
+		setHUDNum("SneakCrosshair", "xscale", _LIH_SneakCrosshairS.GetValueInt() as Float)
+		setHUDNum("SneakCrosshair", "yscale", _LIH_SneakCrosshairS.GetValueInt() as Float)
 	elseIf _LIH_SelectedItem == "BottomLeftLockInstance"
 		_LIH_EnchantLX.SetValue(_LIH_DefEnchantLX.Getvalue())
 		_LIH_EnchantLY.SetValue(_LIH_DefEnchantLY.Getvalue())
 		_LIH_EnchantLS.SetValueInt(100)
 		_LIH_EnchantLR.SetValueInt(0)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.BottomLeftLockInstance", "_x", _LIH_EnchantLX.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.BottomLeftLockInstance", "_y", _LIH_EnchantLY.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.BottomLeftLockInstance", "_xscale", _LIH_EnchantLS.GetValueInt() as Float)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.BottomLeftLockInstance", "_yscale", _LIH_EnchantLS.GetValueInt() as Float)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.BottomLeftLockInstance", "_rotation", _LIH_EnchantLR.GetValueInt() as Float)
+		setHUDNum("BottomLeftLockInstance", "x", _LIH_EnchantLX.Getvalue())
+		setHUDNum("BottomLeftLockInstance", "y", _LIH_EnchantLY.Getvalue())
+		setHUDNum("BottomLeftLockInstance", "xscale", _LIH_EnchantLS.GetValueInt() as Float)
+		setHUDNum("BottomLeftLockInstance", "yscale", _LIH_EnchantLS.GetValueInt() as Float)
+		setHUDNum("BottomLeftLockInstance", "rotation", _LIH_EnchantLR.GetValueInt() as Float)
 	elseIf _LIH_SelectedItem == "BottomRightLockInstance"
 		_LIH_EnchantRX.SetValue(_LIH_DefEnchantRX.Getvalue())
 		_LIH_EnchantRY.SetValue(_LIH_DefEnchantRY.Getvalue())
 		_LIH_EnchantRS.SetValueInt(100)
 		_LIH_EnchantRR.SetValueInt(0)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.BottomRightLockInstance", "_x", _LIH_EnchantRX.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.BottomRightLockInstance", "_y", _LIH_EnchantRY.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.BottomRightLockInstance", "_xscale", _LIH_EnchantRS.GetValueInt() as Float)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.BottomRightLockInstance", "_yscale", _LIH_EnchantRS.GetValueInt() as Float)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.BottomRightLockInstance", "_rotation", _LIH_EnchantRR.GetValueInt() as Float)
+		setHUDNum("BottomRightLockInstance", "x", _LIH_EnchantRX.Getvalue())
+		setHUDNum("BottomRightLockInstance", "y", _LIH_EnchantRY.Getvalue())
+		setHUDNum("BottomRightLockInstance", "xscale", _LIH_EnchantRS.GetValueInt() as Float)
+		setHUDNum("BottomRightLockInstance", "yscale", _LIH_EnchantRS.GetValueInt() as Float)
+		setHUDNum("BottomRightLockInstance", "rotation", _LIH_EnchantRR.GetValueInt() as Float)
 	elseIf _LIH_SelectedItem == "MessagesBlock"
 		_LIH_HUDMsgX.SetValue(_LIH_DefHUDMsgX.Getvalue())
 		_LIH_HUDMsgY.SetValue(_LIH_DefHUDMsgY.Getvalue())
 		_LIH_HUDMsgS.SetValueInt(100)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.MessagesBlock", "_x", _LIH_HUDMsgX.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.MessagesBlock", "_y", _LIH_HUDMsgY.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.MessagesBlock", "_xscale", _LIH_HUDMsgS.GetValueInt() as Float)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.MessagesBlock", "_yscale", _LIH_HUDMsgS.GetValueInt() as Float)
+		setHUDNum("MessagesBlock", "x", _LIH_HUDMsgX.Getvalue())
+		setHUDNum("MessagesBlock", "y", _LIH_HUDMsgY.Getvalue())
+		setHUDNum("MessagesBlock", "xscale", _LIH_HUDMsgS.GetValueInt() as Float)
+		setHUDNum("MessagesBlock", "yscale", _LIH_HUDMsgS.GetValueInt() as Float)
 	elseIf _LIH_SelectedItem == "LocationLockBase"
 		_LIH_LocationX.SetValue(_LIH_DefLocationX.Getvalue())
 		_LIH_LocationY.SetValue(_LIH_DefLocationY.Getvalue())
 		_LIH_LocationS.SetValueInt(100)
 		_LIH_LocationAlign.SetValueInt(100)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.LocationLockBase", "_x", _LIH_LocationX.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.LocationLockBase", "_y", _LIH_LocationY.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.LocationLockBase", "_xscale", _LIH_LocationS.GetValueInt() as Float)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.LocationLockBase", "_yscale", _LIH_LocationS.GetValueInt() as Float)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.LocationAlign", "_yscale", _LIH_LocationAlign.GetValueInt() as Float)
+		setHUDNum("LocationLockBase", "x", _LIH_LocationX.Getvalue())
+		setHUDNum("LocationLockBase", "y", _LIH_LocationY.Getvalue())
+		setHUDNum("LocationLockBase", "xscale", _LIH_LocationS.GetValueInt() as Float)
+		setHUDNum("LocationLockBase", "yscale", _LIH_LocationS.GetValueInt() as Float)
+		setDummyHUDNum("LocationAlign", "yscale", _LIH_LocationAlign.GetValueInt() as Float)
 	elseIf _LIH_SelectedItem == "ActivateButton_tf"
 		_LIH_ActivateButtonX.SetValue(_LIH_DefActivateButtonX.Getvalue())
 		_LIH_ActivateButtonY.SetValue(_LIH_DefActivateButtonY.Getvalue())
 		_LIH_ActivateButtonS.SetValueInt(100)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.ActivateButton_tf", "_x", _LIH_ActivateButtonY.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.ActivateButton_tf", "_y", _LIH_ActivateButtonY.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.ActivateButton_tf", "_xscale", _LIH_ActivateButtonS.GetValueInt() as Float)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.ActivateButton_tf", "_yscale", _LIH_ActivateButtonS.GetValueInt() as Float)
+		setHUDNum("ActivateButton_tf", "x", _LIH_ActivateButtonY.Getvalue())
+		setHUDNum("ActivateButton_tf", "y", _LIH_ActivateButtonY.Getvalue())
+		setHUDNum("ActivateButton_tf", "xscale", _LIH_ActivateButtonS.GetValueInt() as Float)
+		setHUDNum("ActivateButton_tf", "yscale", _LIH_ActivateButtonS.GetValueInt() as Float)
 	elseIf _LIH_SelectedItem == "RolloverNameInstance"
 		_LIH_NameX.SetValue(_LIH_DefNameX.Getvalue())
 		_LIH_NameY.SetValue(_LIH_DefNameY.Getvalue())
 		_LIH_NameS.SetValueInt(100)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.RolloverNameInstance", "_x", _LIH_NameX.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.RolloverNameInstance", "_y", _LIH_NameY.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.RolloverNameInstance", "_xscale", _LIH_NameS.GetValueInt() as Float)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.RolloverNameInstance", "_yscale", _LIH_NameS.GetValueInt() as Float)
+		setHUDNum("RolloverNameInstance", "x", _LIH_NameX.Getvalue())
+		setHUDNum("RolloverNameInstance", "y", _LIH_NameY.Getvalue())
+		setHUDNum("RolloverNameInstance", "xscale", _LIH_NameS.GetValueInt() as Float)
+		setHUDNum("RolloverNameInstance", "yscale", _LIH_NameS.GetValueInt() as Float)
 	elseIf _LIH_SelectedItem == "GrayBarInstance"
 		_LIH_GrayBarX.SetValue(_LIH_DefGrayBarX.Getvalue())
 		_LIH_GrayBarY.SetValue(_LIH_DefGrayBarY.Getvalue())
 		_LIH_GrayBarS.SetValueInt(100)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.GrayBarInstance", "_x", _LIH_GrayBarX.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.GrayBarInstance", "_y", _LIH_GrayBarY.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.GrayBarInstance", "_xscale", _LIH_GrayBarS.GetValueInt() as Float)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.GrayBarInstance", "_yscale", _LIH_GrayBarS.GetValueInt() as Float)
+		setHUDNum("GrayBarInstance", "x", _LIH_GrayBarX.Getvalue())
+		setHUDNum("GrayBarInstance", "y", _LIH_GrayBarY.Getvalue())
+		setHUDNum("GrayBarInstance", "xscale", _LIH_GrayBarS.GetValueInt() as Float)
+		setHUDNum("GrayBarInstance", "yscale", _LIH_GrayBarS.GetValueInt() as Float)
 	elseIf _LIH_SelectedItem == "RolloverInfoInstance"
 		_LIH_InfoX.SetValue(_LIH_DefInfoX.Getvalue())
 		_LIH_InfoY.SetValue(_LIH_DefInfoY.Getvalue())
 		_LIH_InfoS.SetValueInt(100)
 		_LIH_InfoAlign.SetValueInt(50)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.RolloverInfoInstance", "_x", _LIH_InfoX.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.RolloverInfoInstance", "_y", _LIH_InfoY.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.RolloverInfoInstance", "_xscale", _LIH_InfoS.GetValueInt() as Float)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.RolloverInfoInstance", "_yscale", _LIH_InfoS.GetValueInt() as Float)
+		setHUDNum("RolloverInfoInstance", "x", _LIH_InfoX.Getvalue())
+		setHUDNum("RolloverInfoInstance", "y", _LIH_InfoY.Getvalue())
+		setHUDNum("RolloverInfoInstance", "xscale", _LIH_InfoS.GetValueInt() as Float)
+		setHUDNum("RolloverInfoInstance", "yscale", _LIH_InfoS.GetValueInt() as Float)
 	elseIf _LIH_SelectedItem == "SubtitleTextHolder"
 		_LIH_SubtitleX.SetValue(_LIH_DefSubtitleX.Getvalue())
 		_LIH_SubtitleY.SetValue(_LIH_DefSubtitleY.Getvalue())
 		_LIH_SubtitleS.SetValueInt(100)
 		_LIH_SubtitlesAlign.SetValueInt(50)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.SubtitleTextHolder", "_x", _LIH_SubtitleX.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.SubtitleTextHolder", "_y", _LIH_SubtitleY.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.SubtitleTextHolder", "_xscale", _LIH_SubtitleS.GetValueInt() as Float)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.SubtitleTextHolder", "_yscale", _LIH_SubtitleS.GetValueInt() as Float)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.SubtitlesAlign", "_alpha", _LIH_SubtitlesAlign.GetValueInt() as Float)
+		setHUDNum("SubtitleTextHolder", "x", _LIH_SubtitleX.Getvalue())
+		setHUDNum("SubtitleTextHolder", "y", _LIH_SubtitleY.Getvalue())
+		setHUDNum("SubtitleTextHolder", "xscale", _LIH_SubtitleS.GetValueInt() as Float)
+		setHUDNum("SubtitleTextHolder", "yscale", _LIH_SubtitleS.GetValueInt() as Float)
+		setDummyHUDNum("SubtitlesAlign", "alpha", _LIH_SubtitlesAlign.GetValueInt() as Float)
 	elseIf _LIH_SelectedItem == "ItemLeading"
 		_LIH_ItemLeadingAlpha.SetValue(0 as Float)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.ItemLeading", "_alpha", _LIH_ItemLeadingAlpha.Getvalue())
+		setDummyHUDNum("ItemLeading", "alpha", _LIH_ItemLeadingAlpha.Getvalue())
 	elseIf _LIH_SelectedItem == "SubtitleLeading"
 		_LIH_SubtitleLeadingAlpha.SetValue(0 as Float)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.SubtitleLeading", "_alpha", _LIH_SubtitleLeadingAlpha.Getvalue())
+		setDummyHUDNum("SubtitleLeading", "alpha", _LIH_SubtitleLeadingAlpha.Getvalue())
 	elseIf _LIH_SelectedItem == "FavorBackButtonBase"
 		_LIH_FavorBackButtonX.SetValue(_LIH_DefFavorBackButtonX.Getvalue())
 		_LIH_FavorBackButtonY.SetValue(_LIH_DefFavorBackButtonY.Getvalue())
 		_LIH_FavorBackButtonS.SetValueInt(100)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.FavorBackButtonBase", "_x", _LIH_FavorBackButtonX.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.FavorBackButtonBase", "_y", _LIH_FavorBackButtonY.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.FavorBackButtonBase", "_xscale", _LIH_FavorBackButtonS.GetValueInt() as Float)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.FavorBackButtonBase", "_yscale", _LIH_FavorBackButtonS.GetValueInt() as Float)
+		setHUDNum("FavorBackButtonBase", "x", _LIH_FavorBackButtonX.Getvalue())
+		setHUDNum("FavorBackButtonBase", "y", _LIH_FavorBackButtonY.Getvalue())
+		setHUDNum("FavorBackButtonBase", "xscale", _LIH_FavorBackButtonS.GetValueInt() as Float)
+		setHUDNum("FavorBackButtonBase", "yscale", _LIH_FavorBackButtonS.GetValueInt() as Float)
 	elseIf _LIH_SelectedItem == "ObjectiveLineInstance"
 		_LIH_ObjectivesX.SetValue(_LIH_DefObjectivesX.Getvalue())
 		_LIH_ObjectivesY.SetValue(_LIH_DefObjectivesY.Getvalue())
 		_LIH_ObjectivesS.SetValueInt(100)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.ObjectiveLineInstance", "_x", _LIH_ObjectivesX.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.ObjectiveLineInstance", "_y", _LIH_ObjectivesY.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.ObjectiveLineInstance", "_xscale", _LIH_ObjectivesS.GetValueInt() as Float)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.ObjectiveLineInstance", "_yscale", _LIH_ObjectivesS.GetValueInt() as Float)
+		setHUDNum("QuestUpdateBaseInstance.ObjectiveLineInstance", "x", _LIH_ObjectivesX.Getvalue())
+		setHUDNum("QuestUpdateBaseInstance.ObjectiveLineInstance", "y", _LIH_ObjectivesY.Getvalue())
+		setHUDNum("QuestUpdateBaseInstance.ObjectiveLineInstance", "xscale", _LIH_ObjectivesS.GetValueInt() as Float)
+		setHUDNum("QuestUpdateBaseInstance.ObjectiveLineInstance", "yscale", _LIH_ObjectivesS.GetValueInt() as Float)
 	elseIf _LIH_SelectedItem == "ShoutAnimatedLetter"
 		_LIH_ShoutsX.SetValue(_LIH_DefShoutsX.Getvalue())
 		_LIH_ShoutsY.SetValue(_LIH_DefShoutsY.Getvalue())
 		_LIH_ShoutsS.SetValueInt(100)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.ShoutAnimatedLetter", "_x", _LIH_ShoutsX.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.ShoutAnimatedLetter", "_y", _LIH_ShoutsY.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.ShoutAnimatedLetter", "_xscale", _LIH_ShoutsS.GetValueInt() as Float)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.ShoutAnimatedLetter", "_yscale", _LIH_ShoutsS.GetValueInt() as Float)
+		setHUDNum("QuestUpdateBaseInstance.ShoutAnimatedLetter", "x", _LIH_ShoutsX.Getvalue())
+		setHUDNum("QuestUpdateBaseInstance.ShoutAnimatedLetter", "y", _LIH_ShoutsY.Getvalue())
+		setHUDNum("QuestUpdateBaseInstance.ShoutAnimatedLetter", "xscale", _LIH_ShoutsS.GetValueInt() as Float)
+		setHUDNum("QuestUpdateBaseInstance.ShoutAnimatedLetter", "yscale", _LIH_ShoutsS.GetValueInt() as Float)
 	elseIf _LIH_SelectedItem == "AnimatedLetter_mc"
 		_LIH_AnimLetterX.SetValue(_LIH_DefAnimLetterX.Getvalue())
 		_LIH_AnimLetterY.SetValue(_LIH_DefAnimLetterY.Getvalue())
 		_LIH_AnimLetterS.SetValueInt(100)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.AnimatedLetter_mc", "_x", _LIH_AnimLetterX.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.AnimatedLetter_mc", "_y", _LIH_AnimLetterY.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.AnimatedLetter_mc", "_xscale", _LIH_AnimLetterS.GetValueInt() as Float)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.AnimatedLetter_mc", "_yscale", _LIH_AnimLetterS.GetValueInt() as Float)
+		setHUDNum("QuestUpdateBaseInstance.AnimatedLetter_mc", "x", _LIH_AnimLetterX.Getvalue())
+		setHUDNum("QuestUpdateBaseInstance.AnimatedLetter_mc", "y", _LIH_AnimLetterY.Getvalue())
+		setHUDNum("QuestUpdateBaseInstance.AnimatedLetter_mc", "xscale", _LIH_AnimLetterS.GetValueInt() as Float)
+		setHUDNum("QuestUpdateBaseInstance.AnimatedLetter_mc", "yscale", _LIH_AnimLetterS.GetValueInt() as Float)
 	elseIf _LIH_SelectedItem == "LevelMeterBaseInstance"
 		_LIH_LevelUpX.SetValue(_LIH_DefObjectivesX.Getvalue())
 		_LIH_LevelUpY.SetValue(_LIH_DefObjectivesY.Getvalue())
 		_LIH_LevelUpS.SetValueInt(100)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.LevelMeterBaseInstance", "_x", _LIH_LevelUpX.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.LevelMeterBaseInstance", "_y", _LIH_LevelUpY.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.LevelMeterBaseInstance", "_xscale", _LIH_LevelUpS.GetValueInt() as Float)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.LevelMeterBaseInstance", "_yscale", _LIH_LevelUpS.GetValueInt() as Float)
+		setHUDNum("QuestUpdateBaseInstance.LevelMeterBaseInstance", "x", _LIH_LevelUpX.Getvalue())
+		setHUDNum("QuestUpdateBaseInstance.LevelMeterBaseInstance", "y", _LIH_LevelUpY.Getvalue())
+		setHUDNum("QuestUpdateBaseInstance.LevelMeterBaseInstance", "xscale", _LIH_LevelUpS.GetValueInt() as Float)
+		setHUDNum("QuestUpdateBaseInstance.LevelMeterBaseInstance", "yscale", _LIH_LevelUpS.GetValueInt() as Float)
 	endIf
 	if _LIH_DebugVisible.GetValueInt() == 1
-		debug.Notification("Values Reset: " + _LIH_SelectedDesc)
+		notification("Values Reset: " + _LIH_SelectedDesc)
 	endIf
 	UpdateItem()
 endFunction
 
 
 function ApplyHUD()
-	LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.RolloverNameInstance", "_alpha", _LIH_ItemAlpha.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.RolloverInfoInstance", "_alpha", _LIH_InfoAlpha.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.GrayBarInstance", "_alpha", _LIH_SeparatorAlpha.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.SubtitleTextHolder", "_alpha", _LIH_SubtitleAlpha.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.ArrowInfoInstance", "_alpha", _LIH_ArrowsAlpha.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.SubtitleTextHolder", "_alpha", _LIH_SubtitleAlpha.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.ArrowInfoInstance", "_alpha", _LIH_ArrowsAlpha.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Magica", "_rotation", _LIH_MagickaR.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Health", "_rotation", _LIH_HealthR.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Stamina", "_rotation", _LIH_StaminaR.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.BottomLeftLockInstance", "_rotation", _LIH_EnchantLR.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.BottomRightLockInstance", "_rotation", _LIH_EnchantRR.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.BottomLeftLockInstance", "_alpha", _LIH_EnchantmentAlpha.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.BottomRightLockInstance", "_alpha", _LIH_EnchantmentAlpha.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Magica", "_x", _LIH_MagickaX.Getvalue())
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Magica", "_y", _LIH_MagickaY.Getvalue())
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Magica", "_xscale", _LIH_MagickaS.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Magica", "_yscale", _LIH_MagickaS.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Magica", "_alpha", _LIH_MagickaAlpha.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Health", "_x", _LIH_HealthX.Getvalue())
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Health", "_y", _LIH_HealthY.Getvalue())
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Health", "_xscale", _LIH_HealthS.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Health", "_yscale", _LIH_HealthS.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Health", "_alpha", _LIH_HealthAlpha.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Stamina", "_x", _LIH_StaminaX.Getvalue())
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Stamina", "_y", _LIH_StaminaY.Getvalue())
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Stamina", "_xscale", _LIH_StaminaS.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Stamina", "_yscale", _LIH_StaminaS.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Stamina", "_alpha", _LIH_StaminaAlpha.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.CompassShoutMeterHolder", "_x", _LIH_CompassX.Getvalue())
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.CompassShoutMeterHolder", "_y", _LIH_CompassY.Getvalue())
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.CompassShoutMeterHolder", "_xscale", _LIH_CompassS.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.CompassShoutMeterHolder", "_yscale", _LIH_CompassS.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.EnemyHealth_mc", "_x", _LIH_EnemyHealthX.Getvalue())
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.EnemyHealth_mc", "_y", _LIH_EnemyHealthY.Getvalue())
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.EnemyHealth_mc", "_xscale", _LIH_EnemyHealthS.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.EnemyHealth_mc", "_yscale", _LIH_EnemyHealthS.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.ArrowInfoInstance", "_x", _LIH_ArrowsX.Getvalue())
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.ArrowInfoInstance", "_y", _LIH_ArrowsY.Getvalue())
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.ArrowInfoInstance", "_xscale", _LIH_ArrowsS.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.ArrowInfoInstance", "_yscale", _LIH_ArrowsS.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.StealthMeterInstance", "_x", _LIH_StealthMeterX.Getvalue())
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.StealthMeterInstance", "_y", _LIH_StealthMeterY.Getvalue())
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.StealthMeterInstance", "_xscale", _LIH_StealthMeterS.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.StealthMeterInstance", "_yscale", _LIH_StealthMeterS.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Crosshair", "_x", _LIH_CrosshairX.Getvalue())
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Crosshair", "_y", _LIH_CrosshairY.Getvalue())
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Crosshair", "_xscale", _LIH_CrosshairS.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Crosshair", "_yscale", _LIH_CrosshairS.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.SneakCrosshair", "_x", _LIH_SneakCrosshairX.Getvalue())
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.SneakCrosshair", "_y", _LIH_SneakCrosshairY.Getvalue())
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.SneakCrosshair", "_xscale", _LIH_SneakCrosshairS.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.SneakCrosshair", "_yscale", _LIH_SneakCrosshairS.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.BottomLeftLockInstance", "_x", _LIH_EnchantLX.Getvalue())
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.BottomLeftLockInstance", "_y", _LIH_EnchantLY.Getvalue())
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.BottomLeftLockInstance", "_xscale", _LIH_EnchantLS.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.BottomLeftLockInstance", "_yscale", _LIH_EnchantLS.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.BottomRightLockInstance", "_x", _LIH_EnchantRX.Getvalue())
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.BottomRightLockInstance", "_y", _LIH_EnchantRY.Getvalue())
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.BottomRightLockInstance", "_xscale", _LIH_EnchantRS.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.BottomRightLockInstance", "_yscale", _LIH_EnchantRS.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.MessagesBlock", "_x", _LIH_HUDMsgX.Getvalue())
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.MessagesBlock", "_y", _LIH_HUDMsgY.Getvalue())
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.MessagesBlock", "_xscale", _LIH_HUDMsgS.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.MessagesBlock", "_yscale", _LIH_HUDMsgS.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.LocationLockBase", "_x", _LIH_LocationX.Getvalue())
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.LocationLockBase", "_y", _LIH_LocationY.Getvalue())
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.LocationLockBase", "_xscale", _LIH_LocationS.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.LocationLockBase", "_yscale", _LIH_LocationS.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.ActivateButton_tf", "_x", _LIH_ActivateButtonX.Getvalue())
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.ActivateButton_tf", "_y", _LIH_ActivateButtonY.Getvalue())
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.ActivateButton_tf", "_xscale", _LIH_ActivateButtonS.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.ActivateButton_tf", "_yscale", _LIH_ActivateButtonS.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.RolloverNameInstance", "_x", _LIH_NameX.Getvalue())
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.RolloverNameInstance", "_y", _LIH_NameY.Getvalue())
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.RolloverNameInstance", "_xscale", _LIH_NameS.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.RolloverNameInstance", "_yscale", _LIH_NameS.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.GrayBarInstance", "_x", _LIH_GrayBarX.Getvalue())
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.GrayBarInstance", "_y", _LIH_GrayBarY.Getvalue())
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.GrayBarInstance", "_xscale", _LIH_GrayBarS.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.GrayBarInstance", "_yscale", _LIH_GrayBarS.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.RolloverInfoInstance", "_x", _LIH_InfoX.Getvalue())
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.RolloverInfoInstance", "_y", _LIH_InfoY.Getvalue())
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.RolloverInfoInstance", "_xscale", _LIH_InfoS.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.RolloverInfoInstance", "_yscale", _LIH_InfoS.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.SubtitleTextHolder", "_x", _LIH_SubtitleX.Getvalue())
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.SubtitleTextHolder", "_y", _LIH_SubtitleY.Getvalue())
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.SubtitleTextHolder", "_xscale", _LIH_SubtitleS.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.SubtitleTextHolder", "_yscale", _LIH_SubtitleS.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.ItemLeading", "_alpha", _LIH_ItemLeadingAlpha.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.SubtitleLeading", "_alpha", _LIH_SubtitleLeadingAlpha.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.FavorBackButtonBase", "_x", _LIH_FavorBackButtonX.Getvalue())
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.FavorBackButtonBase", "_y", _LIH_FavorBackButtonY.Getvalue())
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.FavorBackButtonBase", "_xscale", _LIH_FavorBackButtonS.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.FavorBackButtonBase", "_yscale", _LIH_FavorBackButtonS.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.LevelMeterBaseInstance", "_x", _LIH_LevelUpX.Getvalue())
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.LevelMeterBaseInstance", "_y", _LIH_LevelUpY.Getvalue())
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.LevelMeterBaseInstance", "_xscale", _LIH_LevelUpS.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.LevelMeterBaseInstance", "_yscale", _LIH_LevelUpS.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.ObjectiveLineInstance", "_x", _LIH_ObjectivesX.Getvalue())
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.ObjectiveLineInstance", "_y", _LIH_ObjectivesY.Getvalue())
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.ObjectiveLineInstance", "_xscale", _LIH_ObjectivesS.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.ObjectiveLineInstance", "_yscale", _LIH_ObjectivesS.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.ShoutAnimatedLetter", "_x", _LIH_ShoutsX.Getvalue())
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.ShoutAnimatedLetter", "_y", _LIH_ShoutsY.Getvalue())
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.ShoutAnimatedLetter", "_xscale", _LIH_ShoutsS.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.ShoutAnimatedLetter", "_yscale", _LIH_ShoutsS.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.AnimatedLetter_mc", "_x", _LIH_AnimLetterX.Getvalue())
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.AnimatedLetter_mc", "_y", _LIH_AnimLetterY.Getvalue())
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.AnimatedLetter_mc", "_xscale", _LIH_AnimLetterS.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.AnimatedLetter_mc", "_yscale", _LIH_AnimLetterS.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.ArrowsAlign", "_alpha", _LIH_ArrowsAlign.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.SubtitlesAlign", "_alpha", _LIH_SubtitlesAlign.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.LocationAlign", "_alpha", _LIH_LocationAlign.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.HUDMsgAlign", "_alpha", _LIH_HUDMsgAlign.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.InfoAlign", "_alpha", _LIH_InfoAlign.GetValueInt() as Float)
+	setDummyHUDNum("RolloverNameInstance", "alpha", _LIH_ItemAlpha.GetValueInt() as Float)
+	setDummyHUDNum("RolloverInfoInstance", "alpha", _LIH_InfoAlpha.GetValueInt() as Float)
+	setDummyHUDNum("GrayBarInstance", "alpha", _LIH_SeparatorAlpha.GetValueInt() as Float)
+	setDummyHUDNum("SubtitleTextHolder", "alpha", _LIH_SubtitleAlpha.GetValueInt() as Float)
+	setDummyHUDNum("ArrowInfoInstance", "alpha", _LIH_ArrowsAlpha.GetValueInt() as Float)
+	setHUDNum("SubtitleTextHolder", "alpha", _LIH_SubtitleAlpha.GetValueInt() as Float)
+	setHUDNum("ArrowInfoInstance", "alpha", _LIH_ArrowsAlpha.GetValueInt() as Float)
+	setHUDNum("Magica", "rotation", _LIH_MagickaR.GetValueInt() as Float)
+	setHUDNum("Health", "rotation", _LIH_HealthR.GetValueInt() as Float)
+	setHUDNum("Stamina", "rotation", _LIH_StaminaR.GetValueInt() as Float)
+	setHUDNum("BottomLeftLockInstance", "rotation", _LIH_EnchantLR.GetValueInt() as Float)
+	setHUDNum("BottomRightLockInstance", "rotation", _LIH_EnchantRR.GetValueInt() as Float)
+	setHUDNum("BottomLeftLockInstance", "alpha", _LIH_EnchantmentAlpha.GetValueInt() as Float)
+	setHUDNum("BottomRightLockInstance", "alpha", _LIH_EnchantmentAlpha.GetValueInt() as Float)
+	setHUDNum("Magica", "x", _LIH_MagickaX.Getvalue())
+	setHUDNum("Magica", "y", _LIH_MagickaY.Getvalue())
+	setHUDNum("Magica", "xscale", _LIH_MagickaS.GetValueInt() as Float)
+	setHUDNum("Magica", "yscale", _LIH_MagickaS.GetValueInt() as Float)
+	setHUDNum("Magica", "alpha", _LIH_MagickaAlpha.GetValueInt() as Float)
+	setHUDNum("Health", "x", _LIH_HealthX.Getvalue())
+	setHUDNum("Health", "y", _LIH_HealthY.Getvalue())
+	setHUDNum("Health", "xscale", _LIH_HealthS.GetValueInt() as Float)
+	setHUDNum("Health", "yscale", _LIH_HealthS.GetValueInt() as Float)
+	setHUDNum("Health", "alpha", _LIH_HealthAlpha.GetValueInt() as Float)
+	setHUDNum("Stamina", "x", _LIH_StaminaX.Getvalue())
+	setHUDNum("Stamina", "y", _LIH_StaminaY.Getvalue())
+	setHUDNum("Stamina", "xscale", _LIH_StaminaS.GetValueInt() as Float)
+	setHUDNum("Stamina", "yscale", _LIH_StaminaS.GetValueInt() as Float)
+	setHUDNum("Stamina", "alpha", _LIH_StaminaAlpha.GetValueInt() as Float)
+	setHUDNum("CompassShoutMeterHolder", "x", _LIH_CompassX.Getvalue())
+	setHUDNum("CompassShoutMeterHolder", "y", _LIH_CompassY.Getvalue())
+	setHUDNum("CompassShoutMeterHolder", "xscale", _LIH_CompassS.GetValueInt() as Float)
+	setHUDNum("CompassShoutMeterHolder", "yscale", _LIH_CompassS.GetValueInt() as Float)
+	setHUDNum("EnemyHealth_mc", "x", _LIH_EnemyHealthX.Getvalue())
+	setHUDNum("EnemyHealth_mc", "y", _LIH_EnemyHealthY.Getvalue())
+	setHUDNum("EnemyHealth_mc", "xscale", _LIH_EnemyHealthS.GetValueInt() as Float)
+	setHUDNum("EnemyHealth_mc", "yscale", _LIH_EnemyHealthS.GetValueInt() as Float)
+	setHUDNum("ArrowInfoInstance", "x", _LIH_ArrowsX.Getvalue())
+	setHUDNum("ArrowInfoInstance", "y", _LIH_ArrowsY.Getvalue())
+	setHUDNum("ArrowInfoInstance", "xscale", _LIH_ArrowsS.GetValueInt() as Float)
+	setHUDNum("ArrowInfoInstance", "yscale", _LIH_ArrowsS.GetValueInt() as Float)
+	setHUDNum("StealthMeterInstance", "x", _LIH_StealthMeterX.Getvalue())
+	setHUDNum("StealthMeterInstance", "y", _LIH_StealthMeterY.Getvalue())
+	setHUDNum("StealthMeterInstance", "xscale", _LIH_StealthMeterS.GetValueInt() as Float)
+	setHUDNum("StealthMeterInstance", "yscale", _LIH_StealthMeterS.GetValueInt() as Float)
+	setHUDNum("Crosshair", "x", _LIH_CrosshairX.Getvalue())
+	setHUDNum("Crosshair", "y", _LIH_CrosshairY.Getvalue())
+	setHUDNum("Crosshair", "xscale", _LIH_CrosshairS.GetValueInt() as Float)
+	setHUDNum("Crosshair", "yscale", _LIH_CrosshairS.GetValueInt() as Float)
+	setHUDNum("SneakCrosshair", "x", _LIH_SneakCrosshairX.Getvalue())
+	setHUDNum("SneakCrosshair", "y", _LIH_SneakCrosshairY.Getvalue())
+	setHUDNum("SneakCrosshair", "xscale", _LIH_SneakCrosshairS.GetValueInt() as Float)
+	setHUDNum("SneakCrosshair", "yscale", _LIH_SneakCrosshairS.GetValueInt() as Float)
+	setHUDNum("BottomLeftLockInstance", "x", _LIH_EnchantLX.Getvalue())
+	setHUDNum("BottomLeftLockInstance", "y", _LIH_EnchantLY.Getvalue())
+	setHUDNum("BottomLeftLockInstance", "xscale", _LIH_EnchantLS.GetValueInt() as Float)
+	setHUDNum("BottomLeftLockInstance", "yscale", _LIH_EnchantLS.GetValueInt() as Float)
+	setHUDNum("BottomRightLockInstance", "x", _LIH_EnchantRX.Getvalue())
+	setHUDNum("BottomRightLockInstance", "y", _LIH_EnchantRY.Getvalue())
+	setHUDNum("BottomRightLockInstance", "xscale", _LIH_EnchantRS.GetValueInt() as Float)
+	setHUDNum("BottomRightLockInstance", "yscale", _LIH_EnchantRS.GetValueInt() as Float)
+	setHUDNum("MessagesBlock", "x", _LIH_HUDMsgX.Getvalue())
+	setHUDNum("MessagesBlock", "y", _LIH_HUDMsgY.Getvalue())
+	setHUDNum("MessagesBlock", "xscale", _LIH_HUDMsgS.GetValueInt() as Float)
+	setHUDNum("MessagesBlock", "yscale", _LIH_HUDMsgS.GetValueInt() as Float)
+	setHUDNum("LocationLockBase", "x", _LIH_LocationX.Getvalue())
+	setHUDNum("LocationLockBase", "y", _LIH_LocationY.Getvalue())
+	setHUDNum("LocationLockBase", "xscale", _LIH_LocationS.GetValueInt() as Float)
+	setHUDNum("LocationLockBase", "yscale", _LIH_LocationS.GetValueInt() as Float)
+	setHUDNum("ActivateButton_tf", "x", _LIH_ActivateButtonX.Getvalue())
+	setHUDNum("ActivateButton_tf", "y", _LIH_ActivateButtonY.Getvalue())
+	setHUDNum("ActivateButton_tf", "xscale", _LIH_ActivateButtonS.GetValueInt() as Float)
+	setHUDNum("ActivateButton_tf", "yscale", _LIH_ActivateButtonS.GetValueInt() as Float)
+	setHUDNum("RolloverNameInstance", "x", _LIH_NameX.Getvalue())
+	setHUDNum("RolloverNameInstance", "y", _LIH_NameY.Getvalue())
+	setHUDNum("RolloverNameInstance", "xscale", _LIH_NameS.GetValueInt() as Float)
+	setHUDNum("RolloverNameInstance", "yscale", _LIH_NameS.GetValueInt() as Float)
+	setHUDNum("GrayBarInstance", "x", _LIH_GrayBarX.Getvalue())
+	setHUDNum("GrayBarInstance", "y", _LIH_GrayBarY.Getvalue())
+	setHUDNum("GrayBarInstance", "xscale", _LIH_GrayBarS.GetValueInt() as Float)
+	setHUDNum("GrayBarInstance", "yscale", _LIH_GrayBarS.GetValueInt() as Float)
+	setHUDNum("RolloverInfoInstance", "x", _LIH_InfoX.Getvalue())
+	setHUDNum("RolloverInfoInstance", "y", _LIH_InfoY.Getvalue())
+	setHUDNum("RolloverInfoInstance", "xscale", _LIH_InfoS.GetValueInt() as Float)
+	setHUDNum("RolloverInfoInstance", "yscale", _LIH_InfoS.GetValueInt() as Float)
+	setHUDNum("SubtitleTextHolder", "x", _LIH_SubtitleX.Getvalue())
+	setHUDNum("SubtitleTextHolder", "y", _LIH_SubtitleY.Getvalue())
+	setHUDNum("SubtitleTextHolder", "xscale", _LIH_SubtitleS.GetValueInt() as Float)
+	setHUDNum("SubtitleTextHolder", "yscale", _LIH_SubtitleS.GetValueInt() as Float)
+	setDummyHUDNum("ItemLeading", "alpha", _LIH_ItemLeadingAlpha.GetValueInt() as Float)
+	setDummyHUDNum("SubtitleLeading", "alpha", _LIH_SubtitleLeadingAlpha.GetValueInt() as Float)
+	setHUDNum("FavorBackButtonBase", "x", _LIH_FavorBackButtonX.Getvalue())
+	setHUDNum("FavorBackButtonBase", "y", _LIH_FavorBackButtonY.Getvalue())
+	setHUDNum("FavorBackButtonBase", "xscale", _LIH_FavorBackButtonS.GetValueInt() as Float)
+	setHUDNum("FavorBackButtonBase", "yscale", _LIH_FavorBackButtonS.GetValueInt() as Float)
+	setHUDNum("QuestUpdateBaseInstance.LevelMeterBaseInstance", "x", _LIH_LevelUpX.Getvalue())
+	setHUDNum("QuestUpdateBaseInstance.LevelMeterBaseInstance", "y", _LIH_LevelUpY.Getvalue())
+	setHUDNum("QuestUpdateBaseInstance.LevelMeterBaseInstance", "xscale", _LIH_LevelUpS.GetValueInt() as Float)
+	setHUDNum("QuestUpdateBaseInstance.LevelMeterBaseInstance", "yscale", _LIH_LevelUpS.GetValueInt() as Float)
+	setHUDNum("QuestUpdateBaseInstance.ObjectiveLineInstance", "x", _LIH_ObjectivesX.Getvalue())
+	setHUDNum("QuestUpdateBaseInstance.ObjectiveLineInstance", "y", _LIH_ObjectivesY.Getvalue())
+	setHUDNum("QuestUpdateBaseInstance.ObjectiveLineInstance", "xscale", _LIH_ObjectivesS.GetValueInt() as Float)
+	setHUDNum("QuestUpdateBaseInstance.ObjectiveLineInstance", "yscale", _LIH_ObjectivesS.GetValueInt() as Float)
+	setHUDNum("QuestUpdateBaseInstance.ShoutAnimatedLetter", "x", _LIH_ShoutsX.Getvalue())
+	setHUDNum("QuestUpdateBaseInstance.ShoutAnimatedLetter", "y", _LIH_ShoutsY.Getvalue())
+	setHUDNum("QuestUpdateBaseInstance.ShoutAnimatedLetter", "xscale", _LIH_ShoutsS.GetValueInt() as Float)
+	setHUDNum("QuestUpdateBaseInstance.ShoutAnimatedLetter", "yscale", _LIH_ShoutsS.GetValueInt() as Float)
+	setHUDNum("QuestUpdateBaseInstance.AnimatedLetter_mc", "x", _LIH_AnimLetterX.Getvalue())
+	setHUDNum("QuestUpdateBaseInstance.AnimatedLetter_mc", "y", _LIH_AnimLetterY.Getvalue())
+	setHUDNum("QuestUpdateBaseInstance.AnimatedLetter_mc", "xscale", _LIH_AnimLetterS.GetValueInt() as Float)
+	setHUDNum("QuestUpdateBaseInstance.AnimatedLetter_mc", "yscale", _LIH_AnimLetterS.GetValueInt() as Float)
+	setDummyHUDNum("ArrowsAlign", "alpha", _LIH_ArrowsAlign.GetValueInt() as Float)
+	setDummyHUDNum("SubtitlesAlign", "alpha", _LIH_SubtitlesAlign.GetValueInt() as Float)
+	setDummyHUDNum("LocationAlign", "alpha", _LIH_LocationAlign.GetValueInt() as Float)
+	setDummyHUDNum("HUDMsgAlign", "alpha", _LIH_HUDMsgAlign.GetValueInt() as Float)
+	setDummyHUDNum("InfoAlign", "alpha", _LIH_InfoAlign.GetValueInt() as Float)
+
 	show("_root.HUDMovieBaseInstance", 1 as Bool)
+	
 	if _LIH_Enabled.GetValueInt() == 0
 		_LIH_Toggle.SetValueInt(1)
 		ToggleHUD()
@@ -1014,88 +1257,171 @@ function ApplyHUD()
 endFunction
 
 
-function MoveDown()
-	if _LIH_SelectedItem == "Magica"
-		_LIH_MagickaY.SetValue(_LIH_MagickaY.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Magica", "_y", _LIH_MagickaY.Getvalue())
-	elseIf _LIH_SelectedItem == "Health"
-		_LIH_HealthY.SetValue(_LIH_HealthY.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Health", "_y", _LIH_HealthY.Getvalue())
-	elseIf _LIH_SelectedItem == "Stamina"
-		_LIH_StaminaY.SetValue(_LIH_StaminaY.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Stamina", "_y", _LIH_StaminaY.Getvalue())
-	elseIf _LIH_SelectedItem == "CompassShoutMeterHolder"
-		_LIH_CompassY.SetValue(_LIH_CompassY.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.CompassShoutMeterHolder", "_y", _LIH_CompassY.Getvalue())
-	elseIf _LIH_SelectedItem == "EnemyHealth_mc"
-		_LIH_EnemyHealthY.SetValue(_LIH_EnemyHealthY.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.EnemyHealth_mc", "_y", _LIH_EnemyHealthY.Getvalue())
-	elseIf _LIH_SelectedItem == "ArrowInfoInstance"
-		_LIH_ArrowsY.SetValue(_LIH_ArrowsY.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.ArrowInfoInstance", "_y", _LIH_ArrowsY.Getvalue())
-	elseIf _LIH_SelectedItem == "StealthMeterInstance"
-		_LIH_StealthMeterY.SetValue(_LIH_StealthMeterY.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.StealthMeterInstance", "_y", _LIH_StealthMeterY.Getvalue())
-	elseIf _LIH_SelectedItem == "Crosshair"
-		_LIH_CrosshairY.SetValue(_LIH_CrosshairY.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Crosshair", "_y", _LIH_CrosshairY.Getvalue())
-	elseIf _LIH_SelectedItem == "SneakCrosshair"
-		_LIH_SneakCrosshairY.SetValue(_LIH_SneakCrosshairY.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.SneakCrosshair", "_y", _LIH_SneakCrosshairY.Getvalue())
-	elseIf _LIH_SelectedItem == "BottomLeftLockInstance"
-		_LIH_EnchantLY.SetValue(_LIH_EnchantLY.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.BottomLeftLockInstance", "_y", _LIH_EnchantLY.Getvalue())
-	elseIf _LIH_SelectedItem == "BottomRightLockInstance"
-		_LIH_EnchantRY.SetValue(_LIH_EnchantRY.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.BottomRightLockInstance", "_y", _LIH_EnchantRY.Getvalue())
-	elseIf _LIH_SelectedItem == "MessagesBlock"
-		_LIH_HUDMsgY.SetValue(_LIH_HUDMsgY.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.MessagesBlock", "_y", _LIH_HUDMsgY.Getvalue())
-	elseIf _LIH_SelectedItem == "LocationLockBase"
-		_LIH_LocationY.SetValue(_LIH_LocationY.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.LocationLockBase", "_y", _LIH_LocationY.Getvalue())
-	elseIf _LIH_SelectedItem == "ActivateButton_tf"
-		_LIH_ActivateButtonY.SetValue(_LIH_ActivateButtonY.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.ActivateButton_tf", "_y", _LIH_ActivateButtonY.Getvalue())
-	elseIf _LIH_SelectedItem == "RolloverNameInstance"
-		_LIH_NameY.SetValue(_LIH_NameY.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.RolloverNameInstance", "_y", _LIH_NameY.Getvalue())
-	elseIf _LIH_SelectedItem == "GrayBarInstance"
-		_LIH_GrayBarY.SetValue(_LIH_GrayBarY.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.GrayBarInstance", "_y", _LIH_GrayBarY.Getvalue())
-	elseIf _LIH_SelectedItem == "RolloverInfoInstance"
-		_LIH_InfoY.SetValue(_LIH_InfoY.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.RolloverInfoInstance", "_y", _LIH_InfoY.Getvalue())
-	elseIf _LIH_SelectedItem == "SubtitleTextHolder"
-		_LIH_SubtitleY.SetValue(_LIH_SubtitleY.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.SubtitleTextHolder", "_y", _LIH_SubtitleY.Getvalue())
-	elseIf _LIH_SelectedItem == "ItemLeading"
-		
-	elseIf _LIH_SelectedItem == "SubtitleLeading"
-		
-	elseIf _LIH_SelectedItem == "FavorBackButtonBase"
-		_LIH_FavorBackButtonY.SetValue(_LIH_FavorBackButtonY.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.FavorBackButtonBase", "_x", _LIH_FavorBackButtonY.Getvalue())
-	elseIf _LIH_SelectedItem == "ObjectiveLineInstance"
-		_LIH_ObjectivesY.SetValue(_LIH_ObjectivesY.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.ObjectiveLineInstance", "_y", _LIH_ObjectivesY.Getvalue())
-	elseIf _LIH_SelectedItem == "ShoutAnimatedLetter"
-		_LIH_ShoutsY.SetValue(_LIH_ShoutsY.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.ShoutAnimatedLetter", "_y", _LIH_ShoutsY.Getvalue())
-	elseIf _LIH_SelectedItem == "AnimatedLetter_mc"
-		_LIH_AnimLetterY.SetValue(_LIH_AnimLetterY.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.AnimatedLetter_mc", "_y", _LIH_AnimLetterY.Getvalue())
-	elseIf _LIH_SelectedItem == "LevelMeterBaseInstance"
-		_LIH_LevelUpY.SetValue(_LIH_LevelUpY.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.LevelMeterBaseInstance", "_y", _LIH_LevelUpY.Getvalue())
+function ApplyChanges()
+	LoadDummy()
+	LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.BottomLeftLockInstance", "_alpha", _LIH_EnchantmentAlpha.GetValueInt() as Float)
+	LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.BottomRightLockInstance", "_alpha", _LIH_EnchantmentAlpha.GetValueInt() as Float)
+	LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.Crosshair", "_alpha", _LIH_CrosshairAlpha.GetValueInt() as Float)
+	LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.SneakCrosshair", "_alpha", _LIH_SneakCrosshairAlpha.GetValueInt() as Float)
+	LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.SneakCrosshair", "_visible", _LIH_SneakCrosshairVisible.GetValueInt() as Float)
+	LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.AltHealthBar", "_visible", _LIH_AltHealthBarVisible.GetValueInt() as Float)
+	LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.BarsAlwaysVisible", "_visible", _LIH_BarsAlwaysVisible.GetValueInt() as Float)
+	LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.ApplyChanges", "_visible", 1 as Float)
+	if _LIH_Selected.GetValueInt() == 0
+		show("_root.HUDDummy", 0 as Bool)
+	else
+		show("_root.HUDDummy", 1 as Bool)
 	endIf
-	UpdateItem()
+	if _LIH_SlimCompassVisible.GetValueInt() == 1
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.CompassShoutMeterHolder.Compass.CompassFrameAlt", "_visible", 1 as Float)
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.CompassShoutMeterHolder.Compass.CompassFrame", "_visible", 0 as Float)
+	else
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.CompassShoutMeterHolder.Compass.CompassFrameAlt", "_visible", 0 as Float)
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.CompassShoutMeterHolder.Compass.CompassFrame", "_visible", 1 as Float)
+	endIf
+	if _LIH_ActivateButtonVisible.GetValueInt() == 1
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.ActButton", "_visible", 1 as Float)
+		if _LIH_ActivateButtonS.GetValueInt() == 0
+			_LIH_ActivateButtonX.SetValue(_LIH_DefActivateButtonX.Getvalue())
+			_LIH_ActivateButtonY.SetValue(_LIH_DefActivateButtonY.Getvalue())
+			_LIH_ActivateButtonS.SetValueInt(100)
+		endIf
+	else
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.ActButton", "_visible", 0 as Float)
+		_LIH_ActivateButtonS.SetValueInt(0)
+	endIf
+	if _LIH_UndiscoveredMarkersVisible.GetValueInt() == 1
+		LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.UndiscoveredMarkers", "_visible", 1 as Float)
+	else
+		LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.UndiscoveredMarkers", "_visible", 0 as Float)
+	endIf
+	if _LIH_LocationMarkersVisible.GetValueInt() == 1
+		LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.LocationMarkers", "_visible", 1 as Float)
+	else
+		LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.LocationMarkers", "_visible", 0 as Float)
+	endIf
+	if _LIH_EnemyMarkersVisible.GetValueInt() == 1
+		LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.EnemyMarkers", "_visible", 1 as Float)
+	else
+		LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.EnemyMarkers", "_visible", 0 as Float)
+	endIf
+	if _LIH_PlayerSetMarkerVisible.GetValueInt() == 1
+		LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.PlayerSetMarker", "_visible", 1 as Float)
+	else
+		LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.PlayerSetMarker", "_visible", 0 as Float)
+	endIf
+	if _LIH_QuestDoorMarkersVisible.GetValueInt() == 1
+		LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.QuestDoorMarkers", "_visible", 1 as Float)
+	else
+		LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.QuestDoorMarkers", "_visible", 0 as Float)
+	endIf
+	if _LIH_QuestMarkersVisible.GetValueInt() == 1
+		LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.QuestMarkers", "_visible", 1 as Float)
+	else
+		LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.QuestMarkers", "_visible", 0 as Float)
+	endIf
+	if _LIH_AltCrosshairVisible.GetValueInt() == 1
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.AltCrosshair", "_visible", 1 as Float)
+	else
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.AltCrosshair", "_visible", 0 as Float)
+	endIf
+	if _LIH_AltSneakMeterVisible.GetValueInt() == 1
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.StealthMeterInstance.SneakAnimInstanceAlt", "_visible", 1 as Float)
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.StealthMeterInstance.SneakAnimInstance", "_visible", 0 as Float)
+	else
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.StealthMeterInstance.SneakAnimInstanceAlt", "_visible", 0 as Float)
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.StealthMeterInstance.SneakAnimInstance", "_visible", 1 as Float)
+	endIf
+	if _LIH_SneakTextVisible.GetValueInt() == 1
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.StealthMeterInstance.SneakTextHolder", "_visible", 1 as Float)
+	else
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.StealthMeterInstance.SneakTextHolder", "_visible", 0 as Float)
+	endIf
 endFunction
 
 
-function show(String clip, Bool visible)
-	isClip = clip
-	LIH_ConfigMenu.setHUDBool(isClip, "_visible", visible)
+function CheckItem()
+	if _LIH_Selected.GetValueInt() == 0
+		_LIH_SelectedItem = "None"
+		_LIH_SelectedDesc = "None"
+	elseIf _LIH_Selected.GetValueInt() == 1
+		_LIH_SelectedItem = "Magica"
+		_LIH_SelectedDesc = "Magicka Bar"
+	elseIf _LIH_Selected.GetValueInt() == 2
+		_LIH_SelectedItem = "Health"
+		_LIH_SelectedDesc = "Health Bar"
+	elseIf _LIH_Selected.GetValueInt() == 3
+		_LIH_SelectedItem = "Stamina"
+		_LIH_SelectedDesc = "Stamina Bar"
+	elseIf _LIH_Selected.GetValueInt() == 4
+		_LIH_SelectedItem = "CompassShoutMeterHolder"
+		_LIH_SelectedDesc = "Compass"
+	elseIf _LIH_Selected.GetValueInt() == 5
+		_LIH_SelectedItem = "EnemyHealth_mc"
+		_LIH_SelectedDesc = "Enemy Health"
+	elseIf _LIH_Selected.GetValueInt() == 6
+		_LIH_SelectedItem = "ArrowInfoInstance"
+		_LIH_SelectedDesc = "Arrows"
+	elseIf _LIH_Selected.GetValueInt() == 7
+		_LIH_SelectedItem = "StealthMeterInstance"
+		_LIH_SelectedDesc = "Stealth Meter"
+	elseIf _LIH_Selected.GetValueInt() == 8
+		_LIH_SelectedItem = "Crosshair"
+		_LIH_SelectedDesc = "Crosshair"
+	elseIf _LIH_Selected.GetValueInt() == 9
+		_LIH_SelectedItem = "SneakCrosshair"
+		_LIH_SelectedDesc = "Sneak Crosshair"
+	elseIf _LIH_Selected.GetValueInt() == 10
+		_LIH_SelectedItem = "BottomLeftLockInstance"
+		_LIH_SelectedDesc = "Enchantment Bar (Left)"
+	elseIf _LIH_Selected.GetValueInt() == 11
+		_LIH_SelectedItem = "BottomRightLockInstance"
+		_LIH_SelectedDesc = "Enchantment Bar (Right)"
+	elseIf _LIH_Selected.GetValueInt() == 12
+		_LIH_SelectedItem = "MessagesBlock"
+		_LIH_SelectedDesc = "HUD Messages"
+	elseIf _LIH_Selected.GetValueInt() == 13
+		_LIH_SelectedItem = "LocationLockBase"
+		_LIH_SelectedDesc = "Location Text"
+	elseIf _LIH_Selected.GetValueInt() == 14
+		_LIH_SelectedItem = "ActivateButton_tf"
+		_LIH_SelectedDesc = "Activate Button"
+	elseIf _LIH_Selected.GetValueInt() == 15
+		_LIH_SelectedItem = "RolloverNameInstance"
+		_LIH_SelectedDesc = "Item/NPC Name"
+	elseIf _LIH_Selected.GetValueInt() == 16
+		_LIH_SelectedItem = "ItemLeading"
+		_LIH_SelectedDesc = "Item/NPC Name Text Linespacing"
+	elseIf _LIH_Selected.GetValueInt() == 17
+		_LIH_SelectedItem = "GrayBarInstance"
+		_LIH_SelectedDesc = "Item Info Separator"
+	elseIf _LIH_Selected.GetValueInt() == 18
+		_LIH_SelectedItem = "RolloverInfoInstance"
+		_LIH_SelectedDesc = "Item Info Text"
+	elseIf _LIH_Selected.GetValueInt() == 19
+		_LIH_SelectedItem = "SubtitleTextHolder"
+		_LIH_SelectedDesc = "Text Subtitles"
+	elseIf _LIH_Selected.GetValueInt() == 20
+		_LIH_SelectedItem = "SubtitleLeading"
+		_LIH_SelectedDesc = "Text Subtitles Linespacing"
+	elseIf _LIH_Selected.GetValueInt() == 21
+		_LIH_SelectedItem = "FavorBackButtonBase"
+		_LIH_SelectedDesc = "Followers Back Button"
+	elseIf _LIH_Selected.GetValueInt() == 22
+		_LIH_SelectedItem = "ObjectiveLineInstance"
+		_LIH_SelectedDesc = "Quest Objectives Text"
+	elseIf _LIH_Selected.GetValueInt() == 23
+		_LIH_SelectedItem = "ShoutAnimatedLetter"
+		_LIH_SelectedDesc = "New Shout Learned Text"
+	elseIf _LIH_Selected.GetValueInt() == 24
+		_LIH_SelectedItem = "AnimatedLetter_mc"
+		_LIH_SelectedDesc = "Skill Level Up Text"
+	elseIf _LIH_Selected.GetValueInt() == 25
+		_LIH_SelectedItem = "LevelMeterBaseInstance"
+		_LIH_SelectedDesc = "Level Up Progress Meter"
+	endIf
+	notification("Selected Item: " + _LIH_SelectedDesc)
+	UpdateItem()
 endFunction
 
 
@@ -1328,122 +1654,364 @@ function UpdateItem()
 endFunction
 
 
-function ResetDefaults()
-	_LIH_UndiscoveredMarkersVisible.SetValueInt(1)
-	_LIH_LocationMarkersVisible.SetValueInt(1)
-	_LIH_EnemyMarkersVisible.SetValueInt(1)
-	_LIH_PlayerSetMarkerVisible.SetValueInt(1)
-	_LIH_QuestDoorMarkersVisible.SetValueInt(1)
-	_LIH_QuestMarkersVisible.SetValueInt(1)
-	_LIH_AltHealthBarVisible.SetValueInt(0)
-	_LIH_EnchantmentAlpha.SetValueInt(100)
-	_LIH_ItemAlpha.SetValueInt(100)
-	_LIH_InfoAlpha.SetValueInt(100)
-	_LIH_SeparatorAlpha.SetValueInt(100)
-	_LIH_SubtitleAlpha.SetValueInt(100)
-	_LIH_ArrowsAlpha.SetValueInt(100)
-	_LIH_CrosshairAlpha.SetValueInt(100)
-	_LIH_SneakCrosshairAlpha.SetValueInt(100)
-	_LIH_MagickaR.SetValueInt(0)
-	_LIH_HealthR.SetValueInt(0)
-	_LIH_StaminaR.SetValueInt(0)
-	_LIH_EnchantLR.SetValueInt(0)
-	_LIH_EnchantRR.SetValueInt(0)
-	_LIH_MagickaX.SetValue(_LIH_DefMagickaX.Getvalue())
-	_LIH_MagickaY.SetValue(_LIH_DefMagickaY.Getvalue())
-	_LIH_MagickaS.SetValueInt(100)
-	_LIH_MagickaAlpha.SetValueInt(100)
-	_LIH_HealthX.SetValue(_LIH_DefHealthX.Getvalue())
-	_LIH_HealthY.SetValue(_LIH_DefHealthY.Getvalue())
-	_LIH_HealthS.SetValueInt(100)
-	_LIH_HealthAlpha.SetValueInt(100)
-	_LIH_StaminaX.SetValue(_LIH_DefStaminaX.Getvalue())
-	_LIH_StaminaY.SetValue(_LIH_DefStaminaY.Getvalue())
-	_LIH_StaminaS.SetValueInt(100)
-	_LIH_StaminaAlpha.SetValueInt(100)
-	_LIH_CompassX.SetValue(_LIH_DefCompassX.Getvalue())
-	_LIH_CompassY.SetValue(_LIH_DefCompassY.Getvalue())
-	_LIH_CompassS.SetValueInt(100)
-	_LIH_EnemyHealthX.SetValue(_LIH_DefEnemyHealthX.Getvalue())
-	_LIH_EnemyHealthY.SetValue(_LIH_DefEnemyHealthY.Getvalue())
-	_LIH_EnemyHealthS.SetValueInt(100)
-	_LIH_ArrowsX.SetValue(_LIH_DefArrowsX.Getvalue())
-	_LIH_ArrowsY.SetValue(_LIH_DefArrowsY.Getvalue())
-	_LIH_ArrowsS.SetValueInt(100)
-	_LIH_StealthMeterX.SetValue(_LIH_DefStealthMeterX.Getvalue())
-	_LIH_StealthMeterY.SetValue(_LIH_DefStealthMeterY.Getvalue())
-	_LIH_StealthMeterS.SetValueInt(58)
-	_LIH_CrosshairX.SetValue(_LIH_DefCrosshairX.Getvalue())
-	_LIH_CrosshairY.SetValue(_LIH_DefCrosshairY.Getvalue())
-	_LIH_CrosshairS.SetValueInt(31)
-	_LIH_SneakCrosshairX.SetValue(_LIH_DefSneakCrosshairX.Getvalue())
-	_LIH_SneakCrosshairY.SetValue(_LIH_DefSneakCrosshairY.Getvalue())
-	_LIH_SneakCrosshairS.SetValueInt(31)
-	_LIH_EnchantLX.SetValue(_LIH_DefEnchantLX.Getvalue())
-	_LIH_EnchantLY.SetValue(_LIH_DefEnchantLY.Getvalue())
-	_LIH_EnchantLS.SetValueInt(100)
-	_LIH_EnchantRX.SetValue(_LIH_DefEnchantRX.Getvalue())
-	_LIH_EnchantRY.SetValue(_LIH_DefEnchantRY.Getvalue())
-	_LIH_EnchantRS.SetValueInt(100)
-	_LIH_HUDMsgX.SetValue(_LIH_DefHUDMsgX.Getvalue())
-	_LIH_HUDMsgY.SetValue(_LIH_DefHUDMsgY.Getvalue())
-	_LIH_HUDMsgS.SetValueInt(100)
-	_LIH_LocationX.SetValue(_LIH_DefLocationX.Getvalue())
-	_LIH_LocationY.SetValue(_LIH_DefLocationY.Getvalue())
-	_LIH_LocationS.SetValueInt(100)
-	_LIH_ActivateButtonX.SetValue(_LIH_DefActivateButtonX.Getvalue())
-	_LIH_ActivateButtonY.SetValue(_LIH_DefActivateButtonY.Getvalue())
-	_LIH_ActivateButtonS.SetValueInt(100)
-	_LIH_NameX.SetValue(_LIH_DefNameX.Getvalue())
-	_LIH_NameY.SetValue(_LIH_DefNameY.Getvalue())
-	_LIH_NameS.SetValueInt(100)
-	_LIH_GrayBarX.SetValue(_LIH_DefGrayBarX.Getvalue())
-	_LIH_GrayBarY.SetValue(_LIH_DefGrayBarY.Getvalue())
-	_LIH_GrayBarS.SetValueInt(100)
-	_LIH_InfoX.SetValue(_LIH_DefInfoX.Getvalue())
-	_LIH_InfoY.SetValue(_LIH_DefInfoY.Getvalue())
-	_LIH_InfoS.SetValueInt(100)
-	_LIH_SubtitleX.SetValue(_LIH_DefSubtitleX.Getvalue())
-	_LIH_SubtitleY.SetValue(_LIH_DefSubtitleY.Getvalue())
-	_LIH_SubtitleS.SetValueInt(100)
-	_LIH_ItemLeadingAlpha.SetValue(0 as Float)
-	_LIH_SubtitleLeadingAlpha.SetValue(0 as Float)
-	_LIH_FavorBackButtonX.SetValue(_LIH_DefFavorBackButtonX.Getvalue())
-	_LIH_FavorBackButtonY.SetValue(_LIH_DefFavorBackButtonY.Getvalue())
-	_LIH_FavorBackButtonS.SetValueInt(100)
-	_LIH_LevelUpX.SetValue(_LIH_DefLevelUpX.Getvalue())
-	_LIH_LevelUpY.SetValue(_LIH_DefLevelUpY.Getvalue())
-	_LIH_LevelUpS.SetValueInt(100)
-	_LIH_ObjectivesX.SetValue(_LIH_DefObjectivesX.Getvalue())
-	_LIH_ObjectivesY.SetValue(_LIH_DefObjectivesY.Getvalue())
-	_LIH_ObjectivesS.SetValueInt(100)
-	_LIH_ShoutsX.SetValue(_LIH_DefShoutsX.Getvalue())
-	_LIH_ShoutsY.SetValue(_LIH_DefShoutsY.Getvalue())
-	_LIH_ShoutsS.SetValueInt(100)
-	_LIH_AnimLetterX.SetValue(_LIH_DefAnimLetterX.Getvalue())
-	_LIH_AnimLetterY.SetValue(_LIH_DefAnimLetterY.Getvalue())
-	_LIH_AnimLetterS.SetValueInt(100)
-	_LIH_ArrowsAlign.SetValueInt(0)
-	_LIH_SubtitlesAlign.SetValueInt(50)
-	_LIH_LocationAlign.SetValueInt(100)
-	_LIH_HUDMsgAlign.SetValueInt(0)
-	_LIH_InfoAlign.SetValueInt(50)
-	if _LIH_Default.GetValueInt() == 1 && _LIH_Reset.GetValueInt() == 1
-		_LIH_Default.SetValueInt(0)
-		debug.Notification("Uninstalling mod...")
-		_LIH_AltHealthBarVisible.SetValueInt(0)
-		_LIH_SneakCrosshairAlpha.SetValueInt(100)
-		_LIH_SneakCrosshairVisible.SetValueInt(0)
-		_LIH_ActivateButtonVisible.SetValueInt(1)
-		_LIH_AltCrosshairVisible.SetValueInt(0)
-		_LIH_AltSneakMeterVisible.SetValueInt(0)
-		_LIH_SneakTextVisible.SetValueInt(1)
-		_LIH_SlimCompassVisible.SetValueInt(0)
-		ApplyChanges()
-		ApplyHUD()
+function ShowAlign()
+	if _LIH_RotateItem == 0
+		_LIH_AlignItem = "(Left)"
+	elseIf _LIH_RotateItem == 50
+		_LIH_AlignItem = "(Center)"
+	else
+		_LIH_AlignItem = "(Right)"
 	endIf
-	_LIH_Reset.SetValueInt(0)
-	ApplySettings()
+endFunction
+
+
+; -------------------------------------------------------------------------------------------------
+; HUD Element Modification
+; -------------------------------------------------------------------------------------------------
+
+function NextItem()
+	_LIH_Selected.SetValueInt(_LIH_Selected.GetValueInt() + 1)
+	if _LIH_Selected.GetValueInt() == 26
+		_LIH_Selected.SetValueInt(1)
+	endIf
+	CheckItem()
+endFunction
+
+
+function PreviousItem()
+	_LIH_Selected.SetValueInt(_LIH_Selected.GetValueInt() - 1)
+	if _LIH_Selected.GetValueInt() == 0
+		_LIH_Selected.SetValueInt(25)
+	endIf
+	CheckItem()
+endFunction
+
+
+function ToggleStep()
+	if _LIH_Step.Getvalue() == 1.00000
+		_LIH_Step.SetValue(10.0000)
+	elseIf _LIH_Step.Getvalue() == 10.0000
+		_LIH_Step.SetValue(0.500000)
+	else
+		_LIH_Step.SetValue(1.00000)
+	endIf
+	UpdateItem()
+endFunction
+
+
+function MoveUp()
+	if _LIH_SelectedItem == "Magica"
+		_LIH_MagickaY.SetValue(_LIH_MagickaY.Getvalue() - _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Magica", "_y", _LIH_MagickaY.Getvalue())
+	elseIf _LIH_SelectedItem == "Health"
+		_LIH_HealthY.SetValue(_LIH_HealthY.Getvalue() - _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Health", "_y", _LIH_HealthY.Getvalue())
+	elseIf _LIH_SelectedItem == "Stamina"
+		_LIH_StaminaY.SetValue(_LIH_StaminaY.Getvalue() - _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Stamina", "_y", _LIH_StaminaY.Getvalue())
+	elseIf _LIH_SelectedItem == "CompassShoutMeterHolder"
+		_LIH_CompassY.SetValue(_LIH_CompassY.Getvalue() - _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.CompassShoutMeterHolder", "_y", _LIH_CompassY.Getvalue())
+	elseIf _LIH_SelectedItem == "EnemyHealth_mc"
+		_LIH_EnemyHealthY.SetValue(_LIH_EnemyHealthY.Getvalue() - _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.EnemyHealth_mc", "_y", _LIH_EnemyHealthY.Getvalue())
+	elseIf _LIH_SelectedItem == "ArrowInfoInstance"
+		_LIH_ArrowsY.SetValue(_LIH_ArrowsY.Getvalue() - _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.ArrowInfoInstance", "_y", _LIH_ArrowsY.Getvalue())
+	elseIf _LIH_SelectedItem == "StealthMeterInstance"
+		_LIH_StealthMeterY.SetValue(_LIH_StealthMeterY.Getvalue() - _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.StealthMeterInstance", "_y", _LIH_StealthMeterY.Getvalue())
+	elseIf _LIH_SelectedItem == "Crosshair"
+		_LIH_CrosshairY.SetValue(_LIH_CrosshairY.Getvalue() - _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Crosshair", "_y", _LIH_CrosshairY.Getvalue())
+	elseIf _LIH_SelectedItem == "SneakCrosshair"
+		_LIH_SneakCrosshairY.SetValue(_LIH_SneakCrosshairY.Getvalue() - _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.SneakCrosshair", "_y", _LIH_SneakCrosshairY.Getvalue())
+	elseIf _LIH_SelectedItem == "BottomLeftLockInstance"
+		_LIH_EnchantLY.SetValue(_LIH_EnchantLY.Getvalue() - _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.BottomLeftLockInstance", "_y", _LIH_EnchantLY.Getvalue())
+	elseIf _LIH_SelectedItem == "BottomRightLockInstance"
+		_LIH_EnchantRY.SetValue(_LIH_EnchantRY.Getvalue() - _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.BottomRightLockInstance", "_y", _LIH_EnchantRY.Getvalue())
+	elseIf _LIH_SelectedItem == "MessagesBlock"
+		_LIH_HUDMsgY.SetValue(_LIH_HUDMsgY.Getvalue() - _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.MessagesBlock", "_y", _LIH_HUDMsgY.Getvalue())
+	elseIf _LIH_SelectedItem == "LocationLockBase"
+		_LIH_LocationY.SetValue(_LIH_LocationY.Getvalue() - _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.LocationLockBase", "_y", _LIH_LocationY.Getvalue())
+	elseIf _LIH_SelectedItem == "ActivateButton_tf"
+		_LIH_ActivateButtonY.SetValue(_LIH_ActivateButtonY.Getvalue() - _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.ActivateButton_tf", "_y", _LIH_ActivateButtonY.Getvalue())
+	elseIf _LIH_SelectedItem == "RolloverNameInstance"
+		_LIH_NameY.SetValue(_LIH_NameY.Getvalue() - _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.RolloverNameInstance", "_y", _LIH_NameY.Getvalue())
+	elseIf _LIH_SelectedItem == "GrayBarInstance"
+		_LIH_GrayBarY.SetValue(_LIH_GrayBarY.Getvalue() - _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.GrayBarInstance", "_y", _LIH_GrayBarY.Getvalue())
+	elseIf _LIH_SelectedItem == "RolloverInfoInstance"
+		_LIH_InfoY.SetValue(_LIH_InfoY.Getvalue() - _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.RolloverInfoInstance", "_y", _LIH_InfoY.Getvalue())
+	elseIf _LIH_SelectedItem == "SubtitleTextHolder"
+		_LIH_SubtitleY.SetValue(_LIH_SubtitleY.Getvalue() - _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.SubtitleTextHolder", "_y", _LIH_SubtitleY.Getvalue())
+	elseIf _LIH_SelectedItem == "ItemLeading"
+		; None
+	elseIf _LIH_SelectedItem == "SubtitleLeading"
+		; None
+	elseIf _LIH_SelectedItem == "FavorBackButtonBase"
+		_LIH_FavorBackButtonY.SetValue(_LIH_FavorBackButtonY.Getvalue() - _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.FavorBackButtonBase", "_x", _LIH_FavorBackButtonY.Getvalue())
+	elseIf _LIH_SelectedItem == "ObjectiveLineInstance"
+		_LIH_ObjectivesY.SetValue(_LIH_ObjectivesY.Getvalue() - _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.ObjectiveLineInstance", "_y", _LIH_ObjectivesY.Getvalue())
+	elseIf _LIH_SelectedItem == "ShoutAnimatedLetter"
+		_LIH_ShoutsY.SetValue(_LIH_ShoutsY.Getvalue() - _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.ShoutAnimatedLetter", "_y", _LIH_ShoutsY.Getvalue())
+	elseIf _LIH_SelectedItem == "AnimatedLetter_mc"
+		_LIH_AnimLetterY.SetValue(_LIH_AnimLetterY.Getvalue() - _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.AnimatedLetter_mc", "_y", _LIH_AnimLetterY.Getvalue())
+	elseIf _LIH_SelectedItem == "LevelMeterBaseInstance"
+		_LIH_LevelUpY.SetValue(_LIH_LevelUpY.Getvalue() - _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.LevelMeterBaseInstance", "_y", _LIH_LevelUpY.Getvalue())
+	endIf
+	UpdateItem()
+endFunction
+
+
+function MoveDown()
+	if _LIH_SelectedItem == "Magica"
+		_LIH_MagickaY.SetValue(_LIH_MagickaY.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Magica", "_y", _LIH_MagickaY.Getvalue())
+	elseIf _LIH_SelectedItem == "Health"
+		_LIH_HealthY.SetValue(_LIH_HealthY.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Health", "_y", _LIH_HealthY.Getvalue())
+	elseIf _LIH_SelectedItem == "Stamina"
+		_LIH_StaminaY.SetValue(_LIH_StaminaY.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Stamina", "_y", _LIH_StaminaY.Getvalue())
+	elseIf _LIH_SelectedItem == "CompassShoutMeterHolder"
+		_LIH_CompassY.SetValue(_LIH_CompassY.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.CompassShoutMeterHolder", "_y", _LIH_CompassY.Getvalue())
+	elseIf _LIH_SelectedItem == "EnemyHealth_mc"
+		_LIH_EnemyHealthY.SetValue(_LIH_EnemyHealthY.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.EnemyHealth_mc", "_y", _LIH_EnemyHealthY.Getvalue())
+	elseIf _LIH_SelectedItem == "ArrowInfoInstance"
+		_LIH_ArrowsY.SetValue(_LIH_ArrowsY.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.ArrowInfoInstance", "_y", _LIH_ArrowsY.Getvalue())
+	elseIf _LIH_SelectedItem == "StealthMeterInstance"
+		_LIH_StealthMeterY.SetValue(_LIH_StealthMeterY.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.StealthMeterInstance", "_y", _LIH_StealthMeterY.Getvalue())
+	elseIf _LIH_SelectedItem == "Crosshair"
+		_LIH_CrosshairY.SetValue(_LIH_CrosshairY.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Crosshair", "_y", _LIH_CrosshairY.Getvalue())
+	elseIf _LIH_SelectedItem == "SneakCrosshair"
+		_LIH_SneakCrosshairY.SetValue(_LIH_SneakCrosshairY.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.SneakCrosshair", "_y", _LIH_SneakCrosshairY.Getvalue())
+	elseIf _LIH_SelectedItem == "BottomLeftLockInstance"
+		_LIH_EnchantLY.SetValue(_LIH_EnchantLY.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.BottomLeftLockInstance", "_y", _LIH_EnchantLY.Getvalue())
+	elseIf _LIH_SelectedItem == "BottomRightLockInstance"
+		_LIH_EnchantRY.SetValue(_LIH_EnchantRY.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.BottomRightLockInstance", "_y", _LIH_EnchantRY.Getvalue())
+	elseIf _LIH_SelectedItem == "MessagesBlock"
+		_LIH_HUDMsgY.SetValue(_LIH_HUDMsgY.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.MessagesBlock", "_y", _LIH_HUDMsgY.Getvalue())
+	elseIf _LIH_SelectedItem == "LocationLockBase"
+		_LIH_LocationY.SetValue(_LIH_LocationY.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.LocationLockBase", "_y", _LIH_LocationY.Getvalue())
+	elseIf _LIH_SelectedItem == "ActivateButton_tf"
+		_LIH_ActivateButtonY.SetValue(_LIH_ActivateButtonY.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.ActivateButton_tf", "_y", _LIH_ActivateButtonY.Getvalue())
+	elseIf _LIH_SelectedItem == "RolloverNameInstance"
+		_LIH_NameY.SetValue(_LIH_NameY.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.RolloverNameInstance", "_y", _LIH_NameY.Getvalue())
+	elseIf _LIH_SelectedItem == "GrayBarInstance"
+		_LIH_GrayBarY.SetValue(_LIH_GrayBarY.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.GrayBarInstance", "_y", _LIH_GrayBarY.Getvalue())
+	elseIf _LIH_SelectedItem == "RolloverInfoInstance"
+		_LIH_InfoY.SetValue(_LIH_InfoY.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.RolloverInfoInstance", "_y", _LIH_InfoY.Getvalue())
+	elseIf _LIH_SelectedItem == "SubtitleTextHolder"
+		_LIH_SubtitleY.SetValue(_LIH_SubtitleY.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.SubtitleTextHolder", "_y", _LIH_SubtitleY.Getvalue())
+	elseIf _LIH_SelectedItem == "ItemLeading"
+		; None
+	elseIf _LIH_SelectedItem == "SubtitleLeading"
+		; None
+	elseIf _LIH_SelectedItem == "FavorBackButtonBase"
+		_LIH_FavorBackButtonY.SetValue(_LIH_FavorBackButtonY.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.FavorBackButtonBase", "_x", _LIH_FavorBackButtonY.Getvalue())
+	elseIf _LIH_SelectedItem == "ObjectiveLineInstance"
+		_LIH_ObjectivesY.SetValue(_LIH_ObjectivesY.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.ObjectiveLineInstance", "_y", _LIH_ObjectivesY.Getvalue())
+	elseIf _LIH_SelectedItem == "ShoutAnimatedLetter"
+		_LIH_ShoutsY.SetValue(_LIH_ShoutsY.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.ShoutAnimatedLetter", "_y", _LIH_ShoutsY.Getvalue())
+	elseIf _LIH_SelectedItem == "AnimatedLetter_mc"
+		_LIH_AnimLetterY.SetValue(_LIH_AnimLetterY.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.AnimatedLetter_mc", "_y", _LIH_AnimLetterY.Getvalue())
+	elseIf _LIH_SelectedItem == "LevelMeterBaseInstance"
+		_LIH_LevelUpY.SetValue(_LIH_LevelUpY.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.LevelMeterBaseInstance", "_y", _LIH_LevelUpY.Getvalue())
+	endIf
+	UpdateItem()
+endFunction
+
+
+function MoveLeft()
+	if _LIH_SelectedItem == "Magica"
+		_LIH_MagickaX.SetValue(_LIH_MagickaX.Getvalue() - _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Magica", "_x", _LIH_MagickaX.Getvalue())
+	elseIf _LIH_SelectedItem == "Health"
+		_LIH_HealthX.SetValue(_LIH_HealthX.Getvalue() - _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Health", "_x", _LIH_HealthX.Getvalue())
+	elseIf _LIH_SelectedItem == "Stamina"
+		_LIH_StaminaX.SetValue(_LIH_StaminaX.Getvalue() - _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Stamina", "_x", _LIH_StaminaX.Getvalue())
+	elseIf _LIH_SelectedItem == "CompassShoutMeterHolder"
+		_LIH_CompassX.SetValue(_LIH_CompassX.Getvalue() - _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.CompassShoutMeterHolder", "_x", _LIH_CompassX.Getvalue())
+	elseIf _LIH_SelectedItem == "EnemyHealth_mc"
+		_LIH_EnemyHealthX.SetValue(_LIH_EnemyHealthX.Getvalue() - _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.EnemyHealth_mc", "_x", _LIH_EnemyHealthX.Getvalue())
+	elseIf _LIH_SelectedItem == "ArrowInfoInstance"
+		_LIH_ArrowsX.SetValue(_LIH_ArrowsX.Getvalue() - _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.ArrowInfoInstance", "_x", _LIH_ArrowsX.Getvalue())
+	elseIf _LIH_SelectedItem == "StealthMeterInstance"
+		_LIH_StealthMeterX.SetValue(_LIH_StealthMeterX.Getvalue() - _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.StealthMeterInstance", "_x", _LIH_StealthMeterX.Getvalue())
+	elseIf _LIH_SelectedItem == "Crosshair"
+		_LIH_CrosshairX.SetValue(_LIH_CrosshairX.Getvalue() - _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Crosshair", "_x", _LIH_CrosshairX.Getvalue())
+	elseIf _LIH_SelectedItem == "SneakCrosshair"
+		_LIH_SneakCrosshairX.SetValue(_LIH_SneakCrosshairX.Getvalue() - _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.SneakCrosshair", "_x", _LIH_SneakCrosshairX.Getvalue())
+	elseIf _LIH_SelectedItem == "BottomLeftLockInstance"
+		_LIH_EnchantLX.SetValue(_LIH_EnchantLX.Getvalue() - _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.BottomLeftLockInstance", "_x", _LIH_EnchantLX.Getvalue())
+	elseIf _LIH_SelectedItem == "BottomRightLockInstance"
+		_LIH_EnchantRX.SetValue(_LIH_EnchantRX.Getvalue() - _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.BottomRightLockInstance", "_x", _LIH_EnchantRX.Getvalue())
+	elseIf _LIH_SelectedItem == "MessagesBlock"
+		_LIH_HUDMsgX.SetValue(_LIH_HUDMsgX.Getvalue() - _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.MessagesBlock", "_x", _LIH_HUDMsgX.Getvalue())
+	elseIf _LIH_SelectedItem == "LocationLockBase"
+		_LIH_LocationX.SetValue(_LIH_LocationX.Getvalue() - _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.LocationLockBase", "_x", _LIH_LocationX.Getvalue())
+	elseIf _LIH_SelectedItem == "ActivateButton_tf"
+		_LIH_ActivateButtonX.SetValue(_LIH_ActivateButtonX.Getvalue() - _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.ActivateButton_tf", "_x", _LIH_ActivateButtonX.Getvalue())
+	elseIf _LIH_SelectedItem == "RolloverNameInstance"
+		_LIH_NameX.SetValue(_LIH_NameX.Getvalue() - _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.RolloverNameInstance", "_x", _LIH_NameX.Getvalue())
+	elseIf _LIH_SelectedItem == "GrayBarInstance"
+		_LIH_GrayBarX.SetValue(_LIH_GrayBarX.Getvalue() - _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.GrayBarInstance", "_x", _LIH_GrayBarX.Getvalue())
+	elseIf _LIH_SelectedItem == "RolloverInfoInstance"
+		_LIH_InfoX.SetValue(_LIH_InfoX.Getvalue() - _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.RolloverInfoInstance", "_x", _LIH_InfoX.Getvalue())
+	elseIf _LIH_SelectedItem == "SubtitleTextHolder"
+		_LIH_SubtitleX.SetValue(_LIH_SubtitleX.Getvalue() - _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.SubtitleTextHolder", "_x", _LIH_SubtitleX.Getvalue())
+	elseIf _LIH_SelectedItem == "ItemLeading"
+		; None
+	elseIf _LIH_SelectedItem == "SubtitleLeading"
+		; None
+	elseIf _LIH_SelectedItem == "FavorBackButtonBase"
+		_LIH_FavorBackButtonX.SetValue(_LIH_FavorBackButtonX.Getvalue() - _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.FavorBackButtonBase", "_x", _LIH_FavorBackButtonX.Getvalue())
+	elseIf _LIH_SelectedItem == "ObjectiveLineInstance"
+		_LIH_ObjectivesX.SetValue(_LIH_ObjectivesX.Getvalue() - _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.ObjectiveLineInstance", "_x", _LIH_ObjectivesX.Getvalue())
+	elseIf _LIH_SelectedItem == "ShoutAnimatedLetter"
+		_LIH_ShoutsX.SetValue(_LIH_ShoutsX.Getvalue() - _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.ShoutAnimatedLetter", "_x", _LIH_ShoutsX.Getvalue())
+	elseIf _LIH_SelectedItem == "AnimatedLetter_mc"
+		_LIH_AnimLetterX.SetValue(_LIH_AnimLetterX.Getvalue() - _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.AnimatedLetter_mc", "_x", _LIH_AnimLetterX.Getvalue())
+	elseIf _LIH_SelectedItem == "LevelMeterBaseInstance"
+		_LIH_LevelUpX.SetValue(_LIH_LevelUpX.Getvalue() - _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.LevelMeterBaseInstance", "_x", _LIH_LevelUpX.Getvalue())
+	endIf
+	UpdateItem()
+endFunction
+
+
+function MoveRight()
+	if _LIH_SelectedItem == "Magica"
+		_LIH_MagickaX.SetValue(_LIH_MagickaX.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Magica", "_x", _LIH_MagickaX.Getvalue())
+	elseIf _LIH_SelectedItem == "Health"
+		_LIH_HealthX.SetValue(_LIH_HealthX.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Health", "_x", _LIH_HealthX.Getvalue())
+	elseIf _LIH_SelectedItem == "Stamina"
+		_LIH_StaminaX.SetValue(_LIH_StaminaX.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Stamina", "_x", _LIH_StaminaX.Getvalue())
+	elseIf _LIH_SelectedItem == "CompassShoutMeterHolder"
+		_LIH_CompassX.SetValue(_LIH_CompassX.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.CompassShoutMeterHolder", "_x", _LIH_CompassX.Getvalue())
+	elseIf _LIH_SelectedItem == "EnemyHealth_mc"
+		_LIH_EnemyHealthX.SetValue(_LIH_EnemyHealthX.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.EnemyHealth_mc", "_x", _LIH_EnemyHealthX.Getvalue())
+	elseIf _LIH_SelectedItem == "ArrowInfoInstance"
+		_LIH_ArrowsX.SetValue(_LIH_ArrowsX.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.ArrowInfoInstance", "_x", _LIH_ArrowsX.Getvalue())
+	elseIf _LIH_SelectedItem == "StealthMeterInstance"
+		_LIH_StealthMeterX.SetValue(_LIH_StealthMeterX.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.StealthMeterInstance", "_x", _LIH_StealthMeterX.Getvalue())
+	elseIf _LIH_SelectedItem == "Crosshair"
+		_LIH_CrosshairX.SetValue(_LIH_CrosshairX.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Crosshair", "_x", _LIH_CrosshairX.Getvalue())
+	elseIf _LIH_SelectedItem == "SneakCrosshair"
+		_LIH_SneakCrosshairX.SetValue(_LIH_SneakCrosshairX.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.SneakCrosshair", "_x", _LIH_SneakCrosshairX.Getvalue())
+	elseIf _LIH_SelectedItem == "BottomLeftLockInstance"
+		_LIH_EnchantLX.SetValue(_LIH_EnchantLX.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.BottomLeftLockInstance", "_x", _LIH_EnchantLX.Getvalue())
+	elseIf _LIH_SelectedItem == "BottomRightLockInstance"
+		_LIH_EnchantRX.SetValue(_LIH_EnchantRX.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.BottomRightLockInstance", "_x", _LIH_EnchantRX.Getvalue())
+	elseIf _LIH_SelectedItem == "MessagesBlock"
+		_LIH_HUDMsgX.SetValue(_LIH_HUDMsgX.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.MessagesBlock", "_x", _LIH_HUDMsgX.Getvalue())
+	elseIf _LIH_SelectedItem == "LocationLockBase"
+		_LIH_LocationX.SetValue(_LIH_LocationX.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.LocationLockBase", "_x", _LIH_LocationX.Getvalue())
+	elseIf _LIH_SelectedItem == "ActivateButton_tf"
+		_LIH_ActivateButtonX.SetValue(_LIH_ActivateButtonX.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.ActivateButton_tf", "_x", _LIH_ActivateButtonX.Getvalue())
+	elseIf _LIH_SelectedItem == "RolloverNameInstance"
+		_LIH_NameX.SetValue(_LIH_NameX.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.RolloverNameInstance", "_x", _LIH_NameX.Getvalue())
+	elseIf _LIH_SelectedItem == "GrayBarInstance"
+		_LIH_GrayBarX.SetValue(_LIH_GrayBarX.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.GrayBarInstance", "_x", _LIH_GrayBarX.Getvalue())
+	elseIf _LIH_SelectedItem == "RolloverInfoInstance"
+		_LIH_InfoX.SetValue(_LIH_InfoX.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.RolloverInfoInstance", "_x", _LIH_InfoX.Getvalue())
+	elseIf _LIH_SelectedItem == "SubtitleTextHolder"
+		_LIH_SubtitleX.SetValue(_LIH_SubtitleX.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.SubtitleTextHolder", "_x", _LIH_SubtitleX.Getvalue())
+	elseIf _LIH_SelectedItem == "ItemLeading"
+		; None
+	elseIf _LIH_SelectedItem == "SubtitleLeading"
+		; None
+	elseIf _LIH_SelectedItem == "FavorBackButtonBase"
+		_LIH_FavorBackButtonX.SetValue(_LIH_FavorBackButtonX.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.FavorBackButtonBase", "_x", _LIH_FavorBackButtonX.Getvalue())
+	elseIf _LIH_SelectedItem == "ObjectiveLineInstance"
+		_LIH_ObjectivesX.SetValue(_LIH_ObjectivesX.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.ObjectiveLineInstance", "_x", _LIH_ObjectivesX.Getvalue())
+	elseIf _LIH_SelectedItem == "ShoutAnimatedLetter"
+		_LIH_ShoutsX.SetValue(_LIH_ShoutsX.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.ShoutAnimatedLetter", "_x", _LIH_ShoutsX.Getvalue())
+	elseIf _LIH_SelectedItem == "AnimatedLetter_mc"
+		_LIH_AnimLetterX.SetValue(_LIH_AnimLetterX.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.AnimatedLetter_mc", "_x", _LIH_AnimLetterX.Getvalue())
+	elseIf _LIH_SelectedItem == "LevelMeterBaseInstance"
+		_LIH_LevelUpX.SetValue(_LIH_LevelUpX.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.LevelMeterBaseInstance", "_x", _LIH_LevelUpX.Getvalue())
+	endIf
+	UpdateItem()
 endFunction
 
 
@@ -1550,6 +2118,180 @@ function ZoomOut()
 	UpdateItem()
 endFunction
 
+
+function ZoomIn()
+	if _LIH_SelectedItem == "Magica"
+		_LIH_MagickaS.SetValueInt(_LIH_MagickaS.GetValueInt() + _LIH_Step.GetValueInt())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Magica", "_xscale", _LIH_MagickaS.GetValueInt() as Float)
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Magica", "_yscale", _LIH_MagickaS.GetValueInt() as Float)
+	elseIf _LIH_SelectedItem == "Health"
+		_LIH_HealthS.SetValueInt(_LIH_HealthS.GetValueInt() + _LIH_Step.GetValueInt())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Health", "_xscale", _LIH_HealthS.GetValueInt() as Float)
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Health", "_yscale", _LIH_HealthS.GetValueInt() as Float)
+	elseIf _LIH_SelectedItem == "Stamina"
+		_LIH_StaminaS.SetValueInt(_LIH_StaminaS.GetValueInt() + _LIH_Step.GetValueInt())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Stamina", "_xscale", _LIH_StaminaS.GetValueInt() as Float)
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Stamina", "_yscale", _LIH_StaminaS.GetValueInt() as Float)
+	elseIf _LIH_SelectedItem == "CompassShoutMeterHolder"
+		_LIH_CompassS.SetValueInt(_LIH_CompassS.GetValueInt() + _LIH_Step.GetValueInt())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.CompassShoutMeterHolder", "_xscale", _LIH_CompassS.GetValueInt() as Float)
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.CompassShoutMeterHolder", "_yscale", _LIH_CompassS.GetValueInt() as Float)
+	elseIf _LIH_SelectedItem == "EnemyHealth_mc"
+		_LIH_EnemyHealthS.SetValueInt(_LIH_EnemyHealthS.GetValueInt() + _LIH_Step.GetValueInt())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.EnemyHealth_mc", "_xscale", _LIH_EnemyHealthS.GetValueInt() as Float)
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.EnemyHealth_mc", "_yscale", _LIH_EnemyHealthS.GetValueInt() as Float)
+	elseIf _LIH_SelectedItem == "ArrowInfoInstance"
+		_LIH_ArrowsS.SetValueInt(_LIH_ArrowsS.GetValueInt() + _LIH_Step.GetValueInt())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.ArrowInfoInstance", "_xscale", _LIH_ArrowsS.GetValueInt() as Float)
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.ArrowInfoInstance", "_yscale", _LIH_ArrowsS.GetValueInt() as Float)
+	elseIf _LIH_SelectedItem == "StealthMeterInstance"
+		_LIH_StealthMeterS.SetValueInt(_LIH_StealthMeterS.GetValueInt() + _LIH_Step.GetValueInt())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.StealthMeterInstance", "_xscale", _LIH_StealthMeterS.GetValueInt() as Float)
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.StealthMeterInstance", "_yscale", _LIH_StealthMeterS.GetValueInt() as Float)
+	elseIf _LIH_SelectedItem == "Crosshair"
+		_LIH_CrosshairS.SetValueInt(_LIH_CrosshairS.GetValueInt() + _LIH_Step.GetValueInt())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Crosshair", "_xscale", _LIH_CrosshairS.GetValueInt() as Float)
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Crosshair", "_yscale", _LIH_CrosshairS.GetValueInt() as Float)
+	elseIf _LIH_SelectedItem == "SneakCrosshair"
+		_LIH_SneakCrosshairS.SetValueInt(_LIH_SneakCrosshairS.GetValueInt() + _LIH_Step.GetValueInt())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.SneakCrosshair", "_xscale", _LIH_SneakCrosshairS.GetValueInt() as Float)
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.SneakCrosshair", "_yscale", _LIH_SneakCrosshairS.GetValueInt() as Float)
+	elseIf _LIH_SelectedItem == "BottomLeftLockInstance"
+		_LIH_EnchantLS.SetValueInt(_LIH_EnchantLS.GetValueInt() + _LIH_Step.GetValueInt())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.BottomLeftLockInstance", "_xscale", _LIH_EnchantLS.GetValueInt() as Float)
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.BottomLeftLockInstance", "_yscale", _LIH_EnchantLS.GetValueInt() as Float)
+	elseIf _LIH_SelectedItem == "BottomRightLockInstance"
+		_LIH_EnchantRS.SetValueInt(_LIH_EnchantRS.GetValueInt() + _LIH_Step.GetValueInt())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.BottomRightLockInstance", "_xscale", _LIH_EnchantRS.GetValueInt() as Float)
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.BottomRightLockInstance", "_yscale", _LIH_EnchantRS.GetValueInt() as Float)
+	elseIf _LIH_SelectedItem == "MessagesBlock"
+		_LIH_HUDMsgS.SetValueInt(_LIH_HUDMsgS.GetValueInt() + _LIH_Step.GetValueInt())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.MessagesBlock", "_xscale", _LIH_HUDMsgS.GetValueInt() as Float)
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.MessagesBlock", "_yscale", _LIH_HUDMsgS.GetValueInt() as Float)
+	elseIf _LIH_SelectedItem == "LocationLockBase"
+		_LIH_LocationS.SetValueInt(_LIH_LocationS.GetValueInt() + _LIH_Step.GetValueInt())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.LocationLockBase", "_xscale", _LIH_LocationS.GetValueInt() as Float)
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.LocationLockBase", "_yscale", _LIH_LocationS.GetValueInt() as Float)
+	elseIf _LIH_SelectedItem == "ActivateButton_tf"
+		_LIH_ActivateButtonS.SetValueInt(_LIH_ActivateButtonS.GetValueInt() + _LIH_Step.GetValueInt())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.ActivateButton_tf", "_xscale", _LIH_ActivateButtonS.GetValueInt() as Float)
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.ActivateButton_tf", "_yscale", _LIH_ActivateButtonS.GetValueInt() as Float)
+	elseIf _LIH_SelectedItem == "RolloverNameInstance"
+		_LIH_NameS.SetValueInt(_LIH_NameS.GetValueInt() + _LIH_Step.GetValueInt())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.RolloverNameInstance", "_xscale", _LIH_NameS.GetValueInt() as Float)
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.RolloverNameInstance", "_yscale", _LIH_NameS.GetValueInt() as Float)
+	elseIf _LIH_SelectedItem == "GrayBarInstance"
+		_LIH_GrayBarS.SetValue(_LIH_GrayBarS.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.GrayBarInstance", "_xscale", _LIH_GrayBarS.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.GrayBarInstance", "_yscale", _LIH_GrayBarS.Getvalue())
+	elseIf _LIH_SelectedItem == "RolloverInfoInstance"
+		_LIH_InfoS.SetValue(_LIH_InfoS.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.RolloverInfoInstance", "_xscale", _LIH_InfoS.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.RolloverInfoInstance", "_yscale", _LIH_InfoS.Getvalue())
+	elseIf _LIH_SelectedItem == "SubtitleTextHolder"
+		_LIH_SubtitleS.SetValue(_LIH_SubtitleS.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.SubtitleTextHolder", "_xscale", _LIH_SubtitleS.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.SubtitleTextHolder", "_yscale", _LIH_SubtitleS.Getvalue())
+	elseIf _LIH_SelectedItem == "ItemLeading"
+		_LIH_ItemLeadingAlpha.SetValue(_LIH_ItemLeadingAlpha.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.ItemLeading", "_alpha", _LIH_ItemLeadingAlpha.Getvalue())
+	elseIf _LIH_SelectedItem == "SubtitleLeading"
+		_LIH_SubtitleLeadingAlpha.SetValue(_LIH_SubtitleLeadingAlpha.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.SubtitleLeading", "_alpha", _LIH_SubtitleLeadingAlpha.Getvalue())
+	elseIf _LIH_SelectedItem == "FavorBackButtonBase"
+		_LIH_FavorBackButtonS.SetValue(_LIH_FavorBackButtonS.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.FavorBackButtonBase", "_xscale", _LIH_FavorBackButtonS.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.FavorBackButtonBase", "_yscale", _LIH_FavorBackButtonS.Getvalue())
+	elseIf _LIH_SelectedItem == "ObjectiveLineInstance"
+		_LIH_ObjectivesS.SetValue(_LIH_ObjectivesS.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.ObjectiveLineInstance", "_xscale", _LIH_ObjectivesS.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.ObjectiveLineInstance", "_yscale", _LIH_ObjectivesS.Getvalue())
+	elseIf _LIH_SelectedItem == "ShoutAnimatedLetter"
+		_LIH_ShoutsS.SetValue(_LIH_ShoutsS.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.ShoutAnimatedLetter", "_xscale", _LIH_ShoutsS.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.ShoutAnimatedLetter", "_yscale", _LIH_ShoutsS.Getvalue())
+	elseIf _LIH_SelectedItem == "AnimatedLetter_mc"
+		_LIH_AnimLetterS.SetValue(_LIH_AnimLetterS.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.AnimatedLetter_mc", "_xscale", _LIH_AnimLetterS.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.AnimatedLetter_mc", "_yscale", _LIH_AnimLetterS.Getvalue())
+	elseIf _LIH_SelectedItem == "LevelMeterBaseInstance"
+		_LIH_LevelUpS.SetValue(_LIH_LevelUpS.Getvalue() + _LIH_Step.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.LevelMeterBaseInstance", "_xscale", _LIH_LevelUpS.Getvalue())
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.LevelMeterBaseInstance", "_yscale", _LIH_LevelUpS.Getvalue())
+	endIf
+	UpdateItem()
+endFunction
+
+
+function RotateAlign()
+	if _LIH_SelectedItem == "Magica"
+		_LIH_MagickaR.SetValueInt(_LIH_MagickaR.GetValueInt() + _LIH_Step.GetValueInt())
+		if _LIH_MagickaR.GetValueInt() == 360
+			_LIH_MagickaR.SetValueInt(0)
+		endIf
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Magica", "_rotation", _LIH_MagickaR.GetValueInt() as Float)
+	elseIf _LIH_SelectedItem == "Health"
+		_LIH_HealthR.SetValueInt(_LIH_HealthR.GetValueInt() + _LIH_Step.GetValueInt())
+		if _LIH_HealthR.GetValueInt() == 360
+			_LIH_HealthR.SetValueInt(0)
+		endIf
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Health", "_rotation", _LIH_HealthR.GetValueInt() as Float)
+	elseIf _LIH_SelectedItem == "Stamina"
+		_LIH_StaminaR.SetValueInt(_LIH_StaminaR.GetValueInt() + _LIH_Step.GetValueInt())
+		if _LIH_StaminaR.GetValueInt() == 360
+			_LIH_StaminaR.SetValueInt(0)
+		endIf
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Stamina", "_rotation", _LIH_StaminaR.GetValueInt() as Float)
+	elseIf _LIH_SelectedItem == "ArrowInfoInstance"
+		_LIH_ArrowsAlign.SetValueInt(_LIH_ArrowsAlign.GetValueInt() + 50)
+		if _LIH_ArrowsAlign.GetValueInt() == 150
+			_LIH_ArrowsAlign.SetValueInt(0)
+		endIf
+		LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.ArrowsAlign", "_alpha", _LIH_ArrowsAlign.GetValueInt() as Float)
+	elseIf _LIH_SelectedItem == "BottomLeftLockInstance"
+		_LIH_EnchantLR.SetValueInt(_LIH_EnchantLR.GetValueInt() + _LIH_Step.GetValueInt())
+		if _LIH_EnchantLR.GetValueInt() == 360
+			_LIH_EnchantLR.SetValueInt(0)
+		endIf
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.BottomLeftLockInstance", "_rotation", _LIH_EnchantLR.GetValueInt() as Float)
+	elseIf _LIH_SelectedItem == "BottomRightLockInstance"
+		_LIH_EnchantRR.SetValueInt(_LIH_EnchantRR.GetValueInt() + _LIH_Step.GetValueInt())
+		if _LIH_EnchantRR.GetValueInt() == 360
+			_LIH_EnchantRR.SetValueInt(0)
+		endIf
+		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.BottomRightLockInstance", "_rotation", _LIH_EnchantRR.GetValueInt() as Float)
+	elseIf _LIH_SelectedItem == "MessagesBlock"
+		_LIH_HUDMsgAlign.SetValueInt(_LIH_HUDMsgAlign.GetValueInt() + 50)
+		if _LIH_HUDMsgAlign.GetValueInt() == 150
+			_LIH_HUDMsgAlign.SetValueInt(0)
+		endIf
+		LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.HUDMsgAlign", "_alpha", _LIH_HUDMsgAlign.GetValueInt() as Float)
+	elseIf _LIH_SelectedItem == "LocationLockBase"
+		_LIH_LocationAlign.SetValueInt(_LIH_LocationAlign.GetValueInt() + 50)
+		if _LIH_LocationAlign.GetValueInt() == 150
+			_LIH_LocationAlign.SetValueInt(0)
+		endIf
+		LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.LocationAlign", "_alpha", _LIH_LocationAlign.GetValueInt() as Float)
+	elseIf _LIH_SelectedItem == "RolloverInfoInstance"
+		_LIH_InfoAlign.SetValueInt(_LIH_InfoAlign.GetValueInt() + 50)
+		if _LIH_InfoAlign.GetValueInt() == 150
+			_LIH_InfoAlign.SetValueInt(0)
+		endIf
+		LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.InfoAlign", "_alpha", _LIH_InfoAlign.GetValueInt() as Float)
+	elseIf _LIH_SelectedItem == "SubtitleTextHolder"
+		_LIH_SubtitlesAlign.SetValueInt(_LIH_SubtitlesAlign.GetValueInt() + 50)
+		if _LIH_SubtitlesAlign.GetValueInt() == 150
+			_LIH_SubtitlesAlign.SetValueInt(0)
+		endIf
+		LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.SubtitlesAlign", "_alpha", _LIH_SubtitlesAlign.Getvalue())
+	endIf
+	UpdateItem()
+endFunction
+
+
+; -------------------------------------------------------------------------------------------------
+; Preset Management
+; -------------------------------------------------------------------------------------------------
 
 function LoadDummy()
 	LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.CompassShoutMeterHolder.CompassFrameAlt", "_visible", _LIH_SlimCompassVisible.GetValueInt() as Float)
@@ -1660,132 +2402,6 @@ function LoadDummy()
 	LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.LocationAlign", "_alpha", _LIH_LocationAlign.Getvalue())
 	LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.HUDMsgAlign", "_alpha", _LIH_HUDMsgAlign.Getvalue())
 	LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.HUDInfoAlign", "_alpha", _LIH_InfoAlign.Getvalue())
-endFunction
-
-
-function ApplySettings()
-	if _LIH_Enabled.GetValueInt() > 0 && _LIH_Reset.GetValueInt() < 1
-		if _LIH_DebugVisible.GetValueInt() == 1
-			debug.Notification("Applying HUD settings...")
-		endIf
-		LIH_MainInstance.reset()
-		ApplyChanges()
-		if _LIH_Default.GetValueInt() == 2
-			if _LIH_DebugVisible.GetValueInt() == 1
-				debug.Notification("Restoring saved HUD position...")
-			endIf
-		elseIf _LIH_DebugVisible.GetValueInt() == 1
-			debug.Notification("Restoring default HUD position...")
-		endIf
-		ApplyHUD()
-	endIf
-	if _LIH_Enabled.GetValueInt() == 0 && _LIH_Default.GetValueInt() > 0
-		debug.Notification("Disabling mod...")
-		LIH_MainInstance.deactivate()
-		_LIH_Default.SetValueInt(1)
-		_LIH_Reset.SetValueInt(1)
-	endIf
-	if _LIH_Reset.GetValueInt() == 1
-		if _LIH_DebugVisible.GetValueInt() == 1
-			debug.Notification("Restoring default HUD values...")
-		endIf
-		ResetDefaults()
-	elseIf _LIH_Load.GetValueInt() > 0
-		if _LIH_DebugVisible.GetValueInt() == 1
-			if _LIH_Load.GetValueInt() == 2
-				debug.Notification("Saved preset HUD values.")
-			else
-				debug.Notification("Restored saved HUD values.")
-			endif
-		endIf
-
-		if _LIH_Load.GetValueInt() == 2
-			SavePreset_New()
-		elseif _LIH_Load.GetValueInt() == 3
-			LoadPreset_New()
-		else
-			LoadPreset()
-		endif
-	endIf
-endFunction
-
-
-function MoveRight()
-	if _LIH_SelectedItem == "Magica"
-		_LIH_MagickaX.SetValue(_LIH_MagickaX.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Magica", "_x", _LIH_MagickaX.Getvalue())
-	elseIf _LIH_SelectedItem == "Health"
-		_LIH_HealthX.SetValue(_LIH_HealthX.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Health", "_x", _LIH_HealthX.Getvalue())
-	elseIf _LIH_SelectedItem == "Stamina"
-		_LIH_StaminaX.SetValue(_LIH_StaminaX.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Stamina", "_x", _LIH_StaminaX.Getvalue())
-	elseIf _LIH_SelectedItem == "CompassShoutMeterHolder"
-		_LIH_CompassX.SetValue(_LIH_CompassX.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.CompassShoutMeterHolder", "_x", _LIH_CompassX.Getvalue())
-	elseIf _LIH_SelectedItem == "EnemyHealth_mc"
-		_LIH_EnemyHealthX.SetValue(_LIH_EnemyHealthX.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.EnemyHealth_mc", "_x", _LIH_EnemyHealthX.Getvalue())
-	elseIf _LIH_SelectedItem == "ArrowInfoInstance"
-		_LIH_ArrowsX.SetValue(_LIH_ArrowsX.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.ArrowInfoInstance", "_x", _LIH_ArrowsX.Getvalue())
-	elseIf _LIH_SelectedItem == "StealthMeterInstance"
-		_LIH_StealthMeterX.SetValue(_LIH_StealthMeterX.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.StealthMeterInstance", "_x", _LIH_StealthMeterX.Getvalue())
-	elseIf _LIH_SelectedItem == "Crosshair"
-		_LIH_CrosshairX.SetValue(_LIH_CrosshairX.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Crosshair", "_x", _LIH_CrosshairX.Getvalue())
-	elseIf _LIH_SelectedItem == "SneakCrosshair"
-		_LIH_SneakCrosshairX.SetValue(_LIH_SneakCrosshairX.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.SneakCrosshair", "_x", _LIH_SneakCrosshairX.Getvalue())
-	elseIf _LIH_SelectedItem == "BottomLeftLockInstance"
-		_LIH_EnchantLX.SetValue(_LIH_EnchantLX.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.BottomLeftLockInstance", "_x", _LIH_EnchantLX.Getvalue())
-	elseIf _LIH_SelectedItem == "BottomRightLockInstance"
-		_LIH_EnchantRX.SetValue(_LIH_EnchantRX.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.BottomRightLockInstance", "_x", _LIH_EnchantRX.Getvalue())
-	elseIf _LIH_SelectedItem == "MessagesBlock"
-		_LIH_HUDMsgX.SetValue(_LIH_HUDMsgX.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.MessagesBlock", "_x", _LIH_HUDMsgX.Getvalue())
-	elseIf _LIH_SelectedItem == "LocationLockBase"
-		_LIH_LocationX.SetValue(_LIH_LocationX.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.LocationLockBase", "_x", _LIH_LocationX.Getvalue())
-	elseIf _LIH_SelectedItem == "ActivateButton_tf"
-		_LIH_ActivateButtonX.SetValue(_LIH_ActivateButtonX.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.ActivateButton_tf", "_x", _LIH_ActivateButtonX.Getvalue())
-	elseIf _LIH_SelectedItem == "RolloverNameInstance"
-		_LIH_NameX.SetValue(_LIH_NameX.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.RolloverNameInstance", "_x", _LIH_NameX.Getvalue())
-	elseIf _LIH_SelectedItem == "GrayBarInstance"
-		_LIH_GrayBarX.SetValue(_LIH_GrayBarX.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.GrayBarInstance", "_x", _LIH_GrayBarX.Getvalue())
-	elseIf _LIH_SelectedItem == "RolloverInfoInstance"
-		_LIH_InfoX.SetValue(_LIH_InfoX.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.RolloverInfoInstance", "_x", _LIH_InfoX.Getvalue())
-	elseIf _LIH_SelectedItem == "SubtitleTextHolder"
-		_LIH_SubtitleX.SetValue(_LIH_SubtitleX.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.SubtitleTextHolder", "_x", _LIH_SubtitleX.Getvalue())
-	elseIf _LIH_SelectedItem == "ItemLeading"
-		
-	elseIf _LIH_SelectedItem == "SubtitleLeading"
-		
-	elseIf _LIH_SelectedItem == "FavorBackButtonBase"
-		_LIH_FavorBackButtonX.SetValue(_LIH_FavorBackButtonX.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.FavorBackButtonBase", "_x", _LIH_FavorBackButtonX.Getvalue())
-	elseIf _LIH_SelectedItem == "ObjectiveLineInstance"
-		_LIH_ObjectivesX.SetValue(_LIH_ObjectivesX.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.ObjectiveLineInstance", "_x", _LIH_ObjectivesX.Getvalue())
-	elseIf _LIH_SelectedItem == "ShoutAnimatedLetter"
-		_LIH_ShoutsX.SetValue(_LIH_ShoutsX.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.ShoutAnimatedLetter", "_x", _LIH_ShoutsX.Getvalue())
-	elseIf _LIH_SelectedItem == "AnimatedLetter_mc"
-		_LIH_AnimLetterX.SetValue(_LIH_AnimLetterX.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.AnimatedLetter_mc", "_x", _LIH_AnimLetterX.Getvalue())
-	elseIf _LIH_SelectedItem == "LevelMeterBaseInstance"
-		_LIH_LevelUpX.SetValue(_LIH_LevelUpX.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.LevelMeterBaseInstance", "_x", _LIH_LevelUpX.Getvalue())
-	endIf
-	UpdateItem()
 endFunction
 
 
@@ -1901,25 +2517,7 @@ function LoadPreset()
 endFunction
 
 
-function toggle2(globalvariable value)
-	if value.GetValueInt() == 0
-		value.SetValueInt(2)
-	else
-		value.SetValueInt(0)
-	endIf
-endFunction
-
-
-function toggle3(globalvariable value)
-	if value.GetValueInt() == 0
-		value.SetValueInt(3)
-	else
-		value.SetValueInt(0)
-	endIf
-endFunction
-
-
-function LoadPreset_New()
+function LoadPresetFISS()
 	FISSInterface fiss = FISSFactory.getFISS()
 	If fiss
 		fiss.beginLoad("LessIntrusiveHUD2.xml")
@@ -2040,7 +2638,7 @@ function LoadPreset_New()
 endFunction
 
 
-function SavePreset_New()
+function SavePresetFISS()
 	FISSInterface fiss = FISSFactory.getFISS()
 	If fiss
 		fiss.beginSave("LessIntrusiveHUD2.xml", "LessIntrusiveHUD2")
@@ -2155,577 +2753,4 @@ function SavePreset_New()
 
 	_LIH_Reset.SetValueInt(0)
 	_LIH_Load.SetValueInt(0)
-endFunction
-
-
-function ZoomIn()
-	if _LIH_SelectedItem == "Magica"
-		_LIH_MagickaS.SetValueInt(_LIH_MagickaS.GetValueInt() + _LIH_Step.GetValueInt())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Magica", "_xscale", _LIH_MagickaS.GetValueInt() as Float)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Magica", "_yscale", _LIH_MagickaS.GetValueInt() as Float)
-	elseIf _LIH_SelectedItem == "Health"
-		_LIH_HealthS.SetValueInt(_LIH_HealthS.GetValueInt() + _LIH_Step.GetValueInt())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Health", "_xscale", _LIH_HealthS.GetValueInt() as Float)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Health", "_yscale", _LIH_HealthS.GetValueInt() as Float)
-	elseIf _LIH_SelectedItem == "Stamina"
-		_LIH_StaminaS.SetValueInt(_LIH_StaminaS.GetValueInt() + _LIH_Step.GetValueInt())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Stamina", "_xscale", _LIH_StaminaS.GetValueInt() as Float)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Stamina", "_yscale", _LIH_StaminaS.GetValueInt() as Float)
-	elseIf _LIH_SelectedItem == "CompassShoutMeterHolder"
-		_LIH_CompassS.SetValueInt(_LIH_CompassS.GetValueInt() + _LIH_Step.GetValueInt())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.CompassShoutMeterHolder", "_xscale", _LIH_CompassS.GetValueInt() as Float)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.CompassShoutMeterHolder", "_yscale", _LIH_CompassS.GetValueInt() as Float)
-	elseIf _LIH_SelectedItem == "EnemyHealth_mc"
-		_LIH_EnemyHealthS.SetValueInt(_LIH_EnemyHealthS.GetValueInt() + _LIH_Step.GetValueInt())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.EnemyHealth_mc", "_xscale", _LIH_EnemyHealthS.GetValueInt() as Float)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.EnemyHealth_mc", "_yscale", _LIH_EnemyHealthS.GetValueInt() as Float)
-	elseIf _LIH_SelectedItem == "ArrowInfoInstance"
-		_LIH_ArrowsS.SetValueInt(_LIH_ArrowsS.GetValueInt() + _LIH_Step.GetValueInt())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.ArrowInfoInstance", "_xscale", _LIH_ArrowsS.GetValueInt() as Float)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.ArrowInfoInstance", "_yscale", _LIH_ArrowsS.GetValueInt() as Float)
-	elseIf _LIH_SelectedItem == "StealthMeterInstance"
-		_LIH_StealthMeterS.SetValueInt(_LIH_StealthMeterS.GetValueInt() + _LIH_Step.GetValueInt())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.StealthMeterInstance", "_xscale", _LIH_StealthMeterS.GetValueInt() as Float)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.StealthMeterInstance", "_yscale", _LIH_StealthMeterS.GetValueInt() as Float)
-	elseIf _LIH_SelectedItem == "Crosshair"
-		_LIH_CrosshairS.SetValueInt(_LIH_CrosshairS.GetValueInt() + _LIH_Step.GetValueInt())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Crosshair", "_xscale", _LIH_CrosshairS.GetValueInt() as Float)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Crosshair", "_yscale", _LIH_CrosshairS.GetValueInt() as Float)
-	elseIf _LIH_SelectedItem == "SneakCrosshair"
-		_LIH_SneakCrosshairS.SetValueInt(_LIH_SneakCrosshairS.GetValueInt() + _LIH_Step.GetValueInt())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.SneakCrosshair", "_xscale", _LIH_SneakCrosshairS.GetValueInt() as Float)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.SneakCrosshair", "_yscale", _LIH_SneakCrosshairS.GetValueInt() as Float)
-	elseIf _LIH_SelectedItem == "BottomLeftLockInstance"
-		_LIH_EnchantLS.SetValueInt(_LIH_EnchantLS.GetValueInt() + _LIH_Step.GetValueInt())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.BottomLeftLockInstance", "_xscale", _LIH_EnchantLS.GetValueInt() as Float)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.BottomLeftLockInstance", "_yscale", _LIH_EnchantLS.GetValueInt() as Float)
-	elseIf _LIH_SelectedItem == "BottomRightLockInstance"
-		_LIH_EnchantRS.SetValueInt(_LIH_EnchantRS.GetValueInt() + _LIH_Step.GetValueInt())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.BottomRightLockInstance", "_xscale", _LIH_EnchantRS.GetValueInt() as Float)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.BottomRightLockInstance", "_yscale", _LIH_EnchantRS.GetValueInt() as Float)
-	elseIf _LIH_SelectedItem == "MessagesBlock"
-		_LIH_HUDMsgS.SetValueInt(_LIH_HUDMsgS.GetValueInt() + _LIH_Step.GetValueInt())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.MessagesBlock", "_xscale", _LIH_HUDMsgS.GetValueInt() as Float)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.MessagesBlock", "_yscale", _LIH_HUDMsgS.GetValueInt() as Float)
-	elseIf _LIH_SelectedItem == "LocationLockBase"
-		_LIH_LocationS.SetValueInt(_LIH_LocationS.GetValueInt() + _LIH_Step.GetValueInt())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.LocationLockBase", "_xscale", _LIH_LocationS.GetValueInt() as Float)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.LocationLockBase", "_yscale", _LIH_LocationS.GetValueInt() as Float)
-	elseIf _LIH_SelectedItem == "ActivateButton_tf"
-		_LIH_ActivateButtonS.SetValueInt(_LIH_ActivateButtonS.GetValueInt() + _LIH_Step.GetValueInt())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.ActivateButton_tf", "_xscale", _LIH_ActivateButtonS.GetValueInt() as Float)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.ActivateButton_tf", "_yscale", _LIH_ActivateButtonS.GetValueInt() as Float)
-	elseIf _LIH_SelectedItem == "RolloverNameInstance"
-		_LIH_NameS.SetValueInt(_LIH_NameS.GetValueInt() + _LIH_Step.GetValueInt())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.RolloverNameInstance", "_xscale", _LIH_NameS.GetValueInt() as Float)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.RolloverNameInstance", "_yscale", _LIH_NameS.GetValueInt() as Float)
-	elseIf _LIH_SelectedItem == "GrayBarInstance"
-		_LIH_GrayBarS.SetValue(_LIH_GrayBarS.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.GrayBarInstance", "_xscale", _LIH_GrayBarS.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.GrayBarInstance", "_yscale", _LIH_GrayBarS.Getvalue())
-	elseIf _LIH_SelectedItem == "RolloverInfoInstance"
-		_LIH_InfoS.SetValue(_LIH_InfoS.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.RolloverInfoInstance", "_xscale", _LIH_InfoS.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.RolloverInfoInstance", "_yscale", _LIH_InfoS.Getvalue())
-	elseIf _LIH_SelectedItem == "SubtitleTextHolder"
-		_LIH_SubtitleS.SetValue(_LIH_SubtitleS.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.SubtitleTextHolder", "_xscale", _LIH_SubtitleS.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.SubtitleTextHolder", "_yscale", _LIH_SubtitleS.Getvalue())
-	elseIf _LIH_SelectedItem == "ItemLeading"
-		_LIH_ItemLeadingAlpha.SetValue(_LIH_ItemLeadingAlpha.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.ItemLeading", "_alpha", _LIH_ItemLeadingAlpha.Getvalue())
-	elseIf _LIH_SelectedItem == "SubtitleLeading"
-		_LIH_SubtitleLeadingAlpha.SetValue(_LIH_SubtitleLeadingAlpha.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.SubtitleLeading", "_alpha", _LIH_SubtitleLeadingAlpha.Getvalue())
-	elseIf _LIH_SelectedItem == "FavorBackButtonBase"
-		_LIH_FavorBackButtonS.SetValue(_LIH_FavorBackButtonS.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.FavorBackButtonBase", "_xscale", _LIH_FavorBackButtonS.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.FavorBackButtonBase", "_yscale", _LIH_FavorBackButtonS.Getvalue())
-	elseIf _LIH_SelectedItem == "ObjectiveLineInstance"
-		_LIH_ObjectivesS.SetValue(_LIH_ObjectivesS.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.ObjectiveLineInstance", "_xscale", _LIH_ObjectivesS.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.ObjectiveLineInstance", "_yscale", _LIH_ObjectivesS.Getvalue())
-	elseIf _LIH_SelectedItem == "ShoutAnimatedLetter"
-		_LIH_ShoutsS.SetValue(_LIH_ShoutsS.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.ShoutAnimatedLetter", "_xscale", _LIH_ShoutsS.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.ShoutAnimatedLetter", "_yscale", _LIH_ShoutsS.Getvalue())
-	elseIf _LIH_SelectedItem == "AnimatedLetter_mc"
-		_LIH_AnimLetterS.SetValue(_LIH_AnimLetterS.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.AnimatedLetter_mc", "_xscale", _LIH_AnimLetterS.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.AnimatedLetter_mc", "_yscale", _LIH_AnimLetterS.Getvalue())
-	elseIf _LIH_SelectedItem == "LevelMeterBaseInstance"
-		_LIH_LevelUpS.SetValue(_LIH_LevelUpS.Getvalue() + _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.LevelMeterBaseInstance", "_xscale", _LIH_LevelUpS.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.LevelMeterBaseInstance", "_yscale", _LIH_LevelUpS.Getvalue())
-	endIf
-	UpdateItem()
-endFunction
-
-
-function ToggleHUD()
-	if _LIH_Toggle.GetValueInt() > 0
-		_LIH_Toggle.SetValueInt(0)
-		_LIH_Selected.SetValueInt(0)
-		if _LIH_DebugVisible.GetValueInt() == 1
-			debug.Notification("Exiting HUD Edit Mode...")
-		endIf
-		show("_root.HUDDummy", 0 as Bool)
-		show("_root.HUDDummy.guideLines_mc", 0 as Bool)
-		show("_root.HUDDummy.ApplyChanges", 0 as Bool)
-	else
-		LoadDummy()
-		_LIH_Toggle.SetValueInt(1)
-		_LIH_Selected.SetValueInt(1)
-		if _LIH_DebugVisible.GetValueInt() == 1
-			debug.Notification("Entering HUD Edit Mode...")
-		endIf
-		show("_root.HUDDummy", 1 as Bool)
-		show("_root.HUDDummy.guideLines_mc", 1 as Bool)
-		show("_root.HUDDummy.ApplyChanges", 1 as Bool)
-		CheckItem()
-	endIf
-endFunction
-
-
-function PreviousItem()
-	_LIH_Selected.SetValueInt(_LIH_Selected.GetValueInt() - 1)
-	if _LIH_Selected.GetValueInt() == 0
-		_LIH_Selected.SetValueInt(25)
-	endIf
-	CheckItem()
-endFunction
-
-
-function CheckItem()
-	if _LIH_Selected.GetValueInt() == 0
-		_LIH_SelectedItem = "None"
-		_LIH_SelectedDesc = "None"
-	elseIf _LIH_Selected.GetValueInt() == 1
-		_LIH_SelectedItem = "Magica"
-		_LIH_SelectedDesc = "Magicka Bar"
-	elseIf _LIH_Selected.GetValueInt() == 2
-		_LIH_SelectedItem = "Health"
-		_LIH_SelectedDesc = "Health Bar"
-	elseIf _LIH_Selected.GetValueInt() == 3
-		_LIH_SelectedItem = "Stamina"
-		_LIH_SelectedDesc = "Stamina Bar"
-	elseIf _LIH_Selected.GetValueInt() == 4
-		_LIH_SelectedItem = "CompassShoutMeterHolder"
-		_LIH_SelectedDesc = "Compass"
-	elseIf _LIH_Selected.GetValueInt() == 5
-		_LIH_SelectedItem = "EnemyHealth_mc"
-		_LIH_SelectedDesc = "Enemy Health"
-	elseIf _LIH_Selected.GetValueInt() == 6
-		_LIH_SelectedItem = "ArrowInfoInstance"
-		_LIH_SelectedDesc = "Arrows"
-	elseIf _LIH_Selected.GetValueInt() == 7
-		_LIH_SelectedItem = "StealthMeterInstance"
-		_LIH_SelectedDesc = "Stealth Meter"
-	elseIf _LIH_Selected.GetValueInt() == 8
-		_LIH_SelectedItem = "Crosshair"
-		_LIH_SelectedDesc = "Crosshair"
-	elseIf _LIH_Selected.GetValueInt() == 9
-		_LIH_SelectedItem = "SneakCrosshair"
-		_LIH_SelectedDesc = "Sneak Crosshair"
-	elseIf _LIH_Selected.GetValueInt() == 10
-		_LIH_SelectedItem = "BottomLeftLockInstance"
-		_LIH_SelectedDesc = "Enchantment Bar (Left)"
-	elseIf _LIH_Selected.GetValueInt() == 11
-		_LIH_SelectedItem = "BottomRightLockInstance"
-		_LIH_SelectedDesc = "Enchantment Bar (Right)"
-	elseIf _LIH_Selected.GetValueInt() == 12
-		_LIH_SelectedItem = "MessagesBlock"
-		_LIH_SelectedDesc = "HUD Messages"
-	elseIf _LIH_Selected.GetValueInt() == 13
-		_LIH_SelectedItem = "LocationLockBase"
-		_LIH_SelectedDesc = "Location Text"
-	elseIf _LIH_Selected.GetValueInt() == 14
-		_LIH_SelectedItem = "ActivateButton_tf"
-		_LIH_SelectedDesc = "Activate Button"
-	elseIf _LIH_Selected.GetValueInt() == 15
-		_LIH_SelectedItem = "RolloverNameInstance"
-		_LIH_SelectedDesc = "Item/NPC Name"
-	elseIf _LIH_Selected.GetValueInt() == 16
-		_LIH_SelectedItem = "ItemLeading"
-		_LIH_SelectedDesc = "Item/NPC Name Text Linespacing"
-	elseIf _LIH_Selected.GetValueInt() == 17
-		_LIH_SelectedItem = "GrayBarInstance"
-		_LIH_SelectedDesc = "Item Info Separator"
-	elseIf _LIH_Selected.GetValueInt() == 18
-		_LIH_SelectedItem = "RolloverInfoInstance"
-		_LIH_SelectedDesc = "Item Info Text"
-	elseIf _LIH_Selected.GetValueInt() == 19
-		_LIH_SelectedItem = "SubtitleTextHolder"
-		_LIH_SelectedDesc = "Text Subtitles"
-	elseIf _LIH_Selected.GetValueInt() == 20
-		_LIH_SelectedItem = "SubtitleLeading"
-		_LIH_SelectedDesc = "Text Subtitles Linespacing"
-	elseIf _LIH_Selected.GetValueInt() == 21
-		_LIH_SelectedItem = "FavorBackButtonBase"
-		_LIH_SelectedDesc = "Followers Back Button"
-	elseIf _LIH_Selected.GetValueInt() == 22
-		_LIH_SelectedItem = "ObjectiveLineInstance"
-		_LIH_SelectedDesc = "Quest Objectives Text"
-	elseIf _LIH_Selected.GetValueInt() == 23
-		_LIH_SelectedItem = "ShoutAnimatedLetter"
-		_LIH_SelectedDesc = "New Shout Learned Text"
-	elseIf _LIH_Selected.GetValueInt() == 24
-		_LIH_SelectedItem = "AnimatedLetter_mc"
-		_LIH_SelectedDesc = "Skill Level Up Text"
-	elseIf _LIH_Selected.GetValueInt() == 25
-		_LIH_SelectedItem = "LevelMeterBaseInstance"
-		_LIH_SelectedDesc = "Level Up Progress Meter"
-	endIf
-	if _LIH_DebugVisible.GetValueInt() == 1
-		debug.Notification("Selected Item: " + _LIH_SelectedDesc)
-	endIf
-	UpdateItem()
-endFunction
-
-
-function ApplyChanges()
-	LoadDummy()
-	LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.BottomLeftLockInstance", "_alpha", _LIH_EnchantmentAlpha.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.BottomRightLockInstance", "_alpha", _LIH_EnchantmentAlpha.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.Crosshair", "_alpha", _LIH_CrosshairAlpha.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.SneakCrosshair", "_alpha", _LIH_SneakCrosshairAlpha.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.SneakCrosshair", "_visible", _LIH_SneakCrosshairVisible.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.AltHealthBar", "_visible", _LIH_AltHealthBarVisible.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.BarsAlwaysVisible", "_visible", _LIH_BarsAlwaysVisible.GetValueInt() as Float)
-	LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.ApplyChanges", "_visible", 1 as Float)
-	if _LIH_Selected.GetValueInt() == 0
-		show("_root.HUDDummy", 0 as Bool)
-	else
-		show("_root.HUDDummy", 1 as Bool)
-	endIf
-	if _LIH_SlimCompassVisible.GetValueInt() == 1
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.CompassShoutMeterHolder.Compass.CompassFrameAlt", "_visible", 1 as Float)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.CompassShoutMeterHolder.Compass.CompassFrame", "_visible", 0 as Float)
-	else
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.CompassShoutMeterHolder.Compass.CompassFrameAlt", "_visible", 0 as Float)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.CompassShoutMeterHolder.Compass.CompassFrame", "_visible", 1 as Float)
-	endIf
-	if _LIH_ActivateButtonVisible.GetValueInt() == 1
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.ActButton", "_visible", 1 as Float)
-		if _LIH_ActivateButtonS.GetValueInt() == 0
-			_LIH_ActivateButtonX.SetValue(_LIH_DefActivateButtonX.Getvalue())
-			_LIH_ActivateButtonY.SetValue(_LIH_DefActivateButtonY.Getvalue())
-			_LIH_ActivateButtonS.SetValueInt(100)
-		endIf
-	else
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.ActButton", "_visible", 0 as Float)
-		_LIH_ActivateButtonS.SetValueInt(0)
-	endIf
-	if _LIH_UndiscoveredMarkersVisible.GetValueInt() == 1
-		LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.UndiscoveredMarkers", "_visible", 1 as Float)
-	else
-		LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.UndiscoveredMarkers", "_visible", 0 as Float)
-	endIf
-	if _LIH_LocationMarkersVisible.GetValueInt() == 1
-		LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.LocationMarkers", "_visible", 1 as Float)
-	else
-		LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.LocationMarkers", "_visible", 0 as Float)
-	endIf
-	if _LIH_EnemyMarkersVisible.GetValueInt() == 1
-		LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.EnemyMarkers", "_visible", 1 as Float)
-	else
-		LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.EnemyMarkers", "_visible", 0 as Float)
-	endIf
-	if _LIH_PlayerSetMarkerVisible.GetValueInt() == 1
-		LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.PlayerSetMarker", "_visible", 1 as Float)
-	else
-		LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.PlayerSetMarker", "_visible", 0 as Float)
-	endIf
-	if _LIH_QuestDoorMarkersVisible.GetValueInt() == 1
-		LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.QuestDoorMarkers", "_visible", 1 as Float)
-	else
-		LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.QuestDoorMarkers", "_visible", 0 as Float)
-	endIf
-	if _LIH_QuestMarkersVisible.GetValueInt() == 1
-		LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.QuestMarkers", "_visible", 1 as Float)
-	else
-		LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.QuestMarkers", "_visible", 0 as Float)
-	endIf
-	if _LIH_AltCrosshairVisible.GetValueInt() == 1
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.AltCrosshair", "_visible", 1 as Float)
-	else
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.AltCrosshair", "_visible", 0 as Float)
-	endIf
-	if _LIH_AltSneakMeterVisible.GetValueInt() == 1
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.StealthMeterInstance.SneakAnimInstanceAlt", "_visible", 1 as Float)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.StealthMeterInstance.SneakAnimInstance", "_visible", 0 as Float)
-	else
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.StealthMeterInstance.SneakAnimInstanceAlt", "_visible", 0 as Float)
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.StealthMeterInstance.SneakAnimInstance", "_visible", 1 as Float)
-	endIf
-	if _LIH_SneakTextVisible.GetValueInt() == 1
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.StealthMeterInstance.SneakTextHolder", "_visible", 1 as Float)
-	else
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.StealthMeterInstance.SneakTextHolder", "_visible", 0 as Float)
-	endIf
-endFunction
-
-
-function MoveUp()
-	if _LIH_SelectedItem == "Magica"
-		_LIH_MagickaY.SetValue(_LIH_MagickaY.Getvalue() - _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Magica", "_y", _LIH_MagickaY.Getvalue())
-	elseIf _LIH_SelectedItem == "Health"
-		_LIH_HealthY.SetValue(_LIH_HealthY.Getvalue() - _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Health", "_y", _LIH_HealthY.Getvalue())
-	elseIf _LIH_SelectedItem == "Stamina"
-		_LIH_StaminaY.SetValue(_LIH_StaminaY.Getvalue() - _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Stamina", "_y", _LIH_StaminaY.Getvalue())
-	elseIf _LIH_SelectedItem == "CompassShoutMeterHolder"
-		_LIH_CompassY.SetValue(_LIH_CompassY.Getvalue() - _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.CompassShoutMeterHolder", "_y", _LIH_CompassY.Getvalue())
-	elseIf _LIH_SelectedItem == "EnemyHealth_mc"
-		_LIH_EnemyHealthY.SetValue(_LIH_EnemyHealthY.Getvalue() - _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.EnemyHealth_mc", "_y", _LIH_EnemyHealthY.Getvalue())
-	elseIf _LIH_SelectedItem == "ArrowInfoInstance"
-		_LIH_ArrowsY.SetValue(_LIH_ArrowsY.Getvalue() - _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.ArrowInfoInstance", "_y", _LIH_ArrowsY.Getvalue())
-	elseIf _LIH_SelectedItem == "StealthMeterInstance"
-		_LIH_StealthMeterY.SetValue(_LIH_StealthMeterY.Getvalue() - _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.StealthMeterInstance", "_y", _LIH_StealthMeterY.Getvalue())
-	elseIf _LIH_SelectedItem == "Crosshair"
-		_LIH_CrosshairY.SetValue(_LIH_CrosshairY.Getvalue() - _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Crosshair", "_y", _LIH_CrosshairY.Getvalue())
-	elseIf _LIH_SelectedItem == "SneakCrosshair"
-		_LIH_SneakCrosshairY.SetValue(_LIH_SneakCrosshairY.Getvalue() - _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.SneakCrosshair", "_y", _LIH_SneakCrosshairY.Getvalue())
-	elseIf _LIH_SelectedItem == "BottomLeftLockInstance"
-		_LIH_EnchantLY.SetValue(_LIH_EnchantLY.Getvalue() - _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.BottomLeftLockInstance", "_y", _LIH_EnchantLY.Getvalue())
-	elseIf _LIH_SelectedItem == "BottomRightLockInstance"
-		_LIH_EnchantRY.SetValue(_LIH_EnchantRY.Getvalue() - _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.BottomRightLockInstance", "_y", _LIH_EnchantRY.Getvalue())
-	elseIf _LIH_SelectedItem == "MessagesBlock"
-		_LIH_HUDMsgY.SetValue(_LIH_HUDMsgY.Getvalue() - _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.MessagesBlock", "_y", _LIH_HUDMsgY.Getvalue())
-	elseIf _LIH_SelectedItem == "LocationLockBase"
-		_LIH_LocationY.SetValue(_LIH_LocationY.Getvalue() - _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.LocationLockBase", "_y", _LIH_LocationY.Getvalue())
-	elseIf _LIH_SelectedItem == "ActivateButton_tf"
-		_LIH_ActivateButtonY.SetValue(_LIH_ActivateButtonY.Getvalue() - _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.ActivateButton_tf", "_y", _LIH_ActivateButtonY.Getvalue())
-	elseIf _LIH_SelectedItem == "RolloverNameInstance"
-		_LIH_NameY.SetValue(_LIH_NameY.Getvalue() - _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.RolloverNameInstance", "_y", _LIH_NameY.Getvalue())
-	elseIf _LIH_SelectedItem == "GrayBarInstance"
-		_LIH_GrayBarY.SetValue(_LIH_GrayBarY.Getvalue() - _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.GrayBarInstance", "_y", _LIH_GrayBarY.Getvalue())
-	elseIf _LIH_SelectedItem == "RolloverInfoInstance"
-		_LIH_InfoY.SetValue(_LIH_InfoY.Getvalue() - _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.RolloverInfoInstance", "_y", _LIH_InfoY.Getvalue())
-	elseIf _LIH_SelectedItem == "SubtitleTextHolder"
-		_LIH_SubtitleY.SetValue(_LIH_SubtitleY.Getvalue() - _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.SubtitleTextHolder", "_y", _LIH_SubtitleY.Getvalue())
-	elseIf _LIH_SelectedItem == "ItemLeading"
-		
-	elseIf _LIH_SelectedItem == "SubtitleLeading"
-		
-	elseIf _LIH_SelectedItem == "FavorBackButtonBase"
-		_LIH_FavorBackButtonY.SetValue(_LIH_FavorBackButtonY.Getvalue() - _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.FavorBackButtonBase", "_x", _LIH_FavorBackButtonY.Getvalue())
-	elseIf _LIH_SelectedItem == "ObjectiveLineInstance"
-		_LIH_ObjectivesY.SetValue(_LIH_ObjectivesY.Getvalue() - _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.ObjectiveLineInstance", "_y", _LIH_ObjectivesY.Getvalue())
-	elseIf _LIH_SelectedItem == "ShoutAnimatedLetter"
-		_LIH_ShoutsY.SetValue(_LIH_ShoutsY.Getvalue() - _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.ShoutAnimatedLetter", "_y", _LIH_ShoutsY.Getvalue())
-	elseIf _LIH_SelectedItem == "AnimatedLetter_mc"
-		_LIH_AnimLetterY.SetValue(_LIH_AnimLetterY.Getvalue() - _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.AnimatedLetter_mc", "_y", _LIH_AnimLetterY.Getvalue())
-	elseIf _LIH_SelectedItem == "LevelMeterBaseInstance"
-		_LIH_LevelUpY.SetValue(_LIH_LevelUpY.Getvalue() - _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.LevelMeterBaseInstance", "_y", _LIH_LevelUpY.Getvalue())
-	endIf
-	UpdateItem()
-endFunction
-
-
-function ToggleStep()
-	if _LIH_Step.Getvalue() == 1.00000
-		_LIH_Step.SetValue(10.0000)
-	elseIf _LIH_Step.Getvalue() == 10.0000
-		_LIH_Step.SetValue(0.500000)
-	else
-		_LIH_Step.SetValue(1.00000)
-	endIf
-	UpdateItem()
-endFunction
-
-
-function ShowAlign()
-	if _LIH_RotateItem == 0
-		_LIH_AlignItem = "(Left)"
-	elseIf _LIH_RotateItem == 50
-		_LIH_AlignItem = "(Center)"
-	else
-		_LIH_AlignItem = "(Right)"
-	endIf
-endFunction
-
-
-function NextItem()
-	_LIH_Selected.SetValueInt(_LIH_Selected.GetValueInt() + 1)
-	if _LIH_Selected.GetValueInt() == 26
-		_LIH_Selected.SetValueInt(1)
-	endIf
-	CheckItem()
-endFunction
-
-
-function RotateAlign()
-	if _LIH_SelectedItem == "Magica"
-		_LIH_MagickaR.SetValueInt(_LIH_MagickaR.GetValueInt() + _LIH_Step.GetValueInt())
-		if _LIH_MagickaR.GetValueInt() == 360
-			_LIH_MagickaR.SetValueInt(0)
-		endIf
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Magica", "_rotation", _LIH_MagickaR.GetValueInt() as Float)
-	elseIf _LIH_SelectedItem == "Health"
-		_LIH_HealthR.SetValueInt(_LIH_HealthR.GetValueInt() + _LIH_Step.GetValueInt())
-		if _LIH_HealthR.GetValueInt() == 360
-			_LIH_HealthR.SetValueInt(0)
-		endIf
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Health", "_rotation", _LIH_HealthR.GetValueInt() as Float)
-	elseIf _LIH_SelectedItem == "Stamina"
-		_LIH_StaminaR.SetValueInt(_LIH_StaminaR.GetValueInt() + _LIH_Step.GetValueInt())
-		if _LIH_StaminaR.GetValueInt() == 360
-			_LIH_StaminaR.SetValueInt(0)
-		endIf
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Stamina", "_rotation", _LIH_StaminaR.GetValueInt() as Float)
-	elseIf _LIH_SelectedItem == "ArrowInfoInstance"
-		_LIH_ArrowsAlign.SetValueInt(_LIH_ArrowsAlign.GetValueInt() + 50)
-		if _LIH_ArrowsAlign.GetValueInt() == 150
-			_LIH_ArrowsAlign.SetValueInt(0)
-		endIf
-		LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.ArrowsAlign", "_alpha", _LIH_ArrowsAlign.GetValueInt() as Float)
-	elseIf _LIH_SelectedItem == "BottomLeftLockInstance"
-		_LIH_EnchantLR.SetValueInt(_LIH_EnchantLR.GetValueInt() + _LIH_Step.GetValueInt())
-		if _LIH_EnchantLR.GetValueInt() == 360
-			_LIH_EnchantLR.SetValueInt(0)
-		endIf
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.BottomLeftLockInstance", "_rotation", _LIH_EnchantLR.GetValueInt() as Float)
-	elseIf _LIH_SelectedItem == "BottomRightLockInstance"
-		_LIH_EnchantRR.SetValueInt(_LIH_EnchantRR.GetValueInt() + _LIH_Step.GetValueInt())
-		if _LIH_EnchantRR.GetValueInt() == 360
-			_LIH_EnchantRR.SetValueInt(0)
-		endIf
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.BottomRightLockInstance", "_rotation", _LIH_EnchantRR.GetValueInt() as Float)
-	elseIf _LIH_SelectedItem == "MessagesBlock"
-		_LIH_HUDMsgAlign.SetValueInt(_LIH_HUDMsgAlign.GetValueInt() + 50)
-		if _LIH_HUDMsgAlign.GetValueInt() == 150
-			_LIH_HUDMsgAlign.SetValueInt(0)
-		endIf
-		LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.HUDMsgAlign", "_alpha", _LIH_HUDMsgAlign.GetValueInt() as Float)
-	elseIf _LIH_SelectedItem == "LocationLockBase"
-		_LIH_LocationAlign.SetValueInt(_LIH_LocationAlign.GetValueInt() + 50)
-		if _LIH_LocationAlign.GetValueInt() == 150
-			_LIH_LocationAlign.SetValueInt(0)
-		endIf
-		LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.LocationAlign", "_alpha", _LIH_LocationAlign.GetValueInt() as Float)
-	elseIf _LIH_SelectedItem == "RolloverInfoInstance"
-		_LIH_InfoAlign.SetValueInt(_LIH_InfoAlign.GetValueInt() + 50)
-		if _LIH_InfoAlign.GetValueInt() == 150
-			_LIH_InfoAlign.SetValueInt(0)
-		endIf
-		LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.InfoAlign", "_alpha", _LIH_InfoAlign.GetValueInt() as Float)
-	elseIf _LIH_SelectedItem == "SubtitleTextHolder"
-		_LIH_SubtitlesAlign.SetValueInt(_LIH_SubtitlesAlign.GetValueInt() + 50)
-		if _LIH_SubtitlesAlign.GetValueInt() == 150
-			_LIH_SubtitlesAlign.SetValueInt(0)
-		endIf
-		LIH_ConfigMenu.setHUDNumber("_root.HUDDummy.SubtitlesAlign", "_alpha", _LIH_SubtitlesAlign.Getvalue())
-	endIf
-	UpdateItem()
-endFunction
-
-
-function MoveLeft()
-	if _LIH_SelectedItem == "Magica"
-		_LIH_MagickaX.SetValue(_LIH_MagickaX.Getvalue() - _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Magica", "_x", _LIH_MagickaX.Getvalue())
-	elseIf _LIH_SelectedItem == "Health"
-		_LIH_HealthX.SetValue(_LIH_HealthX.Getvalue() - _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Health", "_x", _LIH_HealthX.Getvalue())
-	elseIf _LIH_SelectedItem == "Stamina"
-		_LIH_StaminaX.SetValue(_LIH_StaminaX.Getvalue() - _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Stamina", "_x", _LIH_StaminaX.Getvalue())
-	elseIf _LIH_SelectedItem == "CompassShoutMeterHolder"
-		_LIH_CompassX.SetValue(_LIH_CompassX.Getvalue() - _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.CompassShoutMeterHolder", "_x", _LIH_CompassX.Getvalue())
-	elseIf _LIH_SelectedItem == "EnemyHealth_mc"
-		_LIH_EnemyHealthX.SetValue(_LIH_EnemyHealthX.Getvalue() - _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.EnemyHealth_mc", "_x", _LIH_EnemyHealthX.Getvalue())
-	elseIf _LIH_SelectedItem == "ArrowInfoInstance"
-		_LIH_ArrowsX.SetValue(_LIH_ArrowsX.Getvalue() - _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.ArrowInfoInstance", "_x", _LIH_ArrowsX.Getvalue())
-	elseIf _LIH_SelectedItem == "StealthMeterInstance"
-		_LIH_StealthMeterX.SetValue(_LIH_StealthMeterX.Getvalue() - _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.StealthMeterInstance", "_x", _LIH_StealthMeterX.Getvalue())
-	elseIf _LIH_SelectedItem == "Crosshair"
-		_LIH_CrosshairX.SetValue(_LIH_CrosshairX.Getvalue() - _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.Crosshair", "_x", _LIH_CrosshairX.Getvalue())
-	elseIf _LIH_SelectedItem == "SneakCrosshair"
-		_LIH_SneakCrosshairX.SetValue(_LIH_SneakCrosshairX.Getvalue() - _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.SneakCrosshair", "_x", _LIH_SneakCrosshairX.Getvalue())
-	elseIf _LIH_SelectedItem == "BottomLeftLockInstance"
-		_LIH_EnchantLX.SetValue(_LIH_EnchantLX.Getvalue() - _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.BottomLeftLockInstance", "_x", _LIH_EnchantLX.Getvalue())
-	elseIf _LIH_SelectedItem == "BottomRightLockInstance"
-		_LIH_EnchantRX.SetValue(_LIH_EnchantRX.Getvalue() - _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.BottomRightLockInstance", "_x", _LIH_EnchantRX.Getvalue())
-	elseIf _LIH_SelectedItem == "MessagesBlock"
-		_LIH_HUDMsgX.SetValue(_LIH_HUDMsgX.Getvalue() - _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.MessagesBlock", "_x", _LIH_HUDMsgX.Getvalue())
-	elseIf _LIH_SelectedItem == "LocationLockBase"
-		_LIH_LocationX.SetValue(_LIH_LocationX.Getvalue() - _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.LocationLockBase", "_x", _LIH_LocationX.Getvalue())
-	elseIf _LIH_SelectedItem == "ActivateButton_tf"
-		_LIH_ActivateButtonX.SetValue(_LIH_ActivateButtonX.Getvalue() - _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.ActivateButton_tf", "_x", _LIH_ActivateButtonX.Getvalue())
-	elseIf _LIH_SelectedItem == "RolloverNameInstance"
-		_LIH_NameX.SetValue(_LIH_NameX.Getvalue() - _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.RolloverNameInstance", "_x", _LIH_NameX.Getvalue())
-	elseIf _LIH_SelectedItem == "GrayBarInstance"
-		_LIH_GrayBarX.SetValue(_LIH_GrayBarX.Getvalue() - _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.GrayBarInstance", "_x", _LIH_GrayBarX.Getvalue())
-	elseIf _LIH_SelectedItem == "RolloverInfoInstance"
-		_LIH_InfoX.SetValue(_LIH_InfoX.Getvalue() - _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.RolloverInfoInstance", "_x", _LIH_InfoX.Getvalue())
-	elseIf _LIH_SelectedItem == "SubtitleTextHolder"
-		_LIH_SubtitleX.SetValue(_LIH_SubtitleX.Getvalue() - _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.SubtitleTextHolder", "_x", _LIH_SubtitleX.Getvalue())
-	elseIf _LIH_SelectedItem == "ItemLeading"
-		
-	elseIf _LIH_SelectedItem == "SubtitleLeading"
-		
-	elseIf _LIH_SelectedItem == "FavorBackButtonBase"
-		_LIH_FavorBackButtonX.SetValue(_LIH_FavorBackButtonX.Getvalue() - _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.FavorBackButtonBase", "_x", _LIH_FavorBackButtonX.Getvalue())
-	elseIf _LIH_SelectedItem == "ObjectiveLineInstance"
-		_LIH_ObjectivesX.SetValue(_LIH_ObjectivesX.Getvalue() - _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.ObjectiveLineInstance", "_x", _LIH_ObjectivesX.Getvalue())
-	elseIf _LIH_SelectedItem == "ShoutAnimatedLetter"
-		_LIH_ShoutsX.SetValue(_LIH_ShoutsX.Getvalue() - _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.ShoutAnimatedLetter", "_x", _LIH_ShoutsX.Getvalue())
-	elseIf _LIH_SelectedItem == "AnimatedLetter_mc"
-		_LIH_AnimLetterX.SetValue(_LIH_AnimLetterX.Getvalue() - _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.AnimatedLetter_mc", "_x", _LIH_AnimLetterX.Getvalue())
-	elseIf _LIH_SelectedItem == "LevelMeterBaseInstance"
-		_LIH_LevelUpX.SetValue(_LIH_LevelUpX.Getvalue() - _LIH_Step.Getvalue())
-		LIH_ConfigMenu.setHUDNumber("_root.HUDMovieBaseInstance.QuestUpdateBaseInstance.LevelMeterBaseInstance", "_x", _LIH_LevelUpX.Getvalue())
-	endIf
-	UpdateItem()
-endFunction
-
-
-function toggle(globalvariable value)
-	if value.GetValueInt() == 0
-		value.SetValueInt(1)
-	else
-		value.SetValueInt(0)
-	endIf
 endFunction

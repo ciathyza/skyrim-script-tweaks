@@ -1,4 +1,4 @@
-Scriptname HeadtrackingConfigMenu extends SKI_ConfigBase  
+Scriptname HeadtrackingConfigMenu extends SKI_ConfigBase
 
 ; -------------------------------------------------------------------------------------------------
 ; Properties
@@ -35,7 +35,7 @@ int SilentOID
 int TextID
 int TimerOID
 
-bool changed
+bool hasChanged
 
 
 ; -------------------------------------------------------------------------------------------------
@@ -43,13 +43,10 @@ bool changed
 ; -------------------------------------------------------------------------------------------------
 
 Event OnConfigInit()
-	; Execution Delay.
-	Utility.Wait(13.0)
-
 	If !Headtracking.IsRunning()
 		Headtracking.Start()
 	EndIf
-	
+
 	QuestScript = Headtracking as HeadTrackingScript
 	If QuestScript.Version == 0
 		QuestScript.TrackScripts = New HeadtrackingTargetScript[15]
@@ -61,7 +58,7 @@ Event OnConfigInit()
 			index += 1
 		EndWhile
 	ElseIf QuestScript.Version < 30
-		Debug.Notification("Player Headtracking updated to version 3.3!")
+		Debug.Notification("Player Headtracking updated to version 3.3.")
 	EndIf
 	QuestScript.Version = GetVersion()
 	Refresh()
@@ -69,46 +66,51 @@ EndEvent
 
 
 Event OnConfigOpen()
-	changed = False
+	hasChanged = False
 EndEvent
 
 
 Event OnConfigClose()
-	If changed
+	If hasChanged
 		Refresh()
 	EndIf
 EndEvent
 
 
 event OnPageReset(string page)
+	Int IsEnabledOptionFlag = OPTION_FLAG_DISABLED
+	If HeadtrackingUninstall.GetValueInt() == 0
+		IsEnabledOptionFlag = OPTION_FLAG_NONE
+	EndIf
+
 	SetCursorFillMode(LEFT_TO_RIGHT)
 	DisableOID = AddToggleOption("Player Headtracking", !(HeadtrackingUninstall.GetValueInt() as Bool))
 	If HeadtrackingUninstall.GetValueInt() == 0
-		MovingOID = AddToggleOption("Headtrack while moving", (HeadtrackingMoving.GetValueInt() as Bool))
+		MovingOID = AddToggleOption("Headtrack while moving", (HeadtrackingMoving.GetValueInt() as Bool), IsEnabledOptionFlag)
 		AddEmptyOption()
-		SilentOID = AddToggleOption("Headtrack non-talking actors", (HeadtrackingSilent.GetValueInt() as Bool))
+		SilentOID = AddToggleOption("Headtrack non-talking actors", (HeadtrackingSilent.GetValueInt() as Bool), IsEnabledOptionFlag)
 		AddEmptyOption()
-		CorpsesOID = AddToggleOption("Headtrack corpses", (HeadtrackingCorpses.GetValueInt() as Bool))
+		CorpsesOID = AddToggleOption("Headtrack corpses", (HeadtrackingCorpses.GetValueInt() as Bool), IsEnabledOptionFlag)
 		TextID = AddTextOption("Headtracking does not work in first person,", "", 1)
-		RangeOID = AddSliderOption("Headtracking distance", HeadtrackingRange.GetValue(), "{0} feet")
+		RangeOID = AddSliderOption("Headtracking distance", HeadtrackingRange.GetValue(), "{0} feet", IsEnabledOptionFlag)
 		TextID = AddTextOption("when weapons are out, or when riding a mount.", "", 1)
 		SetCursorFillMode(TOP_TO_BOTTOM)
 		If HeadtrackingTimer.GetValue() > 0
-			TimerOID = AddSliderOption("Headtracking duration", HeadtrackingTimer.GetValue(), "{1} seconds")
+			TimerOID = AddSliderOption("Headtracking duration", HeadtrackingTimer.GetValue(), "{1} seconds", IsEnabledOptionFlag)
 		Else
-			TimerOID = AddSliderOption("Headtracking duration", 0, "infinite")
+			TimerOID = AddSliderOption("Headtracking duration", 0, "infinite", IsEnabledOptionFlag)
 		EndIf
 		if HeadtrackingExpressions.GetValue() > 0
-			ExpressionsOID = AddSliderOption("Facial expression strength", HeadtrackingExpressions.GetValue(), "{0}")
+			ExpressionsOID = AddSliderOption("Facial expression strength", HeadtrackingExpressions.GetValue(), "{0}", IsEnabledOptionFlag)
 		Else
-			ExpressionsOID = AddToggleOption("Facial expressions", false)
+			ExpressionsOID = AddToggleOption("Facial expressions", false, IsEnabledOptionFlag)
 		EndIf
 	EndIf
 endEvent
 
 
 event OnOptionSelect(int option)
-	changed = True
+	hasChanged = true
 	If option == MovingOID
 		HeadtrackingMoving.SetValueInt((!(HeadtrackingMoving.GetValueInt() as Bool)) as Int)
 		SetToggleOptionValue(option, (HeadtrackingMoving.GetValueInt() as Bool))
@@ -131,7 +133,7 @@ EndEvent
 
 event OnOptionDefault(int option)
 	If option == RangeOID
-		HeadtrackingRange.SetValue(6.0)
+		HeadtrackingRange.SetValue(4.0)
 	ElseIf option == MovingOID
 		HeadtrackingMoving.SetValueInt(1)
 		SetToggleOptionValue(MovingOID, true)
@@ -173,7 +175,7 @@ endEvent
 
 
 event OnOptionSliderAccept(int option, float value)
-	changed = True
+	hasChanged = true
 	If option == RangeOID
 		HeadtrackingRange.SetValue(value)
 		SetSliderOptionValue(option, value, "{0} feet")
@@ -197,7 +199,7 @@ EndEvent
 event OnOptionHighlight(int option)
 	if option == TimerOID
 		SetSliderOptionValue(TimerOID, HeadtrackingTimer.GetValue(), "{1} seconds")
-		SetInfoText("Set the duration before Headtracking of boring actors stops. A value of 0 makes it infinite.")
+		SetInfoText("Set the duration before head-tracking of boring actors stops. A value of 0 makes it infinite.")
 	Else
 		if HeadtrackingTimer.GetValue() == 0
 			SetSliderOptionValue(TimerOID, 0, "infinite")

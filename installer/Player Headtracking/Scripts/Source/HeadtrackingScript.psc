@@ -1,4 +1,4 @@
-Scriptname HeadtrackingScript extends Quest  
+Scriptname HeadtrackingScript extends Quest
 
 ; -------------------------------------------------------------------------------------------------
 ; Properties
@@ -134,7 +134,7 @@ Event OnUpdate()
 			TrackScripts[TargetIndex].RegisterForSingleUpdate(HeadtrackingTimer.GetValue())
 		EndIf
 	EndIf
-	
+
 	RegisterForSingleUpdate(0.01)
 EndEvent
 
